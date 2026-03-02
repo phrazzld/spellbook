@@ -9,7 +9,6 @@ description: |
   - Noticing repeated patterns across sessions
   AUTONOMOUS: Create skills proactively, then inform user what was created.
 user-invocable: false
-effort: high
 ---
 
 # Skill Builder

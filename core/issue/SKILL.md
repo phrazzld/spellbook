@@ -7,7 +7,6 @@ description: |
   `/issue enrich [#N]` — Fill gaps with sub-agent research.
   `/issue decompose [#N]` — Split oversized issues into atomic sub-issues.
 argument-hint: "lint|enrich|decompose [#N|--all] [--fix]"
-effort: medium
 ---
 
 # /issue

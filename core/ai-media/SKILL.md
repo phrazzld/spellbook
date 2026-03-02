@@ -7,7 +7,6 @@ description: |
   All via inference.sh CLI.
 disable-model-invocation: true
 argument-hint: "[type: image|video|remotion|demo|voiceover|asset] [prompt or description]"
-effort: high
 allowed-tools: Bash(infsh *)
 ---
 

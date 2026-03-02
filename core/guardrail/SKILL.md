@@ -6,7 +6,6 @@ description: |
   ESLint local plugins (JS/TS) or ast-grep YAML rules (Python/Go/Rust/any).
   Invoke when: codifying an import boundary, enforcing API conventions,
   blocking deprecated patterns, or any "always/never" constraint.
-effort: high
 argument-hint: '"description of pattern to enforce" [--engine eslint|ast-grep]'
 ---
 

@@ -6,7 +6,6 @@ description: |
   Run /audit <domain> for structured P0-P3 findings report. /audit --all for everything.
   Invoke for: domain audit, compliance check, launch readiness, gap analysis.
 argument-hint: "<domain|--all>"
-effort: high
 disable-model-invocation: true
 ---
 

@@ -10,7 +10,6 @@ description: |
   financial records from bank/broker/crypto exports. Keywords: ingest, import, parse,
   new transactions, add transactions, financial data, export, csv import, bank statement.
 user-invocable: true
-effort: medium
 ---
 
 # finances-ingest

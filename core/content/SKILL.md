@@ -5,7 +5,6 @@ description: |
   launch announcements, email sequences, and AI-writing cleanup. Covers the
   full content lifecycle from first draft to polished, on-brand output.
   Use when writing, editing, or publishing any marketing or product content.
-effort: high
 disable-model-invocation: true
 ---
 

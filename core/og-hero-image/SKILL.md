@@ -6,7 +6,6 @@ description: |
   Use when: creating social sharing images, website headers, marketing collateral.
   Keywords: og image, open graph, hero image, social header, brand image
 argument-hint: "[brand name or project path]"
-effort: high
 ---
 
 # /og-hero-image

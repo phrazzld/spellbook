@@ -5,7 +5,6 @@ description: |
   Two modes: Explore (greenfield, 6 directions) or Extend (refinement).
   Composes design tokens, aesthetic system, taste constraints, and visual QA.
   Use when designing UI systems, exploring directions, or establishing brand visuals.
-effort: high
 ---
 
 # DESIGN

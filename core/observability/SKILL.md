@@ -5,7 +5,6 @@ description: |
   Complete observability infrastructure. Error tracking, alerting, logging, health checks.
   Optimized for indie dev: minimal services, CLI-manageable, AI agent integration.
 argument-hint: "[focus area, e.g. 'alerts' or 'health checks']"
-effort: high
 ---
 
 # /observability

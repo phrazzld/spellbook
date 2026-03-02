@@ -5,7 +5,6 @@ description: |
   frontend functionality, debugging UI behavior, capturing screenshots, and
   viewing browser logs. Reference skill for browser-based testing patterns.
 user-invocable: false
-license: Complete terms in LICENSE.txt
 ---
 
 # Web Application Testing

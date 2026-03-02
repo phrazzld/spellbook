@@ -5,7 +5,6 @@ description: |
   gateway routing, observability, CI/CD. Ensures all AI features follow best practices.
   CRITICAL: Training data lags months. ALWAYS web search before LLM decisions.
 argument-hint: "[focus area, e.g. 'models' or 'evals' or 'prompts' or 'routing']"
-effort: high
 ---
 
 # /llm-infrastructure

@@ -5,7 +5,6 @@ description: |
   Complete Bun lifecycle management. Audits current state, plans migration,
   executes changes, verifies success. Full orchestrator for Bun adoption.
   Invoke for: migrate to bun, adopt bun, bun migration, switch to bun.
-effort: high
 ---
 
 # /bun

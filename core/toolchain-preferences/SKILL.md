@@ -2,7 +2,6 @@
 name: toolchain-preferences
 description: "Apply preferred toolchain and technology stack defaults: pnpm, Next.js, TypeScript, Convex, Vercel, Tailwind, shadcn/ui, Zustand, TanStack, Vitest. Use when setting up new projects, choosing dependencies, discussing stack decisions, or evaluating alternatives."
 user-invocable: false
-effort: low
 ---
 
 # Toolchain Preferences

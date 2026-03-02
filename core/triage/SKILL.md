@@ -6,7 +6,6 @@ description: |
   Use for: production down, error spikes, CI failures, incident response,
   "postmortem", "verify fix", "is production ok", user reports.
 argument-hint: "[action: status | investigate ISSUE-ID | investigate-ci RUN-ID | fix | verify | postmortem ISSUE-ID]"
-effort: max
 ---
 
 # /triage

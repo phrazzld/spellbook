@@ -6,7 +6,6 @@ description: |
   Runs Glance (bottom-up directory summaries) + Cartographer (top-down architecture map),
   then synthesizes into CLAUDE.md, AGENTS.md, ADRs, and memory.
   Use when: onboarding to a new repo, improving agent effectiveness, repo setup, agent tuning.
-effort: high
 ---
 
 # /tune-repo

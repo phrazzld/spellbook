@@ -1,6 +1,6 @@
 ---
-description: Render /architect output as a visual architecture diagram with component graph, data flow, file impact map, and tradeoffs
-source_skill: /architect
+description: Render /shape --design-only output as a visual architecture diagram with component graph, data flow, file impact map, and tradeoffs
+source_skill: /shape
 ---
 
 # Architect Diagram

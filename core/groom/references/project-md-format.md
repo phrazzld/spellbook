@@ -88,7 +88,7 @@ Things we've tried that didn't work. Distilled from `.groom/retro.md`.
 
 - `/groom` Phase 1 — load for session context
 - `/autopilot` — load before starting any issue
-- `/spec` and `/architect` — load for product context
+- `/shape` — load for product context
 - `/issue enrich` — embed vision one-liner in Context section
 
 ## Update Frequency

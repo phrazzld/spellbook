@@ -4,7 +4,6 @@ disable-model-invocation: true
 description: |
   Parse new financial documents into Moneta. Detect type, run parser, validate output, summarize reconciliation.
 user-invocable: true
-effort: high
 ---
 
 # /moneta-ingest

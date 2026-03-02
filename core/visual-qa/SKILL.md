@@ -6,7 +6,6 @@ description: |
   Use when: frontend changes are code-complete, before commit or PR.
   Composes: agent-browser for automation, taste-skill for anti-slop analysis.
 allowed-tools: Bash(agent-browser:*), Bash(npx agent-browser:*)
-effort: medium
 ---
 
 # /visual-qa
@@ -38,7 +37,7 @@ This skill is a **primitive** invoked by other skills. It also runs standalone v
 | `/build` | After quality gates pass, if diff touches `app/`, `components/`, or `*.css` |
 | `/autopilot` | After Build, before Refine phase |
 | `/frontend-design` | After code generation, as validation loop |
-| `/review-and-fix` | After fixes applied, before `/pr` |
+| `/pr-fix` | After fixes applied, before `/pr` |
 | `/pr` | Generates before/after screenshots for PR body |
 | `/commit` | Optional — if `--qa` flag or diff touches frontend files |
 | standalone | `/visual-qa [url]` |

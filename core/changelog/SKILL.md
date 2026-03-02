@@ -6,7 +6,6 @@ description: |
   commitlint, GitHub Actions, LLM synthesis, public changelog page, and RSS.
 disable-model-invocation: true
 argument-hint: "[focus area, e.g. 'LLM synthesis' or 'public page' or 'setup']"
-effort: medium
 ---
 
 # /changelog

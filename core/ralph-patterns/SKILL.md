@@ -5,7 +5,6 @@ description: |
   completion signals, progress tracking, and iteration patterns.
   Ralph = autonomous issue-to-merged-PR loop.
 user-invocable: false
-effort: high
 ---
 
 # Ralph Loop Patterns
@@ -32,7 +31,7 @@ Ralph monitors these for "no progress" circuit breaker:
 ## Within a Ralph Loop
 
 You have full access to:
-- `/spec`, `/architect`, `/build`, `/refactor`, `/update-docs`, `/pr`
+- `/shape`, `/build`, `/pr-fix`, `/pr`
 - Task tool for parallel agent delegation
 - Sentry, PostHog, GitHub MCPs
 - All configured hooks and skills

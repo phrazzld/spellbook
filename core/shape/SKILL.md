@@ -6,7 +6,6 @@ description: |
   Use when: planning a feature, shaping an idea, writing specs, designing architecture.
   Trigger: /shape, /spec, /architect, /brainstorm, /breadboard, /shaping, /critique.
 disable-model-invocation: true
-effort: high
 argument-hint: <issue-id-or-idea>
 ---
 

@@ -4,7 +4,6 @@ disable-model-invocation: true
 description: |
   Calculate capital gains with FIFO, wash sale detection, term classification, and Form 8949 outputs.
 user-invocable: true
-effort: high
 ---
 
 # /crypto-gains

@@ -6,7 +6,6 @@ description: |
   Use when: backlog session, issue grooming, sprint planning, backlog cleanup.
   Trigger: /groom, /backlog, /tidy, "groom the backlog", "clean up issues".
 disable-model-invocation: true
-effort: high
 ---
 
 # /groom

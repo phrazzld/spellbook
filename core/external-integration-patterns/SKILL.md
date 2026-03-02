@@ -2,7 +2,6 @@
 name: external-integration-patterns
 user-invocable: false
 description: "Patterns for reliable external service integration: env validation, health checks, error handling, observability. Invoke when integrating Stripe, Clerk, Sendgrid, or any external API."
-effort: high
 ---
 
 # External Integration Patterns

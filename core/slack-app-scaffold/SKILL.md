@@ -2,7 +2,6 @@
 name: slack-app-scaffold
 disable-model-invocation: true
 description: "Scaffold Slack apps from existing functionality using Bolt for JavaScript and the Slack CLI. Use when turning a service, script, or workflow into a Slack app with events, commands, modals, or automations."
-effort: high
 ---
 
 # Slack App Scaffold

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repo Is
 
-A unified skills monorepo (~74 skills) for multi-model AI agents (Claude, Codex, Gemini, Factory, Pi). Pure Markdown — no application code, no tests, no CI. Skills are distributed to agent harnesses via symlinks.
+A unified skills monorepo (~74 skills) for multi-model AI agents (Claude, Codex, Gemini, Factory, Pi). Markdown-first (with helper scripts) — no application code, no tests, no CI. Skills are distributed to agent harnesses via symlinks.
 
 ## Repo Structure
 
@@ -62,7 +62,6 @@ No README.md in skill dirs (prohibited).
 name: skill-name
 description: |
   [What it does] + [When to use it / trigger phrases] + [Key capabilities]
-effort: low | medium | high | max
 user-invocable: false                  # Optional. Reference skills only.
 disable-model-invocation: true         # Optional. User-only workflows (free — no budget cost).
 argument-hint: "[optional example]"    # Optional. Shown in /menu.
@@ -104,10 +103,9 @@ Domain checklists live in `audit/references/`, `fix/references/`.
 ## Adding a Skill
 
 1. Create `core/{name}/SKILL.md` with frontmatter
-2. Match effort level to reasoning cost (low=lookup, medium=scaffold, high=implement, max=architecture)
-3. Choose invocation mode: default (model+user), DMI (user-only), or reference (auto-load)
-4. Follow patterns from existing skills in the same category
-5. Run `./scripts/sync.sh all` to distribute
+2. Choose invocation mode: default (model+user), DMI (user-only), or reference (auto-load)
+3. Follow patterns from existing skills in the same category
+4. Run `./scripts/sync.sh all` to distribute
 
 ## Principles
 

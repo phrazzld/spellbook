@@ -6,7 +6,6 @@ description: |
   Use when: shipping an issue end-to-end, autonomous delivery, sprint execution.
   Trigger: /autopilot, "ship this issue", "build and ship", "sprint execute".
 argument-hint: "[issue-id]"
-effort: high
 ---
 
 # /autopilot
@@ -51,7 +50,7 @@ and a clean dogfood QA pass.
 5. **Design** — Invoke `/shape --design-only` if no `## Technical Design` section
 6. **Build** — Invoke `/build` (branching, implementation, commits)
 7. **Visual QA** — If diff touches frontend files (`app/`, `components/`, `*.css`), run `/visual-qa --fix`. Fix P0/P1 before proceeding.
-8. **Refine** — `/refactor`, `/update-docs`, then `ousterhout` agent for module depth review
+8. **Refine** — `/pr-fix --refactor`, update docs inline, then `ousterhout` agent for module depth review
 9. **Dogfood QA** — Run automated QA against local dev server (see Dogfood QA section below).
    Iterate until no P0/P1 issues remain. **Do not open a PR until QA passes.**
 10. **Commit** — Create semantic commits for all remaining changes:
@@ -142,7 +141,7 @@ After `/build` completes, parallelize the refinement phase:
 |----------|------|
 | **Simplifier** | Run code-simplifier agent, commit |
 | **Depth reviewer** | Run ousterhout agent, commit |
-| **Doc updater** | Run /update-docs, commit |
+| **Doc updater** | Update docs (README, ADRs, API docs), commit |
 
 Lead sequences commits after all teammates finish. Then dogfood QA, then `/pr`.
 

@@ -1,6 +1,6 @@
 ---
-description: Render /spec output as a visual feature specification with user journey, approach comparison, and success metrics
-source_skill: /spec
+description: Render /shape --spec-only output as a visual feature specification with user journey, approach comparison, and success metrics
+source_skill: /shape
 ---
 
 # Spec Overview

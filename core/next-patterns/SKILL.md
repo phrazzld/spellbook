@@ -7,7 +7,6 @@ description: |
   Keywords: Next.js, App Router, RSC, use cache, PPR, cacheLife, cacheTag, metadata,
   route handlers, middleware, Suspense, hydration
 user-invocable: false
-effort: high
 ---
 
 # Next.js Patterns

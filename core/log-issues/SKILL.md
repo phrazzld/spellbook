@@ -6,7 +6,6 @@ description: |
   production, product-standards, bun, virality. Deduplicates against open issues.
   Invoke for: backlog creation from audit, issue triage, gap tracking.
 argument-hint: "<domain|--all>"
-effort: medium
 disable-model-invocation: true
 ---
 

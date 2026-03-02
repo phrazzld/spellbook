@@ -2,11 +2,6 @@
 name: audit-website
 disable-model-invocation: true
 description: Audit websites for SEO, performance, security, technical, content, and 15 other issue cateories with 230+ rules using the squirrelscan CLI. Returns LLM-optimized reports with health scores, broken links, meta tag analysis, and actionable recommendations. Use to discover and asses website or webapp issues and health.
-license: See LICENSE file in repository root
-compatibility: Requires squirrel CLI installed and accessible in PATH
-metadata:
-  author: squirrelscan
-  version: "1.22"
 allowed-tools: Bash(squirrel:*) Read Edit Grep Glob
 ---
 

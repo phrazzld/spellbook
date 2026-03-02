@@ -3,7 +3,6 @@ name: distill
 description: |
   Distill repo knowledge into CLAUDE.md and codify session learnings into durable improvements.
   Invoke at end of sessions or when onboarding a repo.
-effort: high
 ---
 
 # DISTILL

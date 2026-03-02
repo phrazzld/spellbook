@@ -6,7 +6,6 @@ description: |
   Use when: PR passes CI but needs runtime verification before merge.
 disable-model-invocation: true
 argument-hint: "<PR-number>"
-effort: high
 ---
 
 # /flywheel-qa

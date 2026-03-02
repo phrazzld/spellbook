@@ -5,7 +5,6 @@ description: |
   Extracts learnings, updates docs, captures retro signals for future grooming.
   Invoke for: "done", "wrap up", "what did we learn", "retro", "session end",
   finishing multi-step work, after debugging hard problems.
-effort: medium
 disable-model-invocation: true
 argument-hint: "[--skip-commit] [--focus area] [append --issue N]"
 ---

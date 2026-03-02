@@ -6,7 +6,6 @@ description: |
   Use when: PR blocked, CI red, unaddressed reviews, code review needed, refactoring.
   Trigger: /pr-fix, /fix-ci, /review-branch, /review-and-fix, /respond, /address-review, /refactor.
 argument-hint: "[PR-number]"
-effort: high
 ---
 
 # /pr-fix

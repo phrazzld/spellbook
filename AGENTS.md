@@ -1,0 +1,1 @@
+# AGENTS.md — agent-skills\n\n## Scope\n- agent-skills repository-specific Pi foundation.\n- Optimized for .\n\n## Engineering doctrine\n- Root-cause remediation over symptom patching.\n- Favor convention over configuration.\n\n## Quality bar\n- Ensure local tests pass before merge.\n- Meaningful test coverage over line-count gaming.

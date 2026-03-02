@@ -7,7 +7,6 @@ description: |
   - Before suggesting any dashboard action
   - Setting environment variables across platforms
   Keywords: env var, configure, dashboard, settings, production, deploy, CLI
-effort: low
 ---
 
 # CLI Reference

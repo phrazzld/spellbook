@@ -6,7 +6,6 @@ description: |
   local dev, reconciliation, and security. One skill for all Stripe work.
 disable-model-invocation: true
 argument-hint: "[focus area, e.g. 'webhooks' or 'subscription UX' or 'local dev']"
-effort: high
 ---
 
 # /stripe

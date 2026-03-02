@@ -6,7 +6,6 @@ description: |
   OWASP Top 10, cross-module data flow tracing, dependency audit, secrets scan.
 disable-model-invocation: true
 argument-hint: "[optional: specific focus area, e.g. 'auth' or 'api routes']"
-effort: max
 ---
 
 # /security-scan
@@ -140,5 +139,5 @@ git ls-files --cached | grep -i "\.env$" | head -5
 ## Related
 
 - `/check-quality` — Includes lightweight security scan
-- `/review-branch` — security-sentinel is mandatory reviewer
+- `/pr-fix` — security-sentinel is mandatory reviewer
 - `/billing-security` — Payment-specific security patterns

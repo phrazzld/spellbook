@@ -6,7 +6,6 @@ description: |
   bun, virality. One fix per invocation. Run again for next issue.
   Use for: bug fixes, domain issues, error resolution, compliance fixes.
 argument-hint: "<domain|error>"
-effort: high
 ---
 
 # /fix

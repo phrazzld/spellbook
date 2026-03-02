@@ -5,7 +5,6 @@ description: |
   Use when: PR works but could be better, pre-merge quality pass, retrospective review.
   Trigger: /pr-polish, "polish this PR", "elevate quality", "hindsight review".
 argument-hint: "[PR-number]"
-effort: high
 ---
 
 # /pr-polish
@@ -86,7 +85,7 @@ Write missing tests. Each test should justify its existence — no coverage-padd
 
 ### 5. Documentation
 
-Invoke `/update-docs` for anything the PR affects:
+Update docs for anything the PR affects:
 
 - ADRs for architectural decisions made during implementation
 - README updates for new features or changed behavior

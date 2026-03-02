@@ -9,7 +9,6 @@ description: |
   monthly financial check-ins, tracking net worth. Keywords: net worth, balance sheet,
   snapshot, financial update, update finances, capture finances, record net worth.
 user-invocable: true
-effort: medium
 ---
 
 # finances-snapshot

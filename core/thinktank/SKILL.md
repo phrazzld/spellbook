@@ -6,7 +6,6 @@ description: |
   Runs multiple AI models in parallel for diverse perspectives.
   Use when: architecture decisions, code review, security audit, need consensus.
 argument-hint: '"<query>" [file...]'
-effort: high
 ---
 
 # /thinktank

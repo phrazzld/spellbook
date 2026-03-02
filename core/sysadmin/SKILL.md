@@ -5,7 +5,6 @@ description: |
   memory pressure, Docker, Homebrew, stuck processes. Quick health checks and
   safe maintenance actions.
 disable-model-invocation: true
-effort: low
 ---
 
 # /sysadmin

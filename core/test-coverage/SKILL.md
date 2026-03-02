@@ -5,7 +5,6 @@ description: |
   Runs coverage, identifies gaps, enforces test-first workflow.
   Use for: "run test audit", "coverage gaps", "write tests", "TDD",
   "testing philosophy", "vitest setup", "test quality review".
-effort: high
 disable-model-invocation: true
 ---
 

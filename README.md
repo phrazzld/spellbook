@@ -2,7 +2,7 @@
 
 74 deep skills for AI coding agents. Works with Claude Code, Codex, Gemini, Factory, and Pi.
 
-Skills are pure Markdown — no application code, no dependencies. They teach agents *how to work*: debugging methodology, PR workflows, design systems, incident response, and dozens of domain-specific playbooks.
+Skills are Markdown-first with a handful of Python helper scripts. No application code, no dependencies. They teach agents *how to work*: debugging methodology, PR workflows, design systems, incident response, and dozens of domain-specific playbooks.
 
 ## Why
 
@@ -60,6 +60,7 @@ Skills are symlinked, not copied. Edit once, every harness sees the change.
 | `/check-quality` | DMI | Audit quality gates: tests, CI, hooks |
 | `/debug` | Model+User | Four-phase systematic debugging |
 | `/test-coverage` | DMI | TDD workflow, Vitest config, coverage audit |
+| `/distill` | Model+User | Repo knowledge distillation and session codification |
 | `/done` | DMI | Session retrospective and codification |
 | `/triage` | Model+User | Incident response → postmortem → verification |
 
@@ -113,7 +114,7 @@ Domains: bitcoin, btcpay, bun, docs, landing, lightning, observability, onboardi
 
 ### References (auto-loaded)
 
-`git-mastery` · `naming-conventions` · `external-integration-patterns` · `ui-skills` · `business-model-preferences` · `toolchain-preferences` · `distill` · `next-patterns` · `database` · `delegate` · `cli-reference` · `ralph-patterns` · `skill-builder` · `agentic-ui-contract`
+`git-mastery` · `naming-conventions` · `external-integration-patterns` · `ui-skills` · `business-model-preferences` · `toolchain-preferences` · `next-patterns` · `database` · `delegate` · `cli-reference` · `ralph-patterns` · `skill-builder` · `agentic-ui-contract` · `webapp-testing`
 
 ### Domain Tools (DMI)
 
@@ -138,7 +139,6 @@ description: |
   Investigate local development issues: test failures, type errors,
   runtime bugs, build problems. Use when something is broken and you
   need to find the root cause. Not for production incidents (use /triage).
-effort: high
 ---
 ```
 
@@ -146,8 +146,7 @@ effort: high
 
 1. Create `core/{name}/SKILL.md` with frontmatter
 2. Choose mode: default (model+user), `disable-model-invocation: true` (DMI), or `user-invocable: false` (reference)
-3. Set effort: `low` (lookup) · `medium` (scaffold) · `high` (implement) · `max` (architecture)
-4. Run `./scripts/sync.sh all`
+3. Run `./scripts/sync.sh all`
 
 ## Principles
 

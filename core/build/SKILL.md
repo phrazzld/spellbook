@@ -6,7 +6,6 @@ description: |
   Use when: building a feature, implementing an issue, writing code, shipping.
   Trigger: /build, /implement, "build this", "implement this", "start coding".
 argument-hint: <issue-id>
-effort: high
 ---
 
 # /build

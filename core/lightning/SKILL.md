@@ -8,7 +8,6 @@ description: |
   Auto-invoke when: files contain lightning/lnd/bolt11/invoice, imports
   lightning packages, references LND_* env vars, channel handlers modified.
 argument-hint: "[focus area, e.g. 'channels' or 'liquidity']"
-effort: high
 ---
 
 # /lightning

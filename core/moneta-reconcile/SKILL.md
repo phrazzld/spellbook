@@ -4,7 +4,6 @@ disable-model-invocation: true
 description: |
   Verify accounting integrity. Compare totals to source docs, check lots vs holdings, detect duplicates, report gaps.
 user-invocable: true
-effort: high
 ---
 
 # /moneta-reconcile

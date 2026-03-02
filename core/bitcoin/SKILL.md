@@ -8,7 +8,6 @@ description: |
   Auto-invoke when: files contain bitcoin/btc/utxo/satoshi, imports bitcoin
   packages, references BITCOIN_* or BTC_* env vars, wallet handlers modified.
 argument-hint: "[focus area, e.g. 'wallet' or 'testnet config']"
-effort: high
 ---
 
 # /bitcoin

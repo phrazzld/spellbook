@@ -5,7 +5,6 @@ description: |
   launches, referrals, competitor analysis, and pSEO generation. Covers
   the full growth stack from baseline SEO to scaled paid acquisition.
   Use when optimizing conversions, running campaigns, or planning launches.
-effort: high
 disable-model-invocation: true
 ---
 

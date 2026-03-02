@@ -5,7 +5,6 @@ description: |
   linting, security. Outputs prioritized findings (P0-P3) and can fix gaps.
   Invoke for: "quality audit", "set up CI", "add hooks", "coverage gaps",
   "quality gates", "is this project production-ready?"
-effort: high
 disable-model-invocation: true
 ---
 

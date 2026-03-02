@@ -6,7 +6,6 @@ description: |
   Use for: any bug, test failure, production incident, unexpected behavior,
   "investigate", "why is this broken", "debug this", "what went wrong".
 argument-hint: <symptoms - error message, unexpected behavior, what's broken>
-effort: max
 ---
 
 # /debug

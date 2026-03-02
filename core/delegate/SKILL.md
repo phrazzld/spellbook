@@ -5,7 +5,6 @@ description: |
   Multi-AI orchestration primitive. Delegate to specialized AI tools, collect outputs, synthesize.
   Use when: analysis, review, audit, investigation tasks need multiple expert perspectives.
   Keywords: orchestrate, delegate, multi-ai, parallel, synthesis, consensus, dag, swarm
-effort: high
 ---
 
 # /delegate
@@ -237,6 +236,6 @@ use the Task tool with `subagent_type: "general-purpose"`.
 ## Related
 
 - `/llm-communication` — Prompt writing principles
-- `/review-branch` — Example implementation
+- `/pr-fix` — Example implementation
 - `/thinktank` — Multi-model synthesis
 - `/codex-coworker` — Codex delegation patterns

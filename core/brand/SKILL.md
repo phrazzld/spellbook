@@ -5,7 +5,6 @@ description: |
   Creates brand.yaml, compiles to CSS/Tailwind/TypeScript tokens, generates
   OG cards, social images, logos, and branded video. One command from zero to
   full brand system. Use when establishing or updating brand identity.
-effort: high
 disable-model-invocation: true
 ---
 

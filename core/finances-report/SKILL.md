@@ -11,7 +11,6 @@ description: |
   net worth, spending, cash flow, debt, liabilities, bitcoin, how am I doing financially,
   finances summary, show me my finances, portfolio.
 user-invocable: true
-effort: low
 ---
 
 # finances-report

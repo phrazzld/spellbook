@@ -5,7 +5,6 @@ description: |
   migrations, query optimization, transactions, connection pooling, and Convex-specific
   best practices. Reference skill for all database work.
 user-invocable: false
-effort: high
 ---
 
 # Database

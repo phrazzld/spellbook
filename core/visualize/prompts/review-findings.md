@@ -1,6 +1,6 @@
 ---
-description: Render /review-branch output as a visual code review report with severity-organized findings, file heatmap, and reviewer breakdown
-source_skill: /review-branch
+description: Render /pr-fix review output as a visual code review report with severity-organized findings, file heatmap, and reviewer breakdown
+source_skill: /pr-fix
 ---
 
 # Review Findings

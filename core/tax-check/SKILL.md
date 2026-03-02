@@ -4,7 +4,6 @@ disable-model-invocation: true
 description: |
   Validate tax calculations: bracket math, deduction eligibility, Form 8949 format, audit-risk flags.
 user-invocable: true
-effort: high
 ---
 
 # /tax-check

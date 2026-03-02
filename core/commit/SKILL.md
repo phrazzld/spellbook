@@ -6,7 +6,6 @@ description: |
   Use when: ready to commit, cleaning workspace, pushing changes.
   Trigger: /commit, "commit this", "push changes", "clean and commit".
 disable-model-invocation: true
-effort: medium
 ---
 
 # /commit

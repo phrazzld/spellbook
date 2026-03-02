@@ -6,7 +6,6 @@ description: |
   Use when: opening a pull request, shipping to review, creating PR.
   Trigger: /pr, "open PR", "create pull request", "ship to review".
 disable-model-invocation: true
-effort: medium
 ---
 
 # /pr

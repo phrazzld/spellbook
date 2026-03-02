@@ -9,7 +9,6 @@ description: |
   package, references POSTHOG_* env vars, event tracking code modified, user
   mentions "analytics not working" or "events not sending".
 argument-hint: "[focus area, e.g. 'events' or 'feature-flags' or 'debugging']"
-effort: high
 ---
 
 # /posthog

@@ -7,7 +7,6 @@ description: |
   how it is rendered. Use for chat-first apps, tool-calling agents,
   generative UI systems, and planner/tool architecture decisions.
   Keywords: agentic UX, tool calling, planner, generative UI, function tools.
-effort: high
 ---
 
 # Agentic UI Contract

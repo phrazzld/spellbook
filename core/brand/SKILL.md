@@ -173,8 +173,35 @@ For projects not yet on brand.yaml:
 
 ## Phase 6: Logo Generation
 
-1. **Context**: read brand.yaml for identity, palette, voice
-2. **Generate 4 SVG candidates** with constrained prompts:
+### Phase 6a: Icon-library-first path (preferred)
+
+Check if project uses an icon library (Phosphor, Lucide, Heroicons, Tabler):
+1. Scan `package.json` for icon libraries
+2. If found: search for domain-relevant icons (e.g. "Heartbeat" for monitoring)
+3. Present candidates with fill/bold weights — fill works best at 16px favicon
+4. If user picks one:
+   - Extract SVG path from package (`dist/defs/` or core assets)
+   - Color with brand palette primary
+   - Create `public/logo.svg` (256 viewBox, brand-colored fill)
+   - Generate all favicon sizes via sharp:
+```javascript
+const sizes = [16, 32, 180, 192, 512];
+for (const size of sizes) {
+  await sharp(svg, { density: 300 }).resize(size).png().toFile(`favicon-${size}.png`);
+}
+```
+   - Generate `favicon.ico` (ICO header + 32px PNG)
+   - Skip AI generation entirely
+
+### Phase 6b: AI generation (fallback)
+
+When icon-library path is declined or no library exists:
+
+1. **QuiverAI** (quiver.ai) — vector-native SVG generation
+   - Free tier: 20 SVGs/week
+   - API: `POST https://api.quiver.ai/v1/generate`
+   - Prompt constraints: simple icon, max 3 shapes, brand colors only
+2. **Constrained prompt fallback**: Generate 4 SVG candidates
    - Viewbox: 64x64, max 3 shapes (geometric primitives)
    - Colors: only primary + foreground hex
    - No text, no gradients, no filters, no embedded images
@@ -183,15 +210,18 @@ For projects not yet on brand.yaml:
 5. **Optimize + variants**:
 ```bash
 npx svgo logo.svg -o logo-optimized.svg
-# Generate favicon variants at 16, 32, 48, 180, 192, 512px
 ```
 6. **Update brand.yaml** with logo paths
+
+### Wordmark generation
+- Use project's display font (from brand.yaml typography.display)
+- Nano Banana 2 for high-quality text rendering if needed
 
 Output:
 ```
 assets/
   logo.svg, logo-mark.svg
-  favicon-{16,32,48,180,192,512}.png
+  favicon-{16,32,180,192,512}.png
   favicon.ico
 ```
 

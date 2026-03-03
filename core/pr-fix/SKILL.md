@@ -159,6 +159,8 @@ For each bot comment with actionable findings:
 4. **Fix or defer** each finding (same as review comments below)
 5. **Reply to the comment** with resolution status for each finding
 
+If an `Auto PR Feedback Digest` exists in context, use it only as triage seed. Always refresh live GitHub data before final replies.
+
 #### 5b. Review comments and threads
 
 **Independent verification (MANDATORY)**
@@ -187,11 +189,26 @@ Bot feedback (CodeRabbit, Cerberus, Gemini, Codex) gets the same treatment as hu
 
 1. **Categorize feedback** — Sort into critical / in-scope / follow-up / declined. Post transparent assessment to PR. Reviewer feedback CAN be declined with public reasoning. See `references/respond.md` for the full transparency workflow.
 
-2. **TDD fixes** — For critical and in-scope items: write failing test, fix, verify pass, commit. Create GitHub issues for follow-up items. See `references/address-review.md` for the TDD fix procedure and `references/scope-rules.md` for in-scope vs out-of-scope guidance.
+2. **Classify and set severity** — For every actionable comment, record:
+   - Classification: `bug | risk | style | question`
+   - Severity: `critical | high | medium | low`
+   - Decision: `fix now | defer | reject` with reason
+   Policy:
+   - `critical/high`: fix now by default
+   - `medium`: fix now or open follow-up issue with rationale
+   - `low`: optional
 
-3. **Reply to every open thread** — use `gh api repos/$OWNER/$REPO/pulls/$PR/comments/$ID/replies -f body='...'` so the thread shows addressed.
+3. **TDD fixes** — For critical and in-scope items: write failing test, fix, verify pass, commit. Create GitHub issues for follow-up items. See `references/address-review.md` for the TDD fix procedure and `references/scope-rules.md` for in-scope vs out-of-scope guidance.
 
-4. **Resolve every thread via GraphQL** — Replies alone do NOT resolve threads. Non-outdated comments stay visible as open issues to reviewers even after fixing the code and replying. You MUST resolve them:
+4. **Reply to every open thread** — use `gh api repos/$OWNER/$REPO/pulls/$PR/comments/$ID/replies -f body='...'` so the thread shows addressed.
+   Reply format:
+   - `Classification: <bug|risk|style|question>`
+   - `Severity: <critical|high|medium|low>`
+   - `Decision: <fix now|defer|reject>. <reason>`
+   - `Change: <what changed>`
+   - `Verification: <tests/checks run or N/A>`
+
+5. **Resolve every thread via GraphQL** — Replies alone do NOT resolve threads. Non-outdated comments stay visible as open issues to reviewers even after fixing the code and replying. You MUST resolve them:
 
 ```bash
 # Get unresolved thread IDs

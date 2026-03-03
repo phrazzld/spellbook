@@ -48,7 +48,10 @@ and a clean dogfood QA pass.
    - **Never skip an issue because it scored low — YOU make it ready**
 4. **Spec** — Invoke `/shape --spec-only` if no `## Product Spec` section
 5. **Design** — Invoke `/shape --design-only` if no `## Technical Design` section
-6. **Build** — Invoke `/build` (branching, implementation, commits)
+6. **Build (TDD Enforced)** — Invoke `/build` and require RED→GREEN evidence per acceptance criterion:
+   - RED: failing targeted tests before implementation
+   - GREEN: same tests passing after implementation
+   - If test harness is broken, stop and flag blocker (no implementation without explicit user bypass)
 7. **Visual QA** — If diff touches frontend files (`app/`, `components/`, `*.css`), run `/visual-qa --fix`. Fix P0/P1 before proceeding.
 8. **Refine** — `/pr-fix --refactor`, update docs inline, then `ousterhout` agent for module depth review
 9. **Dogfood QA** — Run automated QA against local dev server (see Dogfood QA section below).
@@ -156,4 +159,4 @@ NOT stopping conditions: lacks description, seems big, unclear approach.
 
 ## Output
 
-Report: issue worked, spec status, design status, commits made, dogfood QA summary (issues found/fixed), PR URL.
+Report: issue worked, spec status, design status, TDD evidence (RED/GREEN), commits made, dogfood QA summary (issues found/fixed), PR URL.

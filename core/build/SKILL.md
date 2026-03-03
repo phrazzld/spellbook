@@ -35,12 +35,20 @@ gh issue edit $1 --remove-label "status/ready" --add-label "status/in-progress" 
 
 If on `master`/`main`, branch: `feature/issue-$1` or `fix/issue-$1`.
 
-## TDD Baseline
+## TDD Gate (MANDATORY)
 
-TDD is default. For each chunk: write failing test first, implement minimal code to pass,
-refactor. See `references/tdd-workflow.md` for the full Red-Green-Refactor procedure.
+TDD is enforced, not optional.
 
-If the issue lacks test coverage, establish a failing test before writing implementation.
+For each acceptance-criteria chunk:
+1. Write/adjust test first.
+2. Run targeted test command and confirm failure (RED).
+3. Implement minimal code.
+4. Re-run same targeted test and confirm pass (GREEN).
+5. Refactor with tests still green.
+
+Do not write production implementation before at least one relevant failing test exists.
+
+If tests cannot run (harness/env failure), stop and report blocker. Do not continue implementation unless user explicitly approves bypass.
 
 ## Pre-Delegation Checklist
 
@@ -56,7 +64,7 @@ For each logical chunk:
 
 1. **Understand** — Read issue/spec, find existing patterns to follow
 2. **Delegate** — Clear spec + pattern reference + verify command
-3. **Review** — `git diff --stat && pnpm typecheck && pnpm lint && pnpm test`
+3. **Review** — capture RED→GREEN evidence + `git diff --stat && pnpm typecheck && pnpm lint && pnpm test`
 4. **Commit** — `feat: description (#$1)` if tests pass
 5. **Repeat** until complete
 
@@ -96,7 +104,9 @@ Leave breadcrumbs: starting work, decision points, scope creep, completion. Conc
 
 ## Output
 
-Commits made, files changed, verification status.
+Commits made, files changed, verification status, and explicit TDD evidence:
+- RED command + failing test names
+- GREEN command + passing test names
 
 ## Visual Deliverable
 

@@ -231,7 +231,7 @@ Include user observations from Phase 1 Step 4.
 Use the new org-standards issue format with ALL sections:
 - Problem (specific with evidence)
 - Context (vision one-liner, related issues, domain knowledge)
-- Acceptance Criteria (Given/When/Then)
+- Acceptance Criteria (tagged Given/When/Then: `[test]`, `[command]`, `[behavioral]`)
 - Affected Files (specific paths with descriptions)
 - Verification (executable commands)
 - Boundaries (what NOT to do)

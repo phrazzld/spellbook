@@ -142,8 +142,9 @@ which processes $X/month and has failed silently twice."
 - Domain knowledge agents need (conventions, constraints, prior art)
 
 ## Acceptance Criteria
-- [ ] Given [precondition], when [action], then [outcome]
-- [ ] Given [precondition], when [action], then [outcome]
+- [ ] [test] Given [precondition], when [action], then [expected assertion in tests]
+- [ ] [command] Given [precondition], when `[shell command]`, then [expected output]
+- [ ] [behavioral] Given [precondition], when [user action], then [observable behavior]
 
 ## Affected Files
 - `src/auth/session.ts` — add token refresh logic
@@ -205,7 +206,7 @@ Every issue gets a readiness score 0-100. Minimum score for agent execution: **7
 
 | Section | Points | Scoring |
 |---------|--------|---------|
-| **Acceptance Criteria** | 25 | 25: Given/When/Then with 2+ criteria. 15: checkboxes without Given/When/Then. 5: vague "should work." 0: missing. |
+| **Acceptance Criteria** | 25 | 25: Tagged Given/When/Then (`[test]`/`[command]`/`[behavioral]`) with 2+ criteria. 20: Given/When/Then without tags. 15: checkboxes without Given/When/Then. 5: vague "should work." 0: missing. |
 | **Problem** | 20 | 20: specific with evidence. 10: clear but no evidence. 0: vague or missing. |
 | **Affected Files** | 15 | 15: specific paths with descriptions. 8: paths without descriptions. 0: missing. |
 | **Verification** | 15 | 15: executable commands. 8: described but not executable. 0: missing. |
@@ -251,20 +252,31 @@ After creating each issue, verify:
 - [ ] Issue type set via GraphQL (Bug/Task/Feature)
 - [ ] Assigned to a milestone
 - [ ] P0/P1 with `now` horizon added to Active Sprint project
-- [ ] Acceptance criteria in Given/When/Then format
+- [ ] Acceptance criteria in tagged Given/When/Then format (`[test]`/`[command]`/`[behavioral]`)
 - [ ] Affected files listed with descriptions
 - [ ] Verification commands are executable
 
 ## Acceptance Criteria Examples
 
-Good:
+### Tags
+
+Every AC must be tagged for machine verification by `verify-ac`:
+
+| Tag | Verified By | Use When |
+|-----|-------------|----------|
+| `[test]` | Grep test files for matching assertions | Behavior expressible as a unit/integration test |
+| `[command]` | Execute shell command, check exit code + output | Behavior verifiable by running a command |
+| `[behavioral]` | LLM traces code path (least reliable) | UX flows, cross-cutting behavior, no single test |
+
+### Good (tagged, specific, Given/When/Then)
 ```markdown
-- [ ] Given a user with an expired session token, when they make an API request, then they receive a 401 with `{"error": "token_expired"}`
-- [ ] Given a user with an expired session token, when they visit any page, then the token is silently refreshed and the page loads normally
-- [ ] Given token refresh fails 3 times, when the user's next request arrives, then they are redirected to /login with a flash message
+- [ ] [test] Given a user with an expired session token, when they make an API request, then they receive a 401 with `{"error": "token_expired"}`
+- [ ] [test] Given a user with an expired session token, when they visit any page, then the token is silently refreshed and the page loads normally
+- [ ] [command] Given the auth module is deployed, when `curl -s -o /dev/null -w '%{http_code}' localhost:3000/api/health`, then output is `200`
+- [ ] [behavioral] Given token refresh fails 3 times, when the user's next request arrives, then they are redirected to /login with a flash message
 ```
 
-Bad:
+### Bad (untagged, vague, no structure)
 ```markdown
 - [ ] Session refresh should work
 - [ ] Handle edge cases

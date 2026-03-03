@@ -52,6 +52,36 @@ When >2 plausible root causes and single investigation would anchor on one:
 Use when: ambiguous stack trace, multiple services, flaky failures.
 Don't use when: obvious single cause, config issue, simple regression.
 
+## Instrumented Reproduction Loop
+
+When you can't reproduce the bug yourself (auth-gated, mobile, timing-dependent,
+hardware-specific, user-flow-dependent):
+
+```
+INSTRUMENT → USER REPRODUCES → READ LOGS → REFINE → REPEAT
+```
+
+1. **Hypothesize** -- form 2-3 candidate root causes from symptoms
+2. **Instrument** -- add targeted logging that discriminates between hypotheses.
+   Write to a log file the user can share back:
+   ```bash
+   LOG_FILE="${HOME}/Desktop/debug-$(date +%s).log"
+   ```
+   Log at decision points: function entry/exit, branch taken, values at boundaries.
+   Tag each log line with the hypothesis it tests: `[H1] auth token expired: ${token.exp}`
+3. **Hand off** -- tell user: "Reproduce the bug, then say done." Give exact steps if known.
+4. **Read & analyze** -- when user signals done, read the log file. For each hypothesis:
+   - Supported? Design next experiment to narrow further.
+   - Disproved? Eliminate, remove its instrumentation, add new hypothesis.
+   - Insufficient data? Add more targeted logging at the next layer.
+5. **Iterate** -- repeat until one hypothesis survives all evidence. Max 3 rounds —
+   if still ambiguous after 3, escalate to Multi-Hypothesis Mode (agent teams).
+6. **Clean up** -- remove all instrumentation before fixing. Instrumentation is diagnostic,
+   not the fix.
+
+Use when: flaky tests, user-reported bugs you can't trigger, environment-specific issues.
+Don't use when: bug reproduces in your environment (just use Phase 1-4 directly).
+
 ## The Four Phases
 
 ### Phase 1: Root Cause Investigation
@@ -73,9 +103,22 @@ BEFORE attempting ANY fix:
 
 ### Phase 3: Hypothesis and Testing
 
-1. **Form single hypothesis** -- "I think X because Y" (write it down)
-2. **Test minimally** -- smallest possible change, one variable at a time
-3. **Verify** -- worked? Phase 4. Didn't? New hypothesis. Don't stack fixes.
+Scientific method. One experiment at a time. No stacking.
+
+1. **Form single hypothesis** -- "I think X causes Y because Z" (write it down explicitly)
+2. **Design experiment** -- What will prove or disprove this? Justify: why this experiment,
+   what will it tell us? Smallest possible change, one variable only.
+3. **Run experiment** -- observe result
+4. **Evaluate**:
+   - **Disproved** → eliminate this cause, form NEW hypothesis. This step matters —
+     ruling things out is progress, not failure.
+   - **Supported** → design next experiment to increase confidence. Not proven until
+     you can explain the full causal chain.
+   - **Ambiguous** → experiment was too broad. Narrow scope and rerun.
+5. **Repeat** until root cause is proven or confidence is high enough to act
+
+Never skip justification. "Just try X" is a red flag — if you can't explain what
+you'll learn from an experiment, you don't understand the problem yet.
 
 ### Phase 4: Implementation
 

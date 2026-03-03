@@ -73,6 +73,38 @@ hypothesis -- this is a wrong architecture.
 | "I see the problem, let me fix it" | Seeing symptoms != understanding root cause |
 | "One more fix attempt" (after 2+) | 3+ failures = architectural problem |
 
+## The Scientific Method (One Experiment at a Time)
+
+Debugging is empirical science. Apply the method rigorously:
+
+1. **Examine** what you know about the software's behavior, construct a hypothesis
+   about what might cause it.
+2. **Design an experiment** that tests the hypothesis. Justify: why this experiment,
+   what will it tell us? If you can't justify it, you don't understand the problem.
+3. **If disproved** — new hypothesis. Ruling things out is progress. This step
+   eliminates unrelated issues and narrows the search space.
+4. **If supported** — keep experimenting until either disproved or proven with high
+   confidence. "Supported" is not "proven."
+
+**One experiment at a time.** Multiple simultaneous changes make it impossible to
+attribute results. If you changed two things and the bug disappeared, you don't
+know which fixed it — and the other change may introduce a new bug later.
+
+## Instrumented Reproduction
+
+When the bug requires human reproduction (can't trigger programmatically):
+
+```
+Agent instruments → User reproduces → Agent reads logs → Refine → Repeat
+```
+
+Key rules:
+- Tag log lines with the hypothesis they test: `[H1]`, `[H2]`
+- Log at decision points, not everywhere (targeted, not shotgun)
+- Write to a single file the user can find easily (`~/Desktop/debug-*.log`)
+- Max 3 instrumentation rounds — if still ambiguous, escalate
+- ALWAYS clean up instrumentation after diagnosis
+
 ## Supporting Techniques
 
 - **Root cause tracing**: Trace bugs backward through call stack

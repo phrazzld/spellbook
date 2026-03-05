@@ -5,6 +5,11 @@ import sys
 import re
 from pathlib import Path
 
+try:
+    import yaml  # type: ignore
+except ImportError:
+    yaml = None
+
 
 ALLOWED_PROPERTIES = {
     "name",
@@ -16,6 +21,37 @@ ALLOWED_PROPERTIES = {
     "disable-model-invocation",
     "argument-hint",
 }
+
+
+def strip_inline_comment(value):
+    """Strip YAML inline comments while preserving quoted # characters."""
+    in_single = False
+    in_double = False
+    escaped = False
+    out = []
+
+    for ch in value:
+        if escaped:
+            out.append(ch)
+            escaped = False
+            continue
+        if ch == "\\":
+            escaped = True
+            out.append(ch)
+            continue
+        if ch == "'" and not in_double:
+            in_single = not in_single
+            out.append(ch)
+            continue
+        if ch == '"' and not in_single:
+            in_double = not in_double
+            out.append(ch)
+            continue
+        if ch == "#" and not in_single and not in_double:
+            break
+        out.append(ch)
+
+    return "".join(out).rstrip()
 
 
 def parse_frontmatter(frontmatter_text):
@@ -53,7 +89,7 @@ def parse_frontmatter(frontmatter_text):
 
         key, value = line.split(":", 1)
         key = key.strip()
-        value = value.strip()
+        value = strip_inline_comment(value.strip())
 
         if not key:
             return None, f"Invalid frontmatter line: {line}"
@@ -90,6 +126,15 @@ def validate_skill(skill_path):
         return False, "Invalid frontmatter format"
 
     frontmatter_text = match.group(1)
+
+    # Prefer strict YAML parse when PyYAML is available.
+    if yaml is not None:
+        try:
+            parsed_yaml = yaml.safe_load(frontmatter_text)
+        except yaml.YAMLError as e:
+            return False, f"Invalid YAML in frontmatter: {e}"
+        if parsed_yaml is not None and not isinstance(parsed_yaml, dict):
+            return False, "Frontmatter must be a YAML mapping"
 
     frontmatter, parse_error = parse_frontmatter(frontmatter_text)
     if parse_error:

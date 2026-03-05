@@ -49,7 +49,7 @@ agent-skills/
 
 Harness overlays are applied automatically during sync when present:
 
-```
+```text
 overlays/<harness>/<skill>/...
 ```
 

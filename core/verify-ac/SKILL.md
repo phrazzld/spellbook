@@ -2,7 +2,7 @@
 name: verify-ac
 user-invocable: false
 description: |
-  Machine-verify acceptance criteria against implementation by inferring the best verification strategy per AC.
+  Machine-verify acceptance criteria against implementation by selecting the best verification strategy per AC.
   Use from autopilot/pr-fix/pr-polish when gating commits or PRs against issue acceptance criteria.
 ---
 
@@ -21,14 +21,16 @@ Machine-verifies `## Acceptance Criteria` from a GitHub issue body.
 1. Read issue body:
    - `gh issue view N --json number,title,body`
 2. Extract AC lines from `## Acceptance Criteria`.
-3. Infer verification strategy per AC (`test`, `command`, `behavioral`) using LLM reasoning from AC semantics and diff context.
+3. Select verification strategy per AC:
+   - If AC has explicit legacy tag prefix (`[test]`, `[command]`, `[behavioral]`), honor it.
+   - Otherwise infer strategy (`test`, `command`, `behavioral`) from AC semantics and diff context.
 4. Verify each AC via strategy table below.
 5. Retry UNVERIFIED checks once (2 total attempts).
 6. Emit report + gate decision.
 
 ## Verification Strategies
 
-### `test` (inferred)
+### `test` (tagged or inferred)
 
 - Build query keywords from the AC statement.
 - Search tests only (`**/*test*`, `**/__tests__/**`, `**/*.spec.*`) with `rg`.
@@ -37,7 +39,7 @@ Machine-verifies `## Acceptance Criteria` from a GitHub issue body.
   - `VERIFIED` with file:line evidence
   - `UNVERIFIED` when no credible assertion evidence exists
 
-### `command` (inferred)
+### `command` (tagged or inferred)
 
 - If AC contains an explicit executable command, run it.
 - Otherwise, infer the narrowest reproducible command from repo conventions and AC intent.
@@ -49,7 +51,7 @@ Machine-verifies `## Acceptance Criteria` from a GitHub issue body.
   - `VERIFIED` with command + key output
   - `UNVERIFIED` with exit code/output mismatch
 
-### `behavioral` (inferred)
+### `behavioral` (tagged or inferred)
 
 - Spawn an explore-style subagent to trace changed code paths and call sites.
 - Ask for strict verdict with evidence:

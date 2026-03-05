@@ -56,7 +56,7 @@ Deterministic logic is limited to strict mechanics: schema checks, exact parsing
    - Score < 50: flag to user, attempt enrichment, re-lint
    - **Never skip an issue because it scored low — YOU make it ready**
 4. **Intent gate** — Ensure issue has `## Product Spec` and `### Intent Contract`.
-   If missing, invoke `/shape --spec-only` and re-check before coding.
+   If missing, invoke `/shape --spec-only $1` and re-check before coding.
 5. **Design** — Invoke `/shape --design-only` if no `## Technical Design` section
 6. **Build (TDD Enforced)** — Invoke `/build` and require RED→GREEN evidence per acceptance criterion:
    - RED: failing targeted tests before implementation

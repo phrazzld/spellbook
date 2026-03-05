@@ -76,7 +76,7 @@ gh issue create --title "[Arch] Finding from PR #$PR hindsight review" --body ".
 After Pass 2, run a focused simplification sweep.
 
 - Preferred accelerator (if native in current harness): `/simplify`
-- Portable fallback (required): run `ousterhout` agent and apply resulting module-depth simplifications manually
+- Portable fallback (required): consult the `ousterhout` persona guidance and apply resulting module-depth simplifications manually
 
 If native batch dispatch is available (e.g. `/batch`), use it to parallelize refine/test/docs subtasks.
 Otherwise execute those subtasks sequentially.

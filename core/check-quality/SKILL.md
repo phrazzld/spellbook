@@ -50,9 +50,16 @@ grep -q "@vitest/coverage" package.json 2>/dev/null && echo "V Coverage plugin" 
 grep -rq "vitest-coverage-report" .github/workflows/ 2>/dev/null && echo "V Coverage in PRs" || echo "X Coverage in PRs"
 
 # Baseline policy checks (set OWNER/REPO/BRANCH before running)
-gh api "/repos/${OWNER}/${REPO}/branches/${BRANCH}/protection" --jq '.required_status_checks.contexts | length' 2>/dev/null | awk '{if ($1>0) print "V Required checks"; else print "X Required checks"}'
-gh api "/repos/${OWNER}/${REPO}/branches/${BRANCH}/protection" --jq '.required_pull_request_reviews.required_approving_review_count' 2>/dev/null | awk '{if ($1==0 || $1=="null") print "V No required human approvals"; else print "X Human approvals required"}'
-gh api "/repos/${OWNER}/${REPO}/branches/${BRANCH}/protection" --jq '.required_conversation_resolution.enabled' 2>/dev/null | awk '{if ($1=="true") print "V Conversation resolution required"; else print "X Conversation resolution not required"}'
+PROTECTION_JSON="$(gh api "/repos/${OWNER}/${REPO}/branches/${BRANCH}/protection" 2>/dev/null || true)"
+if [ -z "$PROTECTION_JSON" ]; then
+  echo "X Branch protection unavailable (missing protection or insufficient token permissions)"
+else
+  echo "$PROTECTION_JSON" | jq -r '
+    if (.required_status_checks.contexts | length) > 0 then "V Required checks" else "X Required checks" end,
+    if (.required_pull_request_reviews.required_approving_review_count == 0 or .required_pull_request_reviews.required_approving_review_count == null) then "V No required human approvals" else "X Human approvals required" end,
+    if .required_conversation_resolution.enabled then "V Conversation resolution required" else "X Conversation resolution not required" end
+  '
+fi
 rg -n "trufflehog|secret|gitleaks" .github/workflows -S >/dev/null 2>&1 && echo "V Secret scan workflow (trufflehog/gitleaks)" || echo "X Secret scan workflow"
 
 # Linting

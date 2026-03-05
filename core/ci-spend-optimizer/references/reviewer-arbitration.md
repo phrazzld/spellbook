@@ -32,10 +32,10 @@ Reduce duplicate AI review spend while preserving bug-finding depth.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "src/**"
-      - ".github/workflows/**"
 ```
+
+For required reviewer checks, avoid workflow-level `paths` filters. A filtered
+required check can fail to run on some PRs and block merges.
 
 ## Secondary reviewer on comment
 ```yaml

@@ -97,18 +97,18 @@ materialize_overlay_skill() {
   mkdir -p "$dst"
   cp -a "$base_src"/. "$dst"/
 
+  for overlay_item in "$overlay_src"/*; do
+    [[ ! -e "$overlay_item" ]] && continue
+    [[ "$(basename "$overlay_item")" == "SKILL.append.md" ]] && continue
+    cp -a "$overlay_item" "$dst"/
+  done
+
   if [[ -f "$overlay_src/SKILL.append.md" && -f "$dst/SKILL.md" ]]; then
     cat >> "$dst/SKILL.md" <<'EOF'
 
 EOF
     cat "$overlay_src/SKILL.append.md" >> "$dst/SKILL.md"
   fi
-
-  for overlay_item in "$overlay_src"/*; do
-    [[ ! -e "$overlay_item" ]] && continue
-    [[ "$(basename "$overlay_item")" == "SKILL.append.md" ]] && continue
-    cp -a "$overlay_item" "$dst"/
-  done
 
   cat > "$dst/.sync-managed" <<EOF
 managed_by=sync.sh

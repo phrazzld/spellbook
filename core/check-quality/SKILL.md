@@ -55,12 +55,12 @@ if [ -z "$PROTECTION_JSON" ]; then
   echo "X Branch protection unavailable (missing protection or insufficient token permissions)"
 else
   echo "$PROTECTION_JSON" | jq -r '
-    if (.required_status_checks.contexts | length) > 0 then "V Required checks" else "X Required checks" end,
+    if (((.required_status_checks.contexts // []) | length) > 0 or ((.required_status_checks.checks // []) | length) > 0) then "V Required checks" else "X Required checks" end,
     if (.required_pull_request_reviews.required_approving_review_count == 0 or .required_pull_request_reviews.required_approving_review_count == null) then "V No required human approvals" else "X Human approvals required" end,
     if .required_conversation_resolution.enabled then "V Conversation resolution required" else "X Conversation resolution not required" end
   '
 fi
-rg -n "trufflehog|secret|gitleaks" .github/workflows -S >/dev/null 2>&1 && echo "V Secret scan workflow (trufflehog/gitleaks)" || echo "X Secret scan workflow"
+rg -n "(trufflehog|gitleaks|ggshield|secret[[:space:]_-]?scann(ing|er))" .github/workflows -S >/dev/null 2>&1 && echo "V Secret scan workflow" || echo "X Secret scan workflow"
 
 # Linting
 [ -f "eslint.config.js" ] || [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ] && echo "V ESLint" || echo "X ESLint"

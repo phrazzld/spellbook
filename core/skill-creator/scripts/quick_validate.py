@@ -135,10 +135,11 @@ def validate_skill(skill_path):
             return False, f"Invalid YAML in frontmatter: {e}"
         if parsed_yaml is not None and not isinstance(parsed_yaml, dict):
             return False, "Frontmatter must be a YAML mapping"
-
-    frontmatter, parse_error = parse_frontmatter(frontmatter_text)
-    if parse_error:
-        return False, parse_error
+        frontmatter = parsed_yaml or {}
+    else:
+        frontmatter, parse_error = parse_frontmatter(frontmatter_text)
+        if parse_error:
+            return False, parse_error
 
     # Check for unexpected properties (excluding nested keys under metadata)
     unexpected_keys = set(frontmatter) - ALLOWED_PROPERTIES

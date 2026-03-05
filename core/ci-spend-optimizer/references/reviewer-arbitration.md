@@ -44,7 +44,7 @@ on:
     types: [created]
 jobs:
   review:
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '/review claude')
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/review claude') }}
 ```
 
 ## Escalation on label
@@ -54,7 +54,7 @@ on:
     types: [labeled]
 jobs:
   review:
-    if: github.event.label.name == 'review:deep'
+    if: ${{ github.event.label.name == 'review:deep' }}
 ```
 
 ## Guardrails

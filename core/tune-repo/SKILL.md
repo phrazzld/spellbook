@@ -201,7 +201,7 @@ Guardrail candidates:
 Assess whether this repo needs project-specific skills:
 
 - Does it have a unique build/deploy pipeline that `/build` doesn't cover?
-- Does it use a CLI tool that agents invoke frequently? (e.g., Cerberus uses `opencode`)
+- Does it use a CLI tool that agents invoke frequently? (e.g., a repo-specific internal CLI)
 - Are there repetitive multi-step workflows specific to this domain?
 
 If yes: document the gap as a recommendation. Don't build the skill in this run — that's a separate task.

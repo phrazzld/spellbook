@@ -192,7 +192,7 @@ For each comment without a reply from this PR's author:
 - If **deferred**: reply with follow-up issue number
 - If **declined**: reply with public reasoning
 
-Bot feedback (CodeRabbit, Cerberus, Gemini, Codex) gets the same treatment as human feedback.
+Bot feedback (CodeRabbit, Gemini, Codex, and other reviewer bots) gets the same treatment as human feedback.
 
 #### Execution
 

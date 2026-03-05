@@ -94,6 +94,12 @@ Present: "Here's what I understand. Let me explore the problem space."
    ### Recommended Approach
    [Chosen direction and why]
 
+   ### Intent Contract
+   - Intent: [What must be true after shipping]
+   - Success Conditions: [Measurable outcomes]
+   - Hard Boundaries: [What must never change]
+   - Non-Goals: [Explicitly out of scope]
+
    ### Acceptance Criteria
    - [ ] Given [precondition], when [action], then [outcome]
 
@@ -114,6 +120,9 @@ Present: "Here's what I understand. Let me explore the problem space."
 
    ### Open Questions for Architect
    [Technical unknowns surfaced during exploration]
+
+   ### PR Intent Reference
+   - Every implementation PR must link this issue and include an "Intent Reference" section.
 
    ## Flow
    [Mermaid diagram — flowchart LR for user journeys, flowchart TD for decision trees, sequenceDiagram for integrations]

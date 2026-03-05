@@ -63,6 +63,10 @@ description: |
 **Problem**: Skills give conflicting advice
 **Fix**: Coordinate skill set, use shared conventions
 
+### Flag Explosion
+**Problem**: Core workflow requires remembering multiple UNIX-style flags
+**Fix**: Keep happy path intent-first; reserve flags for deterministic mechanics only
+
 ## Script Anti-Patterns
 
 ### Non-Executable Scripts
@@ -110,3 +114,4 @@ description: |
 - [ ] references/ files never loaded
 - [ ] Contradicts CLAUDE.md guidance
 - [ ] Duplicates another skill's purpose
+- [ ] Core happy path requires memorizing multiple flags

@@ -121,10 +121,26 @@ def validate_skill(skill_path: str) -> dict:
         if len(desc) < 50:
             results["warnings"].append(f"description quite short ({len(desc)} chars) - consider adding trigger terms")
 
+    # Warn on command-surface complexity in frontmatter hints.
+    argument_hint = fm_dict.get("argument-hint", "")
+    if isinstance(argument_hint, str) and argument_hint:
+        argument_flags = set(re.findall(r'--[a-z0-9][a-z0-9-]*', argument_hint))
+        if len(argument_flags) > 1:
+            results["warnings"].append(
+                "argument-hint includes multiple flags; keep happy path intent-first and reserve flags for mechanics"
+            )
+
     # Check body length
     body_lines = len(body.split("\n"))
     if body_lines > 150:
         results["warnings"].append(f"SKILL.md body is {body_lines} lines - consider extracting to references/")
+
+    # Warn when slash-command docs become flag-heavy.
+    slash_flag_usages = re.findall(r'/[a-z][a-z-]*\s+--[a-z][a-z-]*', body)
+    if len(slash_flag_usages) > 3:
+        results["warnings"].append(
+            f"Detected {len(slash_flag_usages)} slash-command flag examples; consider simplifying command surface"
+        )
 
     # Check for references/ if content is heavy
     refs_dir = skill_dir / "references"

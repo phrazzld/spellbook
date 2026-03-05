@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CORE_DIR="$REPO_DIR/core"
 PACKS_DIR="$REPO_DIR/packs"
+OVERLAYS_DIR="$REPO_DIR/overlays"
 
 usage() {
   echo "Usage: sync.sh <command> [options]"
@@ -16,6 +17,10 @@ usage() {
   echo ""
   echo "Options:"
   echo "  --dry-run    Preview without changes"
+  echo ""
+  echo "Overlays:"
+  echo "  overlays/<harness>/<skill>/ files are merged on top of core/<skill>/ at sync time."
+  echo "  Special file: SKILL.append.md appends harness-specific instructions to SKILL.md."
   exit 1
 }
 
@@ -23,6 +28,16 @@ usage() {
 
 log() { echo "[sync] $*"; }
 dry() { [[ "${DRY_RUN:-}" == "--dry-run" ]]; }
+
+is_skipped_skill() {
+  local skill_name="$1"
+  shift
+  local pat
+  for pat in "${@+"$@"}"; do
+    [[ "$skill_name" == "$pat" ]] && return 0
+  done
+  return 1
+}
 
 # Symlink a single skill dir into target dir.
 link_skill() {
@@ -59,39 +74,119 @@ link_skill() {
   fi
 }
 
+# Build a merged skill directory from base + harness overlay.
+# base dir always copied first, overlay files then override.
+# Special overlay file SKILL.append.md is appended to SKILL.md.
+materialize_overlay_skill() {
+  local base_src="$1" overlay_src="$2" target_dir="$3" harness_name="$4"
+  local skill_name dst
+  skill_name="$(basename "$base_src")"
+  dst="$target_dir/$skill_name"
+
+  if dry; then
+    log "[dry] materialize overlay skill $skill_name for $(basename "$(dirname "$overlay_src")")"
+    return
+  fi
+
+  if [[ -L "$dst" ]]; then
+    rm "$dst"
+  elif [[ -d "$dst" ]]; then
+    /usr/bin/trash "$dst" 2>/dev/null || rm -rf "$dst"
+  fi
+
+  mkdir -p "$dst"
+  cp -a "$base_src"/. "$dst"/
+
+  for overlay_item in "$overlay_src"/*; do
+    [[ ! -e "$overlay_item" ]] && continue
+    [[ "$(basename "$overlay_item")" == "SKILL.append.md" ]] && continue
+    cp -a "$overlay_item" "$dst"/
+  done
+
+  if [[ -f "$overlay_src/SKILL.append.md" && -f "$dst/SKILL.md" ]]; then
+    cat >> "$dst/SKILL.md" <<'EOF'
+
+EOF
+    cat "$overlay_src/SKILL.append.md" >> "$dst/SKILL.md"
+  fi
+
+  cat > "$dst/.sync-managed" <<EOF
+managed_by=sync.sh
+harness=$harness_name
+type=overlay
+EOF
+}
+
 # Remove symlinks pointing to deleted skills
 prune_harness() {
   local target_dir="$1"
+  local harness_name="$2"
+  shift 2
+  local -a skip_patterns=("$@")
   [[ ! -d "$target_dir" ]] && { log "SKIP: $target_dir does not exist"; return; }
 
-  local count=0
-  for link in "$target_dir"/*; do
-    [[ ! -L "$link" ]] && continue
-    local target
-    target="$(readlink "$link")"
-    if [[ ! -d "$target" ]]; then
-      if dry; then
-        log "[dry] prune stale: $link -> $target"
-      else
-        rm "$link"
+  local symlink_count=0
+  local managed_dir_count=0
+  local entry
+  for entry in "$target_dir"/*; do
+    [[ ! -e "$entry" && ! -L "$entry" ]] && continue
+
+    if [[ -L "$entry" ]]; then
+      local target
+      target="$(readlink "$entry")"
+      if [[ ! -d "$target" ]]; then
+        if dry; then
+          log "[dry] prune stale symlink: $entry -> $target"
+        else
+          rm "$entry"
+        fi
+        ((symlink_count++))
       fi
-      ((count++))
+      continue
+    fi
+
+    [[ ! -d "$entry" ]] && continue
+    [[ ! -f "$entry/.sync-managed" ]] && continue
+
+    local skill_name
+    skill_name="$(basename "$entry")"
+    local base_skill="$CORE_DIR/$skill_name"
+    local overlay_skill="$OVERLAYS_DIR/$harness_name/$skill_name"
+    local should_prune=false
+
+    if [[ ! -d "$base_skill" ]]; then
+      should_prune=true
+    elif is_skipped_skill "$skill_name" "${skip_patterns[@]+"${skip_patterns[@]}"}"; then
+      should_prune=true
+    elif [[ ! -d "$overlay_skill" ]]; then
+      # Overlay no longer exists; next sync will relink this skill to core.
+      should_prune=true
+    fi
+
+    if $should_prune; then
+      if dry; then
+        log "[dry] prune stale managed dir: $entry"
+      else
+        /usr/bin/trash "$entry" 2>/dev/null || rm -rf "$entry"
+      fi
+      ((managed_dir_count++))
     fi
   done
-  log "$target_dir: pruned $count stale symlinks"
+  log "$target_dir: pruned $symlink_count stale symlinks, $managed_dir_count stale managed dirs"
 }
 
 # Sync all core skills into a target directory.
-# $1 = target dir, $2... = skip patterns (optional)
+# $1 = target dir, $2 = harness name, $3... = skip patterns (optional)
 sync_harness() {
   local target_dir="$1"
-  shift
+  local harness_name="$2"
+  shift 2
   local -a skip_patterns=("$@")
 
   [[ ! -d "$target_dir" ]] && { log "SKIP: $target_dir does not exist"; return; }
 
   # Prune stale symlinks first
-  prune_harness "$target_dir"
+  prune_harness "$target_dir" "$harness_name" "${skip_patterns[@]+"${skip_patterns[@]}"}"
 
   local count=0
   for skill_dir in "$CORE_DIR"/*/; do
@@ -105,7 +200,14 @@ sync_harness() {
     done
     $skip && continue
 
-    link_skill "$CORE_DIR/$skill_name" "$target_dir"
+    local base_skill="$CORE_DIR/$skill_name"
+    local overlay_skill="$OVERLAYS_DIR/$harness_name/$skill_name"
+
+    if [[ -d "$overlay_skill" ]]; then
+      materialize_overlay_skill "$base_skill" "$overlay_skill" "$target_dir" "$harness_name"
+    else
+      link_skill "$base_skill" "$target_dir"
+    fi
     ((count++))
   done
 
@@ -115,13 +217,21 @@ sync_harness() {
 # Sync specific skills only (for Pi shared skills)
 sync_specific() {
   local target_dir="$1"
+  local harness_name="$2"
+  shift
   shift
   local -a skills=("$@")
 
   [[ ! -d "$target_dir" ]] && { log "SKIP: $target_dir does not exist"; return; }
 
   for skill_name in "${skills[@]}"; do
-    link_skill "$CORE_DIR/$skill_name" "$target_dir"
+    local base_skill="$CORE_DIR/$skill_name"
+    local overlay_skill="$OVERLAYS_DIR/$harness_name/$skill_name"
+    if [[ -d "$overlay_skill" ]]; then
+      materialize_overlay_skill "$base_skill" "$overlay_skill" "$target_dir" "$harness_name"
+    else
+      link_skill "$base_skill" "$target_dir"
+    fi
   done
 
   log "$target_dir: ${#skills[@]} shared skills synced"
@@ -187,22 +297,22 @@ sync_pack() {
 
 do_claude() {
   log "=== Claude ==="
-  sync_harness "$HOME/.claude/skills"
+  sync_harness "$HOME/.claude/skills" "claude"
 }
 
 do_codex() {
   log "=== Codex ==="
-  sync_harness "$HOME/.codex/skills" ".system"
+  sync_harness "$HOME/.codex/skills" "codex" ".system"
 }
 
 do_factory() {
   log "=== Factory ==="
-  sync_harness "$HOME/.factory/skills"
+  sync_harness "$HOME/.factory/skills" "factory"
 }
 
 do_gemini() {
   log "=== Gemini ==="
-  sync_harness "$HOME/.gemini/skills"
+  sync_harness "$HOME/.gemini/skills" "gemini"
 
   # Also handle antigravity/global_skills symlinks
   local ag_dir="$HOME/.gemini/antigravity/global_skills"
@@ -224,7 +334,7 @@ do_pi() {
   local -a shared_skills=(
     agent-browser dogfood skill-creator design
   )
-  sync_specific "$pi_skills" "${shared_skills[@]}"
+  sync_specific "$pi_skills" "pi" "${shared_skills[@]}"
 }
 
 # Parse arguments
@@ -251,15 +361,15 @@ case "$COMMAND" in
   --prune)
     HARNESS="${1:-all}"
     case "$HARNESS" in
-      claude)  prune_harness "$HOME/.claude/skills" ;;
-      codex)   prune_harness "$HOME/.codex/skills" ;;
-      factory) prune_harness "$HOME/.factory/skills" ;;
-      gemini)  prune_harness "$HOME/.gemini/skills" ;;
+      claude)  prune_harness "$HOME/.claude/skills" "claude" ;;
+      codex)   prune_harness "$HOME/.codex/skills" "codex" ".system" ;;
+      factory) prune_harness "$HOME/.factory/skills" "factory" ;;
+      gemini)  prune_harness "$HOME/.gemini/skills" "gemini" ;;
       all)
-        prune_harness "$HOME/.claude/skills"
-        prune_harness "$HOME/.codex/skills"
-        prune_harness "$HOME/.factory/skills"
-        prune_harness "$HOME/.gemini/skills"
+        prune_harness "$HOME/.claude/skills" "claude"
+        prune_harness "$HOME/.codex/skills" "codex" ".system"
+        prune_harness "$HOME/.factory/skills" "factory"
+        prune_harness "$HOME/.gemini/skills" "gemini"
         ;;
       *)       echo "Unknown harness: $HARNESS"; exit 1 ;;
     esac

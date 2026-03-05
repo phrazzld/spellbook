@@ -37,6 +37,7 @@ Before creating a skill, verify ALL gates pass:
 | **NON-TRIVIAL** | Required discovery, not docs lookup? | Just followed documentation |
 | **SPECIFIC** | Clear trigger conditions defined? | Vague "sometimes useful" |
 | **VERIFIED** | Solution confirmed working? | Theoretical, untested |
+| **SIMPLE INTERFACE** | Happy path works without flag memorization? | Requires multiple flags for core flow |
 
 If ANY gate fails → Stop. Not skill-worthy.
 

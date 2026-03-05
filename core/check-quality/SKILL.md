@@ -19,8 +19,9 @@ Audit quality infrastructure. Fix gaps. Verify everything works.
 3. Audit CI/CD (GitHub Actions, branch protection)
 4. Audit linting/formatting (ESLint, Prettier, Biome)
 5. Security scan via `security-sentinel` agent
-6. Fix identified gaps (install tools, create configs, set up CI)
-7. Verify fixes work end-to-end
+6. Audit branch-protection/security baseline (required checks, conversation resolution, secret scanning)
+7. Fix identified gaps (install tools, create configs, set up CI)
+8. Verify fixes work end-to-end
 
 **This is both audit AND setup.** It checks what exists, fixes what's missing, and proves it works.
 
@@ -48,6 +49,19 @@ grep -q "@vitest/coverage" package.json 2>/dev/null && echo "V Coverage plugin" 
 [ -f ".github/workflows/ci.yml" ] || [ -f ".github/workflows/test.yml" ] && echo "V CI workflow" || echo "X CI workflow"
 grep -rq "vitest-coverage-report" .github/workflows/ 2>/dev/null && echo "V Coverage in PRs" || echo "X Coverage in PRs"
 
+# Baseline policy checks (set OWNER/REPO/BRANCH before running)
+PROTECTION_JSON="$(gh api "/repos/${OWNER}/${REPO}/branches/${BRANCH}/protection" 2>/dev/null || true)"
+if [ -z "$PROTECTION_JSON" ]; then
+  echo "X Branch protection unavailable (missing protection or insufficient token permissions)"
+else
+  echo "$PROTECTION_JSON" | jq -r '
+    if (((.required_status_checks.contexts // []) | length) > 0 or ((.required_status_checks.checks // []) | length) > 0) then "V Required checks" else "X Required checks" end,
+    if (.required_pull_request_reviews.required_approving_review_count == 0 or .required_pull_request_reviews.required_approving_review_count == null) then "V No required human approvals" else "X Human approvals required" end,
+    if .required_conversation_resolution.enabled then "V Conversation resolution required" else "X Conversation resolution not required" end
+  '
+fi
+rg -n "(trufflehog|gitleaks|ggshield|secret[[:space:]_-]?scann(ing|er))" .github/workflows -S >/dev/null 2>&1 && echo "V Secret scan workflow" || echo "X Secret scan workflow"
+
 # Linting
 [ -f "eslint.config.js" ] || [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ] && echo "V ESLint" || echo "X ESLint"
 [ -f "biome.json" ] && echo "V Biome" || echo "- Biome"
@@ -72,6 +86,8 @@ Prioritize findings:
 | No test runner | P0 |
 | No CI workflow | P0 |
 | Security vulnerabilities | P0 |
+| Missing required checks on protected branch | P0 |
+| Conversation resolution disabled | P0 |
 | No coverage | P1 |
 | No git hooks | P1 |
 | No linting | P1 |
@@ -169,3 +185,5 @@ Coverage is diagnostic, not a goal. 60% meaningful > 95% testing implementation 
 - `/log-quality-issues` -- Create GitHub issues from findings
 - `/fix-quality` -- Fix quality infrastructure
 - `/test-coverage` -- Deep test audit with coverage analysis
+- `/ci-spend-optimizer` -- Reduce CI minute burn and AI reviewer overlap
+- `/org-quality-governance` -- Enforce organization/repo quality policy

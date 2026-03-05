@@ -42,6 +42,10 @@ gh issue view $1 --comments
 gh issue edit $1 --remove-label "status/ready" --add-label "status/in-progress" --add-assignee phrazzld
 ```
 
+Intent gate before coding:
+- Issue must include `## Product Spec` and `### Intent Contract`.
+- If missing, run `/shape --spec-only $1` to lock intent before implementation.
+
 If on `master`/`main`, branch: `feature/issue-$1` or `fix/issue-$1`.
 
 ## TDD Gate (MANDATORY)
@@ -120,6 +124,7 @@ If the issue changes user flows (UI, route handlers, auth, checkout, onboarding,
 ## Issue Comments
 
 Leave breadcrumbs: starting work, decision points, scope creep, completion. Concise, high-context, useful, human.
+Always include the intent reference in completion comment: `Intent Source: #$1`.
 
 ## Output
 

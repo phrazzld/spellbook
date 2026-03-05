@@ -1,7 +1,7 @@
-# Misty Step Org-Wide Standards
+# Organization-Wide Standards
 
 Every issue created or modified MUST comply with these standards.
-Applies to ALL repositories in the misty-step organization.
+Applies to ALL repositories in your target organization.
 
 ## Canonical Label Taxonomy
 
@@ -51,7 +51,8 @@ Every issue MUST have an issue type set via GraphQL. Available types:
 
 Set issue type after creation:
 ```bash
-ISSUE_ID=$(gh api graphql -f query='{ repository(owner: "misty-step", name: "REPO") { issue(number: NUM) { id } } }' --jq '.data.repository.issue.id')
+ORG=your-org
+ISSUE_ID=$(gh api graphql -f query="{ repository(owner: \"$ORG\", name: \"REPO\") { issue(number: NUM) { id } } }" --jq '.data.repository.issue.id')
 gh api graphql -f query="mutation { updateIssue(input: { id: \"$ISSUE_ID\", issueTypeId: \"TYPE_NODE_ID\" }) { issue { number issueType { name } } } }"
 ```
 
@@ -67,8 +68,9 @@ Every issue MUST be assigned to a milestone. If the repo has no milestones:
 2. Create milestone(s) for current work based on project.md focus
 
 ```bash
-gh api "/repos/misty-step/REPO/milestones" --jq '.[].title'
-gh api -X POST "/repos/misty-step/REPO/milestones" -f title="Backlog" -f description="Unscheduled work items"
+ORG=your-org
+gh api "/repos/$ORG/REPO/milestones" --jq '.[].title'
+gh api -X POST "/repos/$ORG/REPO/milestones" -f title="Backlog" -f description="Unscheduled work items"
 gh issue edit NUM --milestone "Milestone Name"
 ```
 
@@ -86,7 +88,8 @@ Three org-level GitHub Projects. Link issues as appropriate:
 - **Triage Inbox** — New issues pending classification
 
 ```bash
-gh project item-add PROJECT_NUMBER --owner misty-step --url "https://github.com/misty-step/REPO/issues/NUM"
+ORG=your-org
+gh project item-add PROJECT_NUMBER --owner "$ORG" --url "https://github.com/$ORG/REPO/issues/NUM"
 ```
 
 ## Label Migration

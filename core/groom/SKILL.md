@@ -29,6 +29,9 @@ deep-dive before scoping decisions are made.
 
 **Opinionated recommendations.** Don't just present options. Recommend and justify.
 
+**Intent-first backlog.** Every issue must carry a clear Intent Contract that downstream
+build/PR workflows can reference.
+
 ## Org-Wide Standards
 
 All issues MUST comply with `groom/references/org-standards.md`.
@@ -231,6 +234,7 @@ Include user observations from Phase 1 Step 4.
 Use the new org-standards issue format with ALL sections:
 - Problem (specific with evidence)
 - Context (vision one-liner, related issues, domain knowledge)
+- Intent Contract (problem statement, success conditions, hard boundaries, non-goals)
 - Acceptance Criteria (tagged Given/When/Then: `[test]`, `[command]`, `[behavioral]`)
 - Affected Files (specific paths with descriptions)
 - Verification (executable commands)

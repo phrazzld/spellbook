@@ -24,7 +24,10 @@ name: skill-name           # lowercase, hyphens, ≤64 chars
 description: |             # ~100 words, ≤1024 chars
   What this skill does. When to use it.
   Include trigger terms users might say.
-allowed-tools: Read, Grep  # Optional: restrict/auto-approve tools
+user-invocable: false                  # Optional: foundational/ambient skill
+disable-model-invocation: true         # Optional: user-only slash command skill
+argument-hint: "[optional examples]"   # Optional: menu guidance
+allowed-tools: Read, Grep              # Optional: restrict/auto-approve tools
 ---
 ```
 
@@ -34,6 +37,12 @@ allowed-tools: Read, Grep  # Optional: restrict/auto-approve tools
 2. **When to Use** (bullet list of triggers)
 3. **Workflow** (numbered steps)
 4. **References** (pointers to detailed docs)
+
+### Command-Surface Rule
+
+- Keep the happy path intent-first (natural language or one simple argument).
+- Use flags only for deterministic mechanics (`--all`, `--list`, `--fix`), not semantic intent classification.
+- Avoid flag matrices that require memorization to execute core workflows.
 
 ## When to Split into References
 

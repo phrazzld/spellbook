@@ -5,8 +5,8 @@ Add production observability to a repository. Detects stack, installs SDKs, writ
 ## Shared Config
 
 ```
-SENTRY_ORG=misty-step
-SENTRY_TEAM=misty-step
+SENTRY_ORG=your-org
+SENTRY_TEAM=your-team
 POSTHOG_PROJECT_ID=293836
 POSTHOG_HOST=https://us.i.posthog.com
 ```
@@ -80,7 +80,7 @@ replaysOnErrorSampleRate: 1.0  # Always replay on error
 |----------|-------|-------|
 | `NEXT_PUBLIC_SENTRY_DSN` | Per-project | Unique per Sentry project |
 | `SENTRY_AUTH_TOKEN` | Shared | For source map uploads |
-| `SENTRY_ORG` | `misty-step` | Hardcode in config |
+| `SENTRY_ORG` | your-org | Set per organization |
 | `NEXT_PUBLIC_POSTHOG_KEY` | Shared | PostHog project API key |
 | `NEXT_PUBLIC_POSTHOG_HOST` | `/ingest` | Via rewrite proxy |
 | `HELICONE_API_KEY` | Shared (server-only) | Never expose client-side |

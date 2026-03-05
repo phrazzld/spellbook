@@ -55,14 +55,17 @@ Deterministic logic is limited to strict mechanics: schema checks, exact parsing
    - Score 50-69: run `/issue enrich $1` first, then re-lint
    - Score < 50: flag to user, attempt enrichment, re-lint
    - **Never skip an issue because it scored low — YOU make it ready**
-4. **Spec** — Invoke `/shape --spec-only` if no `## Product Spec` section
+4. **Intent gate** — Ensure issue has `## Product Spec` and `### Intent Contract`.
+   If missing, invoke `/shape --spec-only $1` and re-check before coding.
 5. **Design** — Invoke `/shape --design-only` if no `## Technical Design` section
 6. **Build (TDD Enforced)** — Invoke `/build` and require RED→GREEN evidence per acceptance criterion:
    - RED: failing targeted tests before implementation
    - GREEN: same tests passing after implementation
    - If test harness is broken, stop and flag blocker (no implementation without explicit user bypass)
 7. **Visual QA** — If diff touches frontend files (`app/`, `components/`, `*.css`), run `/visual-qa --fix`. Fix P0/P1 before proceeding.
-8. **Refine** — `/pr-fix --refactor`, update docs inline, then `ousterhout` agent for module depth review
+8. **Refine** — `/pr-fix --refactor`, update docs inline, then run simplification pass:
+   - Preferred accelerator (if native in current harness): `/simplify`
+   - Portable fallback (required): `ousterhout` agent for module depth review + manual simplification edits
 9. **Dogfood QA** — Run automated QA against local dev server (see Dogfood QA section below).
    Iterate until no P0/P1 issues remain. **Do not open a PR until QA passes.**
 10. **Commit** — Create semantic commits for all remaining changes:
@@ -77,6 +80,7 @@ Deterministic logic is limited to strict mechanics: schema checks, exact parsing
     - Read linked issue from branch name or recent commits
     - PR body must contain all sections:
       - **Summary**: What changed and why. Link to issue. `Closes #N`.
+      - **Intent Reference**: Copy/paste issue intent contract summary + link to source issue section.
       - **Changes**: Concise list of what was done. Key files/functions.
       - **Acceptance Criteria**: From linked issue. Checkboxes.
       - **Manual QA**: Step-by-step verification. Commands, expected output.
@@ -163,6 +167,9 @@ Lead sequences commits after all teammates finish. Then dogfood QA, then `/pr`.
 
 Use when: substantial feature with multiple refinement needs.
 Don't use when: small fix where sequential is fast enough.
+
+If native batch dispatch is available in the harness (e.g. `/batch`), use it.
+Otherwise launch teammates sequentially with normal agent calls.
 
 ## Stopping Conditions
 

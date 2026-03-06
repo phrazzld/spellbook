@@ -92,6 +92,7 @@ Before creating, determine if foundational or workflow:
 - What problem does this solve?
 - What trigger terms would activate it?
 - Is it cross-project or project-specific?
+- Which tier should hold it: hot memory, specialist, cold memory, or hook?
 
 ### 2. Draft Structure
 Reference `references/structure-guide.md` for ideal anatomy.
@@ -101,6 +102,12 @@ Reference `references/description-patterns.md` for trigger-rich descriptions (~1
 
 ### 4. Validate
 Run `scripts/validate_skill.py <skill-path>` to check structure and frontmatter.
+
+Also verify:
+- Metadata is concise and trigger-rich
+- Body stays lean; push detail into `references/`
+- No absolute paths unless the runtime truly requires them
+- Tool scope is explicit when a skill depends on special tools
 
 ### 5. Inform User
 After creating, tell user:
@@ -114,6 +121,9 @@ Keep SKILL.md lean (<100 lines). Put detailed specs in `references/`:
 - Detailed examples → `references/examples.md`
 - Edge cases → `references/edge-cases.md`
 - Anti-patterns → `references/anti-patterns.md`
+
+Beware brevity bias: compress aggressively for general doctrine, but do not
+over-compress high-failure domains that need real mental models.
 
 ## Code Opportunities
 

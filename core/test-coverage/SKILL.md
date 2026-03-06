@@ -2,7 +2,8 @@
 name: test-coverage
 description: |
   Test audit, TDD enforcement, and coverage analysis. Prefer Vitest.
-  Runs coverage, identifies gaps, enforces test-first workflow.
+  Runs coverage, identifies gaps, enforces test-first workflow, and pushes
+  developer tests over mock-heavy unit tests.
   Use for: "run test audit", "coverage gaps", "write tests", "TDD",
   "testing philosophy", "vitest setup", "test quality review".
 disable-model-invocation: true
@@ -36,6 +37,15 @@ REPEAT
 **The critical step most skip:** After writing a failing test, verify it fails
 for the right reason -- not syntax errors, wrong imports, or incorrect assertions.
 
+## Developer Test Rule
+
+Prefer developer tests over mock-heavy unit tests.
+
+- Test module exports and public behavior
+- Test what callers observe, not internal message sends
+- Refactor-hostile tests are bad tests even when green
+- If a refactor breaks tests without changing behavior, fix the tests or the design
+
 ## Testing Philosophy
 
 **Test behavior, not implementation.** Tests should verify WHAT code does,
@@ -44,6 +54,7 @@ not HOW it does it. Implementation changes; behavior remains stable.
 ### What to Test
 
 - Public API (what callers depend on)
+- Module exports / boundary behavior
 - Business logic (critical rules, calculations)
 - Error handling (failure modes)
 - Edge cases (boundaries, null, empty)
@@ -51,6 +62,8 @@ not HOW it does it. Implementation changes; behavior remains stable.
 ### What NOT to Test
 
 - Private implementation details
+- Call order between internal collaborators
+- Which internal method called which dependency
 - Third-party libraries
 - Simple getters/setters (unless they have logic)
 - Framework code
@@ -61,6 +74,7 @@ not HOW it does it. Implementation changes; behavior remains stable.
 - **NEVER mock:** Your own domain logic, internal collaborators (`@/lib/*`)
 - **Red flag:** >3 mocks = coupling to implementation. Refactor.
 - **Pattern:** If mock path starts with `@/` or `../`, reconsider.
+- **Reject:** internal call-count/order assertions unless that order is behavior
 
 ### Test Structure: AAA
 
@@ -71,6 +85,17 @@ Assert:  Verify expected outcome
 ```
 
 One behavior per test. Name: "should [behavior] when [condition]".
+
+## Test Properties
+
+Good programmer tests should be:
+
+- Fast enough to preserve flow
+- Deterministic and isolated
+- Behavioral and structure-insensitive
+- Specific when they fail
+- Cheap to write, read, and change
+- Predictive enough for the level they claim to cover
 
 ## Coverage Philosophy
 
@@ -155,6 +180,7 @@ code, third-party code. Always add a comment explaining WHY.
 ## References
 
 - `references/testing-philosophy.md` -- Full testing philosophy
+- `references/developer-tests.md` -- Behavioral developer-test doctrine
 - `references/tdd-protocol.md` -- Complete TDD workflow and rationalizations
 - `references/vitest-config.md` -- Vitest configuration details
 - `references/vitest-pool-config.md` -- Pool selection guide

@@ -112,7 +112,7 @@ Fill missing issue sections using sub-agent research.
 
 | Missing Section | Agent | Prompt |
 |----------------|-------|--------|
-| Affected Files | Codebase explorer | "Find files related to [issue topic]. Check .glance.md and CODEBASE_MAP.md." |
+| Affected Files | Codebase explorer | "Find files related to [issue topic]. Check docs/context/INDEX.md, docs/context/ROUTING.md, and CODEBASE_MAP.md." |
 | Verification | Codebase explorer | "Find test commands and verification steps for [affected area]." |
 | Acceptance Criteria | General-purpose | "Write Given/When/Then acceptance criteria for: [problem statement]" |
 | Approach | Web researcher + codebase explorer | "Research best practices for [topic]. Find existing patterns in codebase." |

@@ -18,6 +18,8 @@ Staff engineer doing a retrospective pass. Not finding bugs — asking "would we
 ## Objective
 
 Elevate PR `$ARGUMENTS` (or current branch's PR) from "works" to "exemplary": clean architecture, solid tests, current docs.
+Secondary question: **"How confident are we that merging this will not break existing behavior?"**
+Treat confidence as an explicit deliverable, not a vibe.
 
 ## Precondition Gate
 
@@ -29,10 +31,14 @@ gh pr view $PR --json mergeable,statusCheckRollup,reviewDecision
 
 Requirements:
 - No merge conflicts
-- CI green
+- CI green for any relevant existing checks
 - No unaddressed critical review feedback
 
-**If any fail**: Tell user to run `/pr-fix` first. Do not proceed.
+If mergeability is broken, relevant CI is red, or critical review feedback is still open:
+- run `/pr-fix` first
+- do not proceed with polish
+
+If the repo simply lacks the relevant CI checks, continue. Missing CI is a polish target and must be called out in the merge-confidence ledger.
 
 ## Workflow
 
@@ -65,6 +71,9 @@ Address hindsight findings using two-pass refinement (see `pr-fix/references/ref
 
 **Pass 2 — Architecture:** Shallow module consolidation, unnecessary abstraction removal, information hiding improvements.
 
+Delete compatibility layers that only exist to preserve agent-added structure.
+Passing tests do not justify bloat.
+
 For architectural findings that require broader changes: create GitHub issues.
 
 ```bash
@@ -88,10 +97,44 @@ Review test coverage for the PR's changed files. Look for:
 - Missing edge cases
 - Error path coverage
 - Behavior tests (not implementation tests — per `/testing-philosophy`)
+- Module-boundary tests over internal call choreography
 - Boundary conditions
 - Integration gaps
 
 Write missing tests. Each test should justify its existence — no coverage-padding.
+
+If tests are mock-heavy or fail on refactor-only changes, rewrite them as developer tests against exports/public behavior.
+
+### 4.25 Merge Confidence Audit
+
+Ask directly: **"What evidence says this merge will not break existing behavior, and what evidence is still missing?"**
+
+Build a short confidence ledger:
+- `Evidence` — passing tests, typechecks, builds, lint, manual QA, dogfood runs, screenshots, production-safe invariants
+- `Gaps` — missing regression tests, no CI, weak smoke tests, unverified migration paths, untouched error paths, missing browser/runtime verification
+- `Risk` — what could still break despite current green checks
+
+Then remediate the highest-leverage gaps you can within polish scope:
+- Add or strengthen regression/smoke tests for changed behavior
+- Add or tighten CI when checks are missing or too weak
+- Run build/typecheck/lint/test commands that cover the changed surface
+- Run targeted manual QA or browser QA for user-facing diffs
+- Verify compatibility paths explicitly when multiple entrypoints exist (`npm` vs `bun`, web vs mobile, API vs UI)
+
+Rules:
+- If there is **no CI** for the relevant checks, add it or document precisely why it cannot be added in this pass
+- If confidence depends on a manual assumption, turn it into an automated check when feasible
+- Do not claim "high confidence" while major evidence gaps remain
+- If a gap is too broad for polish, create a follow-up issue and call out the residual risk in the PR
+
+### 4.5 Agentic Audit
+
+If the PR touches prompts, model routing, tool schemas, or agent instructions:
+
+- Run `/llm-infrastructure`
+- Review real traces before changing prompts again
+- Add eval cases for observed confusions/regressions
+- Remove irrelevant prompt bulk discovered in traces
 
 ### 5. Documentation
 
@@ -111,6 +154,7 @@ pnpm typecheck && pnpm lint && pnpm test
 ```
 
 All gates must pass. Fix anything that doesn't.
+If repo-wide gates are already red from unrelated debt, still add the strongest PR-scoped automated checks you can and record the residual gap.
 
 ### 7. Update PR Description with Before / After
 
@@ -141,17 +185,18 @@ gh pr view $PR --json body | jq -r '.body'
 
 Omit only when the change is purely internal with no branching or relationships.
 
-### 8. Refresh Glance Summaries (Conditional)
+### 8. Refresh Context Artifacts (Conditional)
 
 If this PR added, removed, or significantly restructured directories:
 
-```bash
-glance   # run from repo root — skips up-to-date directories automatically
-```
+Refresh the relevant context artifacts if the repo uses them:
 
-Do NOT pass `-force`. Glance handles intelligent regeneration based on existing `.glance.md` files. Only affects directories that changed.
+- `docs/CODEBASE_MAP.md`
+- `docs/context/INDEX.md`
+- `docs/context/ROUTING.md`
+- `docs/context/DRIFT-WATCHLIST.md`
 
-Commit any updated `.glance.md` files with the PR branch.
+Commit any updated context artifacts with the PR branch.
 
 ### 9. Codify (Optional)
 
@@ -164,9 +209,12 @@ Skip if nothing novel surfaced.
 - Polishing a PR that doesn't work yet (use `/pr-fix` first)
 - Architectural refactors in a polish pass (create issues instead)
 - Adding tests for coverage percentage instead of confidence
+- Claiming merge confidence without listing concrete evidence and residual risk
+- Leaving missing CI unaddressed when the PR depends on local-only verification
 - Documenting obvious mechanics instead of non-obvious decisions
 - Skipping hindsight and jumping straight to refactoring
+- Preserving unnecessary backward-compat shims in greenfield or pre-user code
 
 ## Output
 
-Summary: hindsight findings, refactors applied, issues created, tests added, docs updated, quality gate results, learnings codified.
+Summary: hindsight findings, refactors applied, issues created, tests added, docs updated, quality gate results, merge-confidence evidence/gaps, learnings codified.

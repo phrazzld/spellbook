@@ -70,8 +70,10 @@ Verify that codebase context artifacts are current:
 # CODEBASE_MAP.md — is last_mapped within 2 weeks?
 [ -f docs/CODEBASE_MAP.md ] && head -5 docs/CODEBASE_MAP.md || echo "No CODEBASE_MAP.md"
 
-# .glance.md files — do they exist for key directories?
-find . -name ".glance.md" -maxdepth 3 2>/dev/null | wc -l
+# docs/context artifacts
+[ -f docs/context/INDEX.md ] && echo "Context index exists" || echo "No context index"
+[ -f docs/context/ROUTING.md ] && echo "Routing table exists" || echo "No routing table"
+[ -f docs/context/DRIFT-WATCHLIST.md ] && echo "Drift watchlist exists" || echo "No drift watchlist"
 
 # CLAUDE.md and AGENTS.md — do they exist with essential sections?
 [ -f CLAUDE.md ] && echo "CLAUDE.md exists" || echo "No CLAUDE.md"
@@ -166,7 +168,7 @@ For each theme the user wants to explore, before making scoping decisions:
    - Trace execution paths through affected code
    - Map dependencies and blast radius
    - Identify existing utilities, helpers, and patterns to reuse
-   - Check `.glance.md` files and `docs/CODEBASE_MAP.md` for architecture context
+   - Check `docs/context/INDEX.md`, `docs/context/ROUTING.md`, and `docs/CODEBASE_MAP.md` for architecture context
 
 4. **Compile research brief** — Structured findings per theme:
    ```markdown

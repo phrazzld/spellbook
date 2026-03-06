@@ -1,6 +1,6 @@
 # Agent Skills
 
-58 core skills + 4 domain packs for AI coding agents. Works with Claude Code, Codex, Gemini, Factory, and Pi.
+63 core skills + 4 domain packs for AI coding agents. Works with Claude Code, Codex, Gemini, Factory, and Pi.
 
 Skills are Markdown-first with a handful of Python helper scripts. No application code, no dependencies. They teach agents *how to work*: debugging methodology, PR workflows, design systems, incident response, and dozens of domain-specific playbooks.
 
@@ -12,8 +12,8 @@ AI agents are only as good as their instructions. Generic prompts produce generi
 
 | Tier | Location | Distribution | Budget cost |
 |------|----------|-------------|-------------|
-| **Core** (58) | `core/` | `sync.sh claude` → global | Per-mode |
-| **Pack** (19) | `packs/` | `sync.sh pack <name> <project>` → per-project | Per-mode |
+| **Core** (63) | `core/` | `sync.sh claude` → global | Per-mode |
+| **Pack** (20) | `packs/` | `sync.sh pack <name> <project>` → per-project | Per-mode |
 | **Repo-local** (5) | `<repo>/.claude/skills/` | Lives in destination repo | Per-mode |
 
 Invocation modes within each tier:
@@ -49,6 +49,18 @@ cd agent-skills
 ```
 
 Skills are symlinked, not copied. Edit once, every harness sees the change.
+
+## Context Architecture
+
+This repo now ships starter cold-memory artifacts under `docs/context/`:
+
+- `docs/context/INDEX.md`
+- `docs/context/ROUTING.md`
+- `docs/context/DRIFT-WATCHLIST.md`
+- `docs/context/SUBSYSTEM-TEMPLATE.md`
+
+They are scaffolds, not encyclopedias. `/tune-repo` is expected to replace the
+starter rows with repo-specific subsystem docs and routing rules.
 
 ## Skills
 
@@ -107,6 +119,8 @@ Domains: bitcoin, btcpay, bun, docs, landing, lightning, observability, onboardi
 | `delegate` | Reference | Multi-AI orchestration primitive |
 | `agent-tools` | Reference | Agent tool patterns |
 | `/agentic-bootstrap` | DMI | Bootstrap `.pi/` for autonomous repos |
+| `break-the-frame` | Reference | Detect dead creative frames and force reframing |
+| `codified-context-architecture` | Reference | Place project knowledge into constitutions, routing, and cold-memory docs |
 | `prompt-context-engineering` | Reference | Production prompt design |
 | `llm-communication` | Reference | Effective LLM instructions |
 | `/llm-infrastructure` | Model+User | LLM evaluation, gateway routing, prompt ops |
@@ -127,7 +141,7 @@ Domains: bitcoin, btcpay, bun, docs, landing, lightning, observability, onboardi
 
 ### References (auto-loaded)
 
-`git-mastery` · `naming-conventions` · `external-integration-patterns` · `ui-skills` · `business-model-preferences` · `toolchain-preferences` · `next-patterns` · `database` · `delegate` · `cli-reference` · `ralph-patterns` · `skill-builder` · `agentic-ui-contract` · `webapp-testing`
+`git-mastery` · `naming-conventions` · `external-integration-patterns` · `ui-skills` · `business-model-preferences` · `toolchain-preferences` · `next-patterns` · `database` · `delegate` · `cli-reference` · `ralph-patterns` · `skill-builder` · `agentic-ui-contract` · `webapp-testing` · `break-the-frame` · `codified-context-architecture`
 
 ## Domain Packs
 
@@ -136,8 +150,8 @@ Packs are loaded per-project via `sync.sh pack <name> <project-dir>`.
 ### payments (3 skills + 5 checklists)
 `bitcoin` · `lightning` · `stripe`
 
-### growth (7 skills + 3 checklists)
-`brand` · `content` · `growth` · `ai-media` · `og-hero-image` · `app-screenshots` · `audit-website`
+### growth (8 skills + 3 checklists)
+`brand` · `content` · `growth` · `ai-media` · `og-hero-image` · `app-screenshots` · `audit-website` · `product-marketing-context`
 
 ### scaffold (5 skills + 1 checklist)
 `github-app-scaffold` · `slack-app-scaffold` · `monorepo-scaffold` · `mobile-migrate` · `bun`

@@ -165,6 +165,7 @@ User picks a direction (or hybrid). Then:
    - `references/web-design-guidelines.md` compliance
 
 3. **Scaffold component library** if none exists.
+4. **Codify token rules** with `/guardrail` so raw values fail at edit time.
 
 Detailed token references:
 - `references/design-tokens-color.md` -- OKLCH, semantic colors, brand-tinted neutrals
@@ -182,6 +183,7 @@ Update `app/globals.css` (or equivalent):
 - Migrate hardcoded values to tokens
 - Ensure dark mode support
 - Update components to use `var(--color-*)` and `var(--spacing-*)`
+- Add guardrails for token usage and wire them into pre-commit
 
 Naming convention: `--category-variant-state`
 ```
@@ -190,6 +192,11 @@ Naming convention: `--category-variant-state`
 --color-text-muted
 --spacing-component-gap
 ```
+
+Minimum guardrails for tokenized systems:
+- no raw color literals outside token/theme files (`#hex`, `rgb[a]`, `hsl[a]`, `oklch`, named colors)
+- no arbitrary spacing/radius values outside token/theme files
+- components consume semantic tokens, not palette literals
 
 ---
 

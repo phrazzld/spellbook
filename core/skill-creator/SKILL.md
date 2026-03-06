@@ -198,6 +198,10 @@ Claude reads REDLINING.md or OOXML.md only when the user needs those features.
 
 - **Avoid deeply nested references** - Keep references one level deep from SKILL.md. All reference files should link directly from SKILL.md.
 - **Structure longer reference files** - For files longer than 100 lines, include a table of contents at the top so Claude can see the full scope when previewing.
+- **Keep metadata tight** - Descriptions should be trigger-rich and compact, not mini-manuals.
+- **Avoid absolute paths in skill content** - Use relative paths unless the runtime or harness location is the point.
+- **Scope tool requirements** - If a skill depends on special tools, say so precisely instead of implying broad access.
+- **Avoid brevity bias** - Some risky domains need substantial embedded context; don't compress them into useless slogans.
 
 ## Skill Creation Process
 

@@ -18,10 +18,11 @@ Audit quality infrastructure. Fix gaps. Verify everything works.
 2. Audit git hooks (Lefthook, Husky)
 3. Audit CI/CD (GitHub Actions, branch protection)
 4. Audit linting/formatting (ESLint, Prettier, Biome)
-5. Security scan via `security-sentinel` agent
-6. Audit branch-protection/security baseline (required checks, conversation resolution, secret scanning)
-7. Fix identified gaps (install tools, create configs, set up CI)
-8. Verify fixes work end-to-end
+5. Audit custom guardrails (architecture, design tokens, import boundaries)
+6. Security scan via `security-sentinel` agent
+7. Audit branch-protection/security baseline (required checks, conversation resolution, secret scanning)
+8. Fix identified gaps (install tools, create configs, set up CI)
+9. Verify fixes work end-to-end
 
 **This is both audit AND setup.** It checks what exists, fixes what's missing, and proves it works.
 
@@ -73,6 +74,10 @@ grep -q '"strict": true' tsconfig.json 2>/dev/null && echo "V Strict mode" || ec
 
 # Custom guardrails
 [ -d "guardrails" ] && echo "V guardrails/" || echo "- No custom guardrails"
+
+# Design tokens (heuristic only; confirm by reading the theme files)
+rg -n "(@theme|--(color|space|spacing|radius|font|shadow)-|tailwind\\.config|globals\\.css|app\\.css|tokens\\.(ts|js|json)|theme\\.(ts|js)|components/ui|src/components/ui)" . -g '!node_modules' >/dev/null 2>&1 && echo "V Design system detected (heuristic)" || echo "- No obvious design system"
+rg -n "(guardrails/.+(token|theme|color|spacing|radius)|no-raw-(color|hex|spacing|radius)|semantic-token|token-(usage|enforce)|design-token)" . -g '!node_modules' >/dev/null 2>&1 && echo "V Token guardrails (heuristic)" || echo "- No token guardrails"
 ```
 
 Spawn `security-sentinel` agent for vulnerability analysis.
@@ -90,11 +95,13 @@ Prioritize findings:
 | Conversation resolution disabled | P0 |
 | No coverage | P1 |
 | No git hooks | P1 |
+| No pre-commit fast feedback | P1 |
 | No linting | P1 |
 | Not strict TypeScript | P1 |
 | No commitlint | P2 |
 | No coverage in PRs | P2 |
-| No custom guardrails | P3 |
+| No custom guardrails | P2 |
+| Design system without token guardrails | P2 |
 | Tool upgrades | P3 |
 
 ### 3. Fix
@@ -102,6 +109,9 @@ Prioritize findings:
 Fix every gap. Delegate to Codex where appropriate.
 
 **Lefthook:** `pnpm add -D lefthook && pnpm lefthook install` + create `lefthook.yml` per `references/lefthook-config.md`
+
+Pre-commit should stay fast: lint, formatting, type/lint on changed files, custom guardrails.
+Push/CI should carry slower gates: full test suite, coverage, e2e.
 
 **Vitest:** `pnpm add -D vitest @vitest/coverage-v8` + config per `references/vitest-config.md`
 
@@ -117,6 +127,8 @@ Prove it works -- don't just check files exist:
 
 ```bash
 pnpm lefthook run pre-commit          # Hooks work
+pnpm eslint .                         # Lint + local guardrails work
+sg scan --config guardrails/sgconfig.yml  # If ast-grep guardrails exist
 pnpm test --run                        # Tests run
 echo "bad message" | pnpm commitlint   # Should fail
 echo "feat: valid" | pnpm commitlint   # Should pass
@@ -140,6 +152,9 @@ Coverage is diagnostic, not a goal. 60% meaningful > 95% testing implementation 
 - Don't skip hooks routinely -- fix root cause
 - Don't test implementation details -- test behavior
 - Don't rely on heavy mocking -- prefer integration tests
+- Don't put slow, flaky suites in pre-commit
+- Don't trust regex heuristics alone for design systems -- read the token files
+- Don't ship a design system with unenforced raw color/magic spacing drift
 - CI on every PR, not just main
 
 ## Output Format

@@ -21,6 +21,14 @@ You don't analyze/review/audit yourself. You:
 3. **Curate** — Validate, filter, resolve conflicts
 4. **Synthesize** — Produce unified output
 
+Before routing, consult the repo's encoded context if it exists:
+- `AGENTS.md`
+- `CLAUDE.md`
+- `docs/context/ROUTING.md`
+- `docs/context/INDEX.md`
+
+Do not rely on memory for specialist selection when the repo has a routing table.
+
 ## Your Team
 
 ### Codex CLI — Implementation Agent
@@ -192,6 +200,8 @@ For each finding:
 **Validate**: Real issue or false positive? Applies to our context?
 **Filter**: Generic advice, style preferences contradicting conventions
 **Resolve Conflicts**: When tools disagree, explain tradeoff, make recommendation
+
+If no specialist or spec exists for a risky area, call that out as a context gap.
 
 ## Output Template
 

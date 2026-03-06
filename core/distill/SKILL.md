@@ -44,6 +44,7 @@ Every line in CLAUDE.md must survive three questions:
 - "The auth middleware is load-bearing, all of it, don't be a hero" — counter-intuitive
 - "DATABASE_URL not POSTGRES_URL — Prisma's Rust engine reads it before Node" — painful gotcha
 - "e2e tests can't run headless due to extension limitations" — surprising constraint
+- "Delete compatibility shims in greenfield paths — they compound fast and mislead agents" — earned by pain
 
 ## Inputs
 
@@ -178,6 +179,8 @@ Scan the session for:
 - Debugging insights ("the real problem was...")
 - Workflow improvements discovered
 - Patterns that should be enforced
+- Repeated explanations that should become cold-memory docs
+- Retrieval misses that exposed undocumented subsystems
 
 ### Codification Targets (highest leverage first)
 
@@ -186,8 +189,12 @@ Scan the session for:
 3. **Agent** — Should a reviewer catch this pattern?
 4. **Skill** — Is this a reusable workflow?
 5. **CLAUDE.md** — Is this philosophy/convention?
+6. **Cold-memory doc** — Does `docs/context/<subsystem>.md` need to exist or be updated?
 
 Lint rules are ideal for: import boundaries, naming conventions, deprecated API usage, auth enforcement, architectural layering violations.
+
+Compatibility shims added only to preserve current structure are codification
+targets too: either document the real contract or delete the shim.
 
 ### Anti-Patterns
 

@@ -27,6 +27,8 @@ written — and `fast-feedback.py` surfaces the error immediately so Claude self
 - Deprecated pattern blocking ("no direct fetch, use apiClient")
 - Auth enforcement ("handlers must call requireAuth")
 - Naming conventions that go beyond basic linting
+- Design-token enforcement ("no raw hex outside theme files")
+- Raw-value blocking ("no arbitrary spacing/radius outside token definitions")
 
 ## Workflow
 
@@ -41,6 +43,7 @@ Clarify the constraint:
 - What EXACTLY should be flagged? (imports, function calls, patterns)
 - What's the fix? (alternative import, wrapper function)
 - Are there exceptions? (test files, migrations, the repository itself)
+- If this is a design-system rule, isolate allowed token/theme files up front
 
 ### Phase 2: Choose Engine
 
@@ -69,6 +72,11 @@ Generate:
 1. Rule implementation with clear error message and fix suggestion
 2. Rule metadata (docs URL, fixable, schema)
 3. Test cases (valid AND invalid examples from the actual codebase)
+
+Common high-value rules:
+- No raw hex/rgb/oklch color literals outside token files
+- No magic spacing/radius values outside theme definitions
+- No direct imports across architectural boundaries
 
 ### Phase 4: Test
 
@@ -188,3 +196,4 @@ GUARDRAIL CREATED:
 | `/tune-repo` | Discovers patterns, recommends `/guardrail` invocations |
 | `/check-quality` | Audits `guardrails/` completeness |
 | CI (GitHub Actions) | Standard `eslint .` or `sg scan` in workflow |
+| pre-commit hooks | Run changed-file guardrails for edit-time enforcement |

@@ -38,6 +38,7 @@ describe('Module Name', () => {
 ❌ "We need 80% coverage"
 ❌ "This file has low coverage, add more tests"
 ❌ Testing implementation details to hit coverage goals
+❌ Mock-heavy tests that fail on harmless refactors
 ❌ Writing tests just to make coverage numbers green
 
 ### The Right Approach
@@ -46,6 +47,7 @@ describe('Module Name', () => {
 - Public API surface, not internal implementation
 - Contract between modules
 - What callers depend on
+- Refactor-safe developer tests over mock choreography
 
 ✅ **Test critical paths and edge cases**
 - Happy path (most common use case)

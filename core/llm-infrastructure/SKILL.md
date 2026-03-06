@@ -21,6 +21,10 @@ Rigorous audit of all LLM-powered features. Model currency, prompt quality, eval
 
 **Observe everything.** Every LLM call should be traceable.
 
+**Default to OpenRouter + Langfuse.** OpenRouter gives cheap routing and observability-friendly metadata. Langfuse gives prompt, trace, and cost visibility.
+
+**Don't tweak in the dark.** Review real traces before changing prompts, tools, or skills.
+
 ## Process
 
 ### 1. Audit
@@ -61,9 +65,19 @@ If using a gateway (OpenRouter, LiteLLM):
 - Confirm cost tracking active
 - Validate model version pinning
 
+Prefer OpenRouter by default unless there is a clear reason not to.
+
 #### Observability Audit
 
 Check for tracing (Langfuse, Phoenix), user ID attachment, token usage capture.
+
+#### Trace Review Loop
+
+Run a few representative tasks, then inspect real traces:
+- Read prompts actually sent in production/dev
+- Look for irrelevant prompt bulk, repeated warnings, and dead instructions
+- Review tool calls, latency, failure paths, and reasoning metadata if available
+- Promote interesting failures/confusions into eval cases
 
 ### 2. Plan
 
@@ -73,7 +87,7 @@ Check for tracing (Langfuse, Phoenix), user ID attachment, token usage capture.
 
 ### 3. Execute
 
-Update models (env vars, not hardcoded), rewrite poor prompts, create eval suite, add observability, add CI gate.
+Update models (env vars, not hardcoded), rewrite poor prompts, create eval suite, add observability, add CI gate, and trim irrelevant prompt jank found in traces.
 
 ### 4. Verify
 
@@ -93,3 +107,4 @@ Run full eval suite, security scan, verify tracing, verify CI gate triggers.
 | `references/evaluation.md` | Promptfoo setup, assertions, CI/CD, red teaming |
 | `references/gateway-routing.md` | OpenRouter, LiteLLM, routing strategies |
 | `references/llm-communication.md` | Writing effective prompts and agent instructions |
+| `references/trace-review-loop.md` | Review Langfuse traces before tweaking prompts |

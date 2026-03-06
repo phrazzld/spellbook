@@ -17,6 +17,8 @@ Full content lifecycle: write, edit, publish, humanize.
 This skill consolidates: `copywriting`, `copy-editing`, `copy-lab`,
 `social-content`, `post`, `announce`, `email-sequence`, `humanizer`.
 
+Foundation skill: `product-marketing-context` -- load first.
+
 ---
 
 ## Quick Start
@@ -46,6 +48,16 @@ This skill consolidates: `copywriting`, `copy-editing`, `copy-lab`,
 
 ---
 
+## First Move
+
+Before writing:
+
+1. Load `product-marketing-context`
+2. Summarize offer, audience, positioning, proof, and current experiment
+3. Only ask for missing context if the gap blocks the draft
+
+If the copy gets cleverer without getting truer, invoke `break-the-frame`.
+
 ## Copywriting
 
 ### Before Writing
@@ -62,6 +74,7 @@ Gather context (ask if not provided):
 - **Specificity over vagueness** -- "Cut reporting from 4 hours to 15 minutes"
 - **Customer language** -- mirror voice-of-customer
 - **One idea per section** -- build a logical flow
+- **True over clever** -- write like a sharp human, not a rubric machine
 
 ### Writing Style
 1. Simple over complex ("use" not "utilize")
@@ -131,6 +144,9 @@ Design-lab pattern for copy. Five distinct approaches, not word variants.
 4. **Iterate until all 5 hit 90+** -- revise using review findings, keep distinct
 5. **Present catalog** -- approach name, strategy, final copy, scores, rationale
 6. **User selects** -- pick or mix, synthesize final draft, re-review
+
+If the five approaches start collapsing into the same frame, stop scoring and
+reframe the problem with `break-the-frame`.
 
 ---
 

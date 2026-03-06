@@ -14,6 +14,7 @@ Use this skill when creating or redesigning a repository's local Pi foundation.
 - Keep output focused and auditable.
 - Bias toward repo-specific fit over generic templates.
 - **Always generate a repo-local persona character in the root `AGENTS.md`.**
+- Scaffold tiered context, not one giant manifest.
 
 ## Workflow
 
@@ -33,6 +34,11 @@ Use this skill when creating or redesigning a repository's local Pi foundation.
    - Emit concrete artifacts (settings, overlays, prompts, pipelines, local workflow doc, and **AGENTS.md**).
    - **Design a personified character (`AGENTS.md`)**: The persona must be a *person* or *character* (e.g., an archivist, a chronomancer) deeply tied to the domain, complete with a Name, Title, Quote, Voice, and Belief System.
    - **Inject context front-and-center**: Do not bury capabilities or the persona in `.pi/persona.md`. The character identity, core domain rules, and essential capabilities must go directly into the repo-root `AGENTS.md` so the Pi runtime automatically loads them on every turn.
+   - Create a codified context architecture:
+     - hot memory: `CLAUDE.md`, `AGENTS.md`
+     - routing: `docs/context/ROUTING.md`
+     - cold memory: `docs/context/INDEX.md` + subsystem docs
+     - drift control: `docs/context/DRIFT-WATCHLIST.md`
    - Require explicit opt-ins in settings.
    - Keep role overlays goal-oriented (role + objective + success criteria + output contract).
 
@@ -47,6 +53,7 @@ Use this skill when creating or redesigning a repository's local Pi foundation.
 - Local config is explicit and narrow.
 - **The persona is a full character with Voice and Beliefs.**
 - **The persona and core rules/capabilities are loaded automatically via the root `AGENTS.md`.**
+- Context is tiered and maintainable, not one bloated file.
 - Workflow supports explore -> design -> implement -> review.
 - Instructions are high-signal and not procedurally bloated.
 - Artifacts are understandable by a new operator in one read.

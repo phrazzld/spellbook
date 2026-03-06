@@ -21,6 +21,8 @@ This skill consolidates: `marketing-ops`, `marketing-dashboard`, `marketing-stat
 `analytics-tracking`, `seo-audit`, `seo-baseline`, `schema-markup`, `programmatic-seo`,
 `pseo-generator`.
 
+Foundation skill: `product-marketing-context` -- load first.
+
 ---
 
 ## Quick Start
@@ -61,6 +63,24 @@ This skill consolidates: `marketing-ops`, `marketing-dashboard`, `marketing-stat
 ```
 
 ---
+
+## First Move
+
+Before any growth work:
+
+1. Load `product-marketing-context`
+2. Summarize offer, audience, positioning, proof, and current experiment
+3. Mark guesses as hypotheses
+
+Do not jump into tactics from a blank slate.
+
+## Operating Principles
+
+- Cheap experiments beat long strategy debates
+- A dozen sloppy tests teach more than one perfect theory
+- If options feel competent but dead, invoke `break-the-frame`
+- Prefer one clear hypothesis per test
+- Learning rate matters more than polish
 
 ## SEO
 
@@ -132,7 +152,8 @@ Route by conversion context:
 3. Identify friction points and drop-off
 4. Propose changes with rationale
 5. Design A/B test
-6. Implement winning variant
+6. Implement the cheapest valid test first
+7. Implement winning variant
 
 ---
 
@@ -163,6 +184,7 @@ Define for each event: name, trigger, properties, implementation.
 3. **Sample size**: calculate required sample for statistical significance
 4. **Duration**: minimum 1-2 full business cycles
 5. **Segmentation**: who sees which variant
+6. **Cheap first pass**: ask whether a dirt-cheap probe can invalidate the idea sooner
 
 ### Common Tests
 - Headlines and CTAs

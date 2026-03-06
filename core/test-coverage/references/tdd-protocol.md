@@ -19,6 +19,7 @@ Write one minimal test showing what should happen.
 Requirements:
 - One behavior
 - Clear name
+- Test exported/public behavior
 - Real code (no mocks unless unavoidable)
 
 ### Verify RED (MANDATORY, NEVER SKIP)
@@ -56,6 +57,8 @@ After green only. Remove duplication, improve names, extract helpers. Stay green
 - AI implements code to pass tests (human reviews)
 - Tests are specifications in executable form
 - Commit tests separately before implementation
+- Prefer developer tests over mock-heavy unit tests
+- Avoid asserting internal call order unless that order is user-visible behavior
 
 ## Bug Fix Pattern
 

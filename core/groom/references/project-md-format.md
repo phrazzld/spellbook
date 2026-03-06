@@ -10,7 +10,9 @@ tune-repo artifacts don't cover: vision, users, priorities, domain language.
 | `CLAUDE.md` | `/tune-repo` | Commands, stack, gotchas (code context) |
 | `AGENTS.md` | `/tune-repo` | Commit, test, PR, style conventions |
 | `docs/CODEBASE_MAP.md` | `/cartographer` | Architecture, modules, data flow |
-| `.glance.md` (per-dir) | `glance` | Per-directory summaries |
+| `docs/context/INDEX.md` | `/tune-repo` | Cold-memory subsystem index |
+| `docs/context/ROUTING.md` | `/tune-repo` | Trigger table for specialist routing |
+| `docs/context/*.md` | `/tune-repo` | Subsystem specifications |
 | `docs/adr/*.md` | `/tune-repo` | Architectural decision records |
 | **`project.md`** | **`/groom`** | **Vision, users, domain, quality bar** |
 

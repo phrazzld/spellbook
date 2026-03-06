@@ -39,6 +39,7 @@ From conversation context:
 | **Bugs introduced** | What broke and why? | Dict access on dataclass |
 | **Missing artifacts** | What would have prevented friction? | Module API reference |
 | **Architecture insights** | Design decisions right/wrong? | SQLite for persistence |
+| **Bloat signals** | What layers should be deleted? | Compatibility shim with no real users |
 
 ### 3. Codification Pass
 
@@ -55,6 +56,9 @@ Docs      -> Reference doc needs update?
 ```
 
 **Default: codify. Exception: justify not codifying.**
+
+If you explained a subsystem twice, add or update a cold-memory doc.
+If a risky subsystem had no relevant doc, record that retrieval miss explicitly.
 
 ### 3.5. Retro Append
 
@@ -77,7 +81,7 @@ This feeds `/groom`'s planning feedback loop.
 
 ### 3.6. Tune Repo
 
-Run `/tune-repo` to refresh `.glance.md` summaries and update CLAUDE.md/AGENTS.md
+Run `/tune-repo` to refresh context artifacts and update CLAUDE.md/AGENTS.md
 if drift detected.
 
 ### 4. Execute Codification
@@ -149,6 +153,7 @@ During planning, `/groom` reads retro.md and extracts:
 - Scope patterns ("Webhook issues always need retry logic")
 - Blocker patterns ("External API docs frequently wrong")
 - Domain insights ("Bitcoin wallet needs regtest testing")
+- Bloat patterns ("Agent kept layering fallback paths instead of deleting old code")
 
 ## Anti-Patterns
 

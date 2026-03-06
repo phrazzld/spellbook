@@ -5,6 +5,8 @@ REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CORE_DIR="$REPO_DIR/core"
 PACKS_DIR="$REPO_DIR/packs"
 OVERLAYS_DIR="$REPO_DIR/overlays"
+AUDIT_CORE_REFS_DIR="$CORE_DIR/audit/references"
+AUDIT_GENERATED_REFS_DIR="$CORE_DIR/audit/generated-references"
 
 usage() {
   echo "Usage: sync.sh <command> [options]"
@@ -74,6 +76,115 @@ link_skill() {
   fi
 }
 
+link_reference() {
+  local src="$1" target_dir="$2"
+  local ref_name dst
+  ref_name="$(basename "$src")"
+  dst="$target_dir/$ref_name"
+
+  if [[ -L "$dst" ]]; then
+    local current
+    current="$(readlink "$dst")"
+    if [[ "$current" == "$src" ]]; then
+      return
+    fi
+    if dry; then
+      log "[dry] repoint $dst -> $src"
+    else
+      rm "$dst"
+    fi
+  elif [[ -e "$dst" ]]; then
+    if dry; then
+      log "[dry] replace generated ref $dst"
+    else
+      /usr/bin/trash "$dst" 2>/dev/null || rm -rf "$dst"
+    fi
+  fi
+
+  if dry; then
+    log "[dry] ln -s $src -> $dst"
+  else
+    ln -s "$src" "$dst"
+  fi
+}
+
+prune_legacy_pack_audit_references() {
+  [[ ! -d "$AUDIT_CORE_REFS_DIR" ]] && return
+
+  local count=0
+  local ref
+  for ref in "$AUDIT_CORE_REFS_DIR"/*.md; do
+    [[ ! -e "$ref" && ! -L "$ref" ]] && continue
+    [[ ! -L "$ref" ]] && continue
+
+    local target
+    target="$(readlink "$ref")"
+    [[ "$target" != "$PACKS_DIR/"* ]] && continue
+
+    if dry; then
+      log "[dry] remove legacy pack audit ref $ref"
+    else
+      rm "$ref"
+    fi
+    ((count+=1))
+  done
+
+  if [[ "$count" -gt 0 ]]; then
+    log "Pruned $count legacy pack audit refs from $AUDIT_CORE_REFS_DIR"
+  fi
+  return 0
+}
+
+prune_generated_audit_references() {
+  [[ ! -d "$AUDIT_GENERATED_REFS_DIR" ]] && return
+
+  local count=0
+  local ref
+  for ref in "$AUDIT_GENERATED_REFS_DIR"/*.md; do
+    [[ ! -e "$ref" && ! -L "$ref" ]] && continue
+    [[ ! -L "$ref" ]] && continue
+
+    local target
+    target="$(readlink "$ref")"
+    if [[ ! -f "$target" ]]; then
+      if dry; then
+        log "[dry] prune stale generated audit ref $ref"
+      else
+        rm "$ref"
+      fi
+      ((count+=1))
+    fi
+  done
+
+  if [[ "$count" -gt 0 ]]; then
+    log "Pruned $count stale generated audit refs from $AUDIT_GENERATED_REFS_DIR"
+  fi
+  return 0
+}
+
+sync_pack_audit_references() {
+  local source_dir="$1"
+  [[ ! -d "$source_dir" ]] && return
+
+  prune_legacy_pack_audit_references
+  if dry; then
+    log "[dry] mkdir -p $AUDIT_GENERATED_REFS_DIR"
+  else
+    mkdir -p "$AUDIT_GENERATED_REFS_DIR"
+  fi
+  prune_generated_audit_references
+
+  local count=0
+  local ref_file
+  for ref_file in "$source_dir"/*.md; do
+    [[ ! -f "$ref_file" ]] && continue
+    link_reference "$ref_file" "$AUDIT_GENERATED_REFS_DIR"
+    ((count+=1))
+  done
+
+  log "Pack audit-references: $count refs synced to $AUDIT_GENERATED_REFS_DIR"
+}
+
 # Build a merged skill directory from base + harness overlay.
 # base dir always copied first, overlay files then override.
 # Special overlay file SKILL.append.md is appended to SKILL.md.
@@ -140,7 +251,7 @@ prune_harness() {
         else
           rm "$entry"
         fi
-        ((symlink_count++))
+        ((symlink_count+=1))
       fi
       continue
     fi
@@ -169,7 +280,7 @@ prune_harness() {
       else
         /usr/bin/trash "$entry" 2>/dev/null || rm -rf "$entry"
       fi
-      ((managed_dir_count++))
+      ((managed_dir_count+=1))
     fi
   done
   log "$target_dir: pruned $symlink_count stale symlinks, $managed_dir_count stale managed dirs"
@@ -208,7 +319,7 @@ sync_harness() {
     else
       link_skill "$base_skill" "$target_dir"
     fi
-    ((count++))
+    ((count+=1))
   done
 
   log "$target_dir: $count skills synced"
@@ -259,37 +370,14 @@ sync_pack() {
     local dir_name
     dir_name="$(basename "$skill_dir")"
 
-    # Link audit-references into core/audit/references/ so orchestrators find them
+    # Pack audit references are runtime-generated, not linked into tracked source.
     if [[ "$dir_name" == "audit-references" ]]; then
-      local audit_refs_dir="$CORE_DIR/audit/references"
-      [[ ! -d "$audit_refs_dir" ]] && continue
-      for ref_file in "$skill_dir"*.md; do
-        [[ ! -f "$ref_file" ]] && continue
-        local ref_name
-        ref_name="$(basename "$ref_file")"
-        local ref_dst="$audit_refs_dir/$ref_name"
-        if [[ -L "$ref_dst" ]]; then
-          local current
-          current="$(readlink "$ref_dst")"
-          [[ "$current" == "$ref_file" ]] && continue
-          if dry; then
-            log "[dry] repoint $ref_dst -> $ref_file"
-          else
-            rm "$ref_dst"
-          fi
-        fi
-        if dry; then
-          log "[dry] ln -s $ref_file -> $ref_dst"
-        else
-          ln -s "$ref_file" "$ref_dst"
-        fi
-      done
-      log "Pack '$pack_name': audit-references linked into $audit_refs_dir"
+      sync_pack_audit_references "$skill_dir"
       continue
     fi
 
     link_skill "$skill_dir" "$target_dir"
-    ((count++))
+    ((count+=1))
   done
 
   log "Pack '$pack_name': $count skills synced to $target_dir"

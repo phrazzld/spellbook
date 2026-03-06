@@ -56,9 +56,10 @@ overlays/<harness>/<skill>/...
 Overlay files are merged onto `core/<skill>/` at sync time. Special file:
 - `SKILL.append.md` appends harness-specific instructions to `SKILL.md`
 
-Pack loading symlinks skills into the project's `.claude/skills/` and links
-`audit-references/*.md` into `core/audit/references/` so audit/fix/log-issues
-orchestrators find them automatically.
+Pack loading symlinks skills into the project's `.claude/skills/` and syncs
+`audit-references/*.md` into ignored runtime state at
+`core/audit/generated-references/` so audit/fix/log-issues can discover them
+without mutating tracked source.
 
 No build, lint, or test commands — this repo is documentation only.
 
@@ -120,9 +121,10 @@ Three unified skills replace all domain-specific check-*/fix-*/log-* skills:
 ```
 
 Core domain checklists live in `core/audit/references/`. Pack checklists live in
-`packs/<pack>/audit-references/` and get symlinked into `core/audit/references/`
-when a pack is loaded via `sync.sh pack <name>`. Audit/fix/log-issues discover
-available domains dynamically by scanning `references/*-checklist.md`.
+`packs/<pack>/audit-references/` and get symlinked into ignored runtime state at
+`core/audit/generated-references/` when a pack is loaded via
+`sync.sh pack <name>`. Audit/fix/log-issues discover available domains
+dynamically by scanning both checklist directories.
 
 ## Adding or Modifying a Skill
 

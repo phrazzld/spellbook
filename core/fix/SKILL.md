@@ -2,8 +2,9 @@
 name: fix
 description: |
   Audit a domain then fix the highest priority issue. Domains discovered
-  dynamically from audit/references/*-checklist.md. One fix per invocation.
-  Run again for next issue. Use for: bug fixes, domain issues, error resolution.
+  dynamically from audit core refs plus generated pack refs. One fix per
+  invocation. Run again for next issue. Use for: bug fixes, domain issues,
+  error resolution.
 argument-hint: "<domain|error>"
 ---
 
@@ -22,14 +23,17 @@ Audit. Fix. Verify. One issue at a time.
 
 ## Domains
 
-**Dynamic.** Scan `audit/references/*-checklist.md` for available domains.
-Core domains always present; pack domains appear after `sync.sh pack <name>`.
+**Dynamic.** Scan `audit/references/*-checklist.md` and
+`audit/generated-references/*-checklist.md` for available domains. Core domains
+always present; pack domains appear after `sync.sh pack <name>`.
 
 ## Process
 
 ### Domain Fix (argument matches a domain)
 
-1. **Audit** -- Read `audit/references/{domain}-checklist.md`, run all checks
+1. **Audit** -- Read `audit/references/{domain}-checklist.md`, or
+   `audit/generated-references/{domain}-checklist.md` for pack-provided domains,
+   then run all checks
 2. **Prioritize** -- Identify highest priority (P0 first) failing check
 3. **Fix** -- Apply the fix for that one issue
 4. **Verify** -- Re-run the failing check to confirm resolution

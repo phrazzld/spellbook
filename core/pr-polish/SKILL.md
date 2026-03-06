@@ -18,6 +18,8 @@ Staff engineer doing a retrospective pass. Not finding bugs — asking "would we
 ## Objective
 
 Elevate PR `$ARGUMENTS` (or current branch's PR) from "works" to "exemplary": clean architecture, solid tests, current docs.
+Secondary question: **"How confident are we that merging this will not break existing behavior?"**
+Treat confidence as an explicit deliverable, not a vibe.
 
 ## Precondition Gate
 
@@ -88,10 +90,44 @@ Review test coverage for the PR's changed files. Look for:
 - Missing edge cases
 - Error path coverage
 - Behavior tests (not implementation tests — per `/testing-philosophy`)
+- Module-boundary tests over internal call choreography
 - Boundary conditions
 - Integration gaps
 
 Write missing tests. Each test should justify its existence — no coverage-padding.
+
+If tests are mock-heavy or fail on refactor-only changes, rewrite them as developer tests against exports/public behavior.
+
+### 4.25 Merge Confidence Audit
+
+Ask directly: **"What evidence says this merge will not break existing behavior, and what evidence is still missing?"**
+
+Build a short confidence ledger:
+- `Evidence` — passing tests, typechecks, builds, lint, manual QA, dogfood runs, screenshots, production-safe invariants
+- `Gaps` — missing regression tests, no CI, weak smoke tests, unverified migration paths, untouched error paths, missing browser/runtime verification
+- `Risk` — what could still break despite current green checks
+
+Then remediate the highest-leverage gaps you can within polish scope:
+- Add or strengthen regression/smoke tests for changed behavior
+- Add or tighten CI when checks are missing or too weak
+- Run build/typecheck/lint/test commands that cover the changed surface
+- Run targeted manual QA or browser QA for user-facing diffs
+- Verify compatibility paths explicitly when multiple entrypoints exist (`npm` vs `bun`, web vs mobile, API vs UI)
+
+Rules:
+- If there is **no CI** for the relevant checks, add it or document precisely why it cannot be added in this pass
+- If confidence depends on a manual assumption, turn it into an automated check when feasible
+- Do not claim "high confidence" while major evidence gaps remain
+- If a gap is too broad for polish, create a follow-up issue and call out the residual risk in the PR
+
+### 4.5 Agentic Audit
+
+If the PR touches prompts, model routing, tool schemas, or agent instructions:
+
+- Run `/llm-infrastructure`
+- Review real traces before changing prompts again
+- Add eval cases for observed confusions/regressions
+- Remove irrelevant prompt bulk discovered in traces
 
 ### 5. Documentation
 
@@ -111,6 +147,7 @@ pnpm typecheck && pnpm lint && pnpm test
 ```
 
 All gates must pass. Fix anything that doesn't.
+If repo-wide gates are already red from unrelated debt, still add the strongest PR-scoped automated checks you can and record the residual gap.
 
 ### 7. Update PR Description with Before / After
 
@@ -164,9 +201,11 @@ Skip if nothing novel surfaced.
 - Polishing a PR that doesn't work yet (use `/pr-fix` first)
 - Architectural refactors in a polish pass (create issues instead)
 - Adding tests for coverage percentage instead of confidence
+- Claiming merge confidence without listing concrete evidence and residual risk
+- Leaving missing CI unaddressed when the PR depends on local-only verification
 - Documenting obvious mechanics instead of non-obvious decisions
 - Skipping hindsight and jumping straight to refactoring
 
 ## Output
 
-Summary: hindsight findings, refactors applied, issues created, tests added, docs updated, quality gate results, learnings codified.
+Summary: hindsight findings, refactors applied, issues created, tests added, docs updated, quality gate results, merge-confidence evidence/gaps, learnings codified.

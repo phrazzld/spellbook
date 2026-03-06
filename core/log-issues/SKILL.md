@@ -2,8 +2,9 @@
 name: log-issues
 description: |
   Audit a domain then create GitHub issues for all findings. Domains discovered
-  dynamically from audit/references/*-checklist.md. Deduplicates against open issues.
-  Invoke for: backlog creation from audit, issue triage, gap tracking.
+  dynamically from audit core refs plus generated pack refs. Deduplicates
+  against open issues. Invoke for: backlog creation from audit, issue triage,
+  gap tracking.
 argument-hint: "<domain|--all>"
 disable-model-invocation: true
 ---
@@ -22,14 +23,17 @@ Audit a domain, create GitHub issues for every finding.
 
 ## Domains
 
-**Dynamic.** Scan `audit/references/*-checklist.md` for available domains.
-Core domains always present; pack domains appear after `sync.sh pack <name>`.
+**Dynamic.** Scan `audit/references/*-checklist.md` and
+`audit/generated-references/*-checklist.md` for available domains. Core domains
+always present; pack domains appear after `sync.sh pack <name>`.
 
 ## Process
 
 ### 1. Audit
 
-Read `audit/references/{domain}-checklist.md` and run all checks.
+Read `audit/references/{domain}-checklist.md`, or
+`audit/generated-references/{domain}-checklist.md` for pack-provided domains,
+and run all checks.
 If `--all`, run all applicable domain checklists.
 
 ### 2. Deduplicate

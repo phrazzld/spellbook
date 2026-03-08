@@ -92,8 +92,14 @@ Deterministic logic is limited to strict mechanics: schema checks, exact parsing
       - **Test Coverage**: Specific test files/functions. Note gaps.
     - `gh pr create --draft --assignee phrazzld`
     - Add context comment if notable decisions were made
-13. **Retro** — Append implementation signals to `.groom/retro.md`:
+13. **Retro** — Ensure `.groom/retro.md` exists first; initialize it with a minimal heading/template if missing. Then append implementation signals:
     ```
+    mkdir -p .groom
+    [ -f .groom/retro.md ] || cat > .groom/retro.md <<'EOF'
+    # Retro Log
+
+    Append one entry per delivered issue.
+    EOF
     /retro append --issue $1 --predicted {effort_label} --actual {actual_effort} \
       --scope "{scope_changes}" --blocker "{blockers}" --pattern "{insight}"
     ```

@@ -39,7 +39,7 @@ Deterministic logic is limited to strict mechanics: schema checks, exact parsing
 
 ## Priority Selection
 
-**Always work on the highest priority issue. No exceptions.**
+**Always work on the highest-priority eligible issue.**
 
 Eligibility comes first:
 - unassigned
@@ -49,7 +49,7 @@ Eligibility comes first:
 1. `p0` > `p1` > `p2` > `p3` > unlabeled
 2. Within tier: `horizon/now` > `horizon/next` > unlabeled
 3. Within same horizon: lower issue number first
-4. Scope, cleanliness, comfort don't matter — priority is absolute
+4. Scope, cleanliness, comfort don't matter after eligibility is satisfied
 
 If the highest-priority issue is already assigned or already `In Progress`, skip it and move to the next eligible issue.
 Never steal claimed work.
@@ -58,11 +58,13 @@ Never steal claimed work.
 
 Autopilot must claim work before shaping or coding.
 
-- Auto-pick mode: only select issues with no assignees and no `In Progress` status
-- Explicit issue mode: if the issue is already assigned or already `In Progress`, stop and report the current owner/status instead of starting parallel work
+- Auto-pick mode: only select issues with no assignees, no `In Progress` status, no open PR, and no active autopilot lane already attached
+- Explicit issue mode: stop if the issue is owned by another operator, already has another open PR, or is otherwise being worked by another lane
+- Explicit issue mode may resume work already claimed by you, including an issue already assigned to you or already marked `In Progress` by your lane
 - Before `/issue lint`, assign the issue to yourself
 - Before `/issue lint`, mark the issue's project status as `In Progress`
-- If assignment or status mutation fails, stop before implementation
+- If the issue is not in a project or the project has no `Status` field, attach it to the canonical delivery project first, then set `Status`
+- If assignment, project attach, or status mutation fails, stop before implementation and report the blocker explicitly
 
 The point is single ownership. One issue should map to one active autopilot lane.
 
@@ -70,13 +72,16 @@ The point is single ownership. One issue should map to one active autopilot lane
 
 1. **Find eligible issue** —
    - Explicit issue: inspect assignees, project status, and open PRs before doing anything else
-   - Auto-pick: choose the highest-priority open issue that is unassigned and not `In Progress`
-   - If no eligible issue exists, stop and report that the queue is already claimed
+   - Auto-pick: choose the highest-priority open issue that is unassigned, not `In Progress`, and has no open PR or active autopilot lane
+   - If there are no open issues, stop and report that the queue is empty
+   - If open issues exist but none are eligible, stop and report that all open work is already claimed
 2. **Claim issue** —
    - Assign the issue to yourself
+   - Ensure the issue is attached to the canonical delivery project
    - Mark the linked project item `Status` as `In Progress`
    - Re-read the issue and confirm the claim stuck before proceeding
-   - If the issue was already assigned or already `In Progress`, stop instead of competing
+   - If the issue is already claimed by your lane, treat this as resume and continue
+   - If the issue is claimed by another lane, stop instead of competing
 3. **Load context** — Read `project.md` for product vision, domain glossary, quality bar
 4. **Readiness gate** — Run `/issue lint $1`:
    - Score >= 70: proceed

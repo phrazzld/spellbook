@@ -1,17 +1,14 @@
----
-name: web-search
-description: Retrieval-first web research with citations and recency controls. Use for web, docs, and news lookups via /web, /web-deep, /web-news, and /web-docs.
----
+# Web Search
 
-# Web Search Skill
-
-Provides retrieval-first web research with citations and recency controls.
+Retrieval-first web research with citations and recency controls.
 
 ## Commands
-- `/web <query>`: fast top links
-- `/web-deep <query>`: fetch and summarize with citations
-- `/web-news <query>`: recency-biased search results
-- `/web-docs <query>`: library/docs-focused retrieval
+- `/research web-search <query>`: fast top links
+- `/research web-deep <query>`: fetch and summarize with citations
+- `/research web-news <query>`: recency-biased search results
+- `/research web-docs <query>`: library/docs-focused retrieval
+
+Legacy aliases: `/web`, `/web-deep`, `/web-news`, `/web-docs`.
 
 ## Behavior Contract
 - Return structured result envelope (see schema below)
@@ -59,7 +56,7 @@ Provides retrieval-first web research with citations and recency controls.
 
 ## Runtime Notes
 - Pi extension entrypoint: `~/.pi/agent/extensions/web-search/` (loaded via settings.json)
-- CLI entrypoint (optional debug): `core/web-search/cli.ts`
+- CLI entrypoint (optional debug): `core/research/cli.ts`
 - Cache: `cache/web-search-cache.json` (TTL via `WEB_SEARCH_TTL_MS`)
 - Logs: `logs/web-search.ndjson` (size-rotated)
 - `PI_WEB_SEARCH_LOG_MAX_BYTES` / `PI_WEB_SEARCH_LOG_MAX_BACKUPS` / `PI_WEB_SEARCH_LOG_ROTATE_CHECK_MS`

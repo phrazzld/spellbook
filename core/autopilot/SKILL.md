@@ -21,6 +21,9 @@ Engineering lead running a sprint. Find work, ensure it's ready, delegate implem
 Deliver Issue `$ARGUMENTS` (or highest-priority eligible open issue) as a draft PR with tests passing,
 a clean dogfood QA pass, and a walkthrough artifact that makes the merge case legible.
 
+An open PR for that issue counts as the active delivery lane. Do not create a duplicate PR
+for the same issue unless you first surface and justify a superseding lane.
+
 ## Latitude
 
 - Codex writes first draft of everything (investigation, implementation, tests, docs)
@@ -75,6 +78,8 @@ The point is single ownership. One issue should map to one active autopilot lane
    - Auto-pick: choose the highest-priority open issue that is unassigned, not `In Progress`, and has no open PR or active autopilot lane
    - If there are no open issues, stop and report that the queue is empty
    - If open issues exist but none are eligible, stop and report that all open work is already claimed
+   - Preferred lane check: run `python3 scripts/issue_lane.py --repo <owner/name> --issue <N>` when the repo provides it
+   - Fallback: query open PRs with `gh pr list --state open --json number,title,body,headRefName,url`
 2. **Claim issue** —
    - Assign the issue to yourself
    - Ensure the issue is attached to the canonical delivery project
@@ -115,8 +120,26 @@ The point is single ownership. One issue should map to one active autopilot lane
 14. **Ship** — Open a draft PR:
     - Stage and commit any uncommitted changes with semantic message
     - Read linked issue from branch name or recent commits
+    - Re-run `python3 scripts/issue_lane.py --repo <owner/name> --issue <N>` immediately before opening the PR when available
+    - Otherwise re-run the in-flight gate immediately before opening the PR
+    - If an open PR already exists for the branch, use `gh pr edit`, not `gh pr create`
+    - If another open PR already exists for the same issue, stop and surface the duplication instead of creating a second lane
     - Load `../pr/references/pr-body-template.md` and follow it
     - The `Walkthrough` section must link the artifact and name the persistent verification that protects the demonstrated path
+    - PR body must contain all sections:
+      - **Why This Matters**: Problem, value added, why now, issue link. This is top-of-line.
+      - **Trade-offs / Risks**: Costs accepted, remaining concerns, why the trade is worthwhile.
+      - **Intent Reference**: Copy/paste issue intent contract summary + link to source issue section.
+      - **Changes**: Concise list of what was done. Key files/functions.
+      - **Alternatives Considered**: Do nothing, credible alternative(s), and why current approach won.
+      - **Acceptance Criteria**: From linked issue. Checkboxes.
+      - **Manual QA**: Step-by-step verification. Commands, expected output.
+      - **What Changed**: Mermaid flow chart for base branch, Mermaid flow chart for this PR, and a third Mermaid architecture/state/sequence diagram, plus explanation of why the new shape is better.
+      - **Before / After**: Text description mandatory. Screenshots for UI changes. Use `<details>` for heavy evidence.
+      - **Test Coverage**: Specific test files/functions. Note gaps.
+      - **Merge Confidence**: Confidence level, strongest evidence, residual risk.
+    - Keep deep sections under `<details>` where useful, but do not hide the topline significance/trade-off story
+    - Use `--body-file` for `gh pr create`, `gh pr edit`, and PR comments
     - `gh pr create --draft --assignee phrazzld`
     - Add context comment if notable decisions were made
 15. **Retro** — Ensure `.groom/retro.md` exists first; initialize it with a minimal heading/template if missing. Then append implementation signals:

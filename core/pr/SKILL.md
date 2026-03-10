@@ -62,7 +62,7 @@ Keep `Why This Matters`, `Trade-offs / Risks`, and the opening `What Changed` ex
 10. **Comment** — Add context comment if notable decisions were made, and use `--body-file` for comment bodies.
 11. **Retro** — If this PR closes a GitHub issue, append implementation feedback:
    ```bash
-  /retro append --issue $ISSUE --predicted {effort_label} --actual {actual_effort} \
+   /retro append --issue $ISSUE --predicted {effort_label} --actual {actual_effort} \
      --scope "{what_changed_from_spec}" --blocker "{blockers}" --pattern "{insight}"
    ```
    This feeds the grooming feedback loop — `/groom` reads retro.md to calibrate

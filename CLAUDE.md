@@ -65,6 +65,17 @@ without mutating tracked source.
 
 No build, lint, or test commands — this repo is documentation only.
 
+## Auto-Sync (post-merge hook)
+
+A `post-merge` git hook auto-runs `sync.sh all --prune` after every `git pull` / `git merge`, keeping all harness symlinks current.
+
+**New machine setup (one-time):**
+```bash
+git config core.hooksPath .githooks
+```
+
+Manual `sync.sh` is still needed for pack loading and explicit refresh.
+
 ## Skill Directory Convention
 
 Core skills live in `core/{skill-name}/`.

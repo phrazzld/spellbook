@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Auto-sync skills to all harnesses after pull/merge
+echo "[agent-skills] syncing skills to harnesses..."
+./scripts/sync.sh all --prune

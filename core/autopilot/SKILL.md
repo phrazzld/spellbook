@@ -18,7 +18,7 @@ Engineering lead running a sprint. Find work, ensure it's ready, delegate implem
 
 ## Objective
 
-Deliver Issue `$ARGUMENTS` (or highest-priority open issue) as a draft PR with tests passing
+Deliver Issue `$ARGUMENTS` (or highest-priority eligible open issue) as a draft PR with tests passing
 and a clean dogfood QA pass.
 
 ## Latitude
@@ -39,46 +39,79 @@ Deterministic logic is limited to strict mechanics: schema checks, exact parsing
 
 ## Priority Selection
 
-**Always work on the highest priority issue. No exceptions.**
+**Always work on the highest-priority eligible issue.**
+
+Eligibility comes first:
+- unassigned
+- not already marked `In Progress`
+- not already being worked by another autopilot run or open PR
 
 1. `p0` > `p1` > `p2` > `p3` > unlabeled
 2. Within tier: `horizon/now` > `horizon/next` > unlabeled
 3. Within same horizon: lower issue number first
-4. Scope, cleanliness, comfort don't matter — priority is absolute
+4. Scope, cleanliness, comfort don't matter after eligibility is satisfied
+
+If the highest-priority issue is already assigned or already `In Progress`, skip it and move to the next eligible issue.
+Never steal claimed work.
+
+## Claim Discipline
+
+Autopilot must claim work before shaping or coding.
+
+- Auto-pick mode: only select issues with no assignees, no `In Progress` status, no open PR, and no active autopilot lane already attached
+- Explicit issue mode: stop if the issue is owned by another operator, already has another open PR, or is otherwise being worked by another lane
+- Explicit issue mode may resume work already claimed by you, including an issue already assigned to you or already marked `In Progress` by your lane
+- Before `/issue lint`, assign the issue to yourself
+- Before `/issue lint`, mark the issue's project status as `In Progress`
+- If the issue is not in a project or the project has no `Status` field, attach it to the canonical delivery project first, then set `Status`
+- If assignment, project attach, or status mutation fails, stop before implementation and report the blocker explicitly
+
+The point is single ownership. One issue should map to one active autopilot lane.
 
 ## Workflow
 
-1. **Find issue** — `gh issue view $1` or `gh issue list --state open --limit 20`
-2. **Load context** — Read `project.md` for product vision, domain glossary, quality bar
-3. **Readiness gate** — Run `/issue lint $1`:
+1. **Find eligible issue** —
+   - Explicit issue: inspect assignees, project status, and open PRs before doing anything else
+   - Auto-pick: choose the highest-priority open issue that is unassigned, not `In Progress`, and has no open PR or active autopilot lane
+   - If there are no open issues, stop and report that the queue is empty
+   - If open issues exist but none are eligible, stop and report that all open work is already claimed
+2. **Claim issue** —
+   - Assign the issue to yourself
+   - Ensure the issue is attached to the canonical delivery project
+   - Mark the linked project item `Status` as `In Progress`
+   - Re-read the issue and confirm the claim stuck before proceeding
+   - If the issue is already claimed by your lane, treat this as resume and continue
+   - If the issue is claimed by another lane, stop instead of competing
+3. **Load context** — Read `project.md` for product vision, domain glossary, quality bar
+4. **Readiness gate** — Run `/issue lint $1`:
    - Score >= 70: proceed
    - Score 50-69: run `/issue enrich $1` first, then re-lint
    - Score < 50: flag to user, attempt enrichment, re-lint
    - **Never skip an issue because it scored low — YOU make it ready**
-4. **Intent gate** — Ensure issue has `## Product Spec` and `### Intent Contract`.
+5. **Intent gate** — Ensure issue has `## Product Spec` and `### Intent Contract`.
    If missing, invoke `/shape --spec-only $1` and re-check before coding.
-5. **Design** — Invoke `/shape --design-only` if no `## Technical Design` section
-6. **Build (TDD Enforced)** — Invoke `/build` and require RED→GREEN evidence per acceptance criterion:
+6. **Design** — Invoke `/shape --design-only` if no `## Technical Design` section
+7. **Build (TDD Enforced)** — Invoke `/build` and require RED→GREEN evidence per acceptance criterion:
    - RED: failing targeted tests before implementation
    - GREEN: same tests passing after implementation
    - If test harness is broken, stop and flag blocker (no implementation without explicit user bypass)
    - Delete compatibility scaffolding in greenfield/pre-user paths unless a real contract requires it
-7. **Visual QA** — If diff touches frontend files (`app/`, `components/`, `*.css`), run `/visual-qa --fix`. Fix P0/P1 before proceeding.
-8. **Agentic QA** — If diff touches prompts, model routing, tool schemas, or agent instructions, run `/llm-infrastructure` and inspect trace/eval coverage before shipping.
-9. **Refine** — `/pr-fix --refactor`, update docs inline, then run simplification pass:
+8. **Visual QA** — If diff touches frontend files (`app/`, `components/`, `*.css`), run `/visual-qa --fix`. Fix P0/P1 before proceeding.
+9. **Agentic QA** — If diff touches prompts, model routing, tool schemas, or agent instructions, run `/llm-infrastructure` and inspect trace/eval coverage before shipping.
+10. **Refine** — `/pr-fix --refactor`, update docs inline, then run simplification pass:
     - Preferred accelerator (if native in current harness): `/simplify`
     - Portable fallback (required): manual module-depth review + simplification edits using Ousterhout checks: shallow modules, information leakage, pass-throughs, and compatibility shims with no active contract
     - Optional accelerator: use an `ousterhout` persona/agent if the harness provides one
-10. **Dogfood QA** — Run automated QA against local dev server (see Dogfood QA section below).
+11. **Dogfood QA** — Run automated QA against local dev server (see Dogfood QA section below).
    Iterate until no P0/P1 issues remain. **Do not open a PR until QA passes.**
-11. **Commit** — Create semantic commits for all remaining changes:
+12. **Commit** — Create semantic commits for all remaining changes:
     - Categorize files: commit, gitignore, delete, consolidate
     - Group into logical commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
     - Subject: imperative, lowercase, no period, ~50 chars. Body: why not what.
     - Run quality gates (`lint`, `typecheck`, `test`) before pushing
     - `git fetch origin && git push origin HEAD` (rebase if behind)
     - Never force push. Never push to main without confirmation.
-12. **Ship** — Open a draft PR:
+13. **Ship** — Open a draft PR:
     - Stage and commit any uncommitted changes with semantic message
     - Read linked issue from branch name or recent commits
     - PR body must contain all sections:
@@ -92,7 +125,7 @@ Deterministic logic is limited to strict mechanics: schema checks, exact parsing
       - **Test Coverage**: Specific test files/functions. Note gaps.
     - `gh pr create --draft --assignee phrazzld`
     - Add context comment if notable decisions were made
-13. **Retro** — Ensure `.groom/retro.md` exists first; initialize it with a minimal heading/template if missing. Then append implementation signals:
+14. **Retro** — Ensure `.groom/retro.md` exists first; initialize it with a minimal heading/template if missing. Then append implementation signals:
     ```
     mkdir -p .groom
     [ -f .groom/retro.md ] || cat > .groom/retro.md <<'EOF'

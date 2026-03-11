@@ -27,7 +27,7 @@ Evidence:
 graph TD
   A[Dogfood QA passes] --> B[Verify ACs via verify-ac]
   B -->|all ACs verified or partial only| C[Walkthrough]
-  B -->|any AC still unverified after 2 attempts| D[Stop and flag blocker]
+  B -->|any AC still unverified after 2 attempts| D[Remediate and rerun verify-ac]
   C --> E[Commit]
   E --> F[Draft PR]
 ```

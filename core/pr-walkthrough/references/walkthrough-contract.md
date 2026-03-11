@@ -68,6 +68,24 @@ For each scene, capture at least one of:
 
 If a scene has no evidence, cut or rewrite the claim.
 
+## Media Delivery Rules
+
+The evidence must render or open cleanly for reviewers in the live PR.
+
+Preferred order:
+
+1. GitHub-uploaded attachments for screenshots and video
+2. GitHub-relative blob links for private-repo screenshots: `../blob/<ref>/path/to/image.png?raw=true`
+3. Explicit direct-download blob links for repo-hosted video fallback: `../blob/<ref>/path/to/video.mp4?raw=1`
+
+Avoid:
+
+- `raw.githubusercontent.com/...` in private-repo PR bodies or comments
+- bare repo-relative asset paths like `walkthrough/screenshots/foo.png` in PR bodies or comments
+- plain blob links to `.mp4` files that dump reviewers into the code viewer without warning
+
+If the branch has more than one artifact, add a committed `walkthrough/reviewer-evidence.md` file and link it from the top of the PR.
+
 ## Motion Rule
 
 - Use video only when motion is part of the proof: a user action, animation, state transition, navigation flow, drag/drop, async update, or other observable behavior.
@@ -80,6 +98,13 @@ If a scene has no evidence, cut or rewrite the claim.
 Every PR should include a section like this:
 
 ```md
+## Reviewer Evidence
+
+- Start here: [walkthrough/reviewer-evidence.md or attachment comment]
+- Direct video download: [artifact]
+- Walkthrough notes: [artifact]
+- Fast claim: [one sentence]
+
 ## Walkthrough
 
 - Renderer: Screenshot bundle | Browser walkthrough | Terminal walkthrough | Remotion walkthrough | Mixed

@@ -15,6 +15,12 @@ Use this structure when creating or heavily rewriting a PR description.
 These sections should stay visible on first load:
 
 ````markdown
+## Reviewer Evidence
+- Start here:
+- Direct video download:
+- Walkthrough notes:
+- Fast claim:
+
 ## Why This Matters
 - Problem:
 - Value:
@@ -95,6 +101,22 @@ Pattern:
 ## Required Sections
 
 All PRs must contain these sections, visible or inside `<details>`:
+
+### `## Reviewer Evidence`
+
+Put the proof before the prose when the PR has user-visible evidence.
+
+- Link one obvious reviewer entrypoint
+- Link the video in a way that does not drop reviewers into a confusing code viewer
+- Surface 1-3 screenshots inline when they materially help
+- State the merge claim in one sentence
+
+For private repositories:
+
+- prefer GitHub-uploaded attachments for screenshots and video
+- fallback screenshot syntax in PR bodies/comments: `../blob/<ref>/path/to/image.png?raw=true`
+- fallback repo-hosted video link: `../blob/<ref>/path/to/video.mp4?raw=1`
+- do not use `raw.githubusercontent.com/...` or bare asset paths like `walkthrough/screenshots/foo.png`
 
 ### `## Why This Matters`
 
@@ -202,6 +224,7 @@ For Mermaid syntax examples and GitHub rendering constraints, load
 ## Cleanliness Rules
 
 - Do not bury the value proposition below a long diff recap.
+- Do not bury the reviewer evidence below the narrative when the branch has user-visible proof.
 - Do not present risks only as a footnote.
 - Do not use a single diagram when before/after comparison is the actual point.
 - Do not force screenshots for purely internal changes, but do provide text before/after.

@@ -40,7 +40,7 @@ A PR missing template sections is not ready.
 
 Use `<details>/<summary>` to collapse larger sections such as Alternatives,
 Manual QA, Acceptance Criteria, Test Coverage, Walkthrough evidence, and screenshot-heavy Before / After evidence.
-Keep `Why This Matters`, `Trade-offs / Risks`, and the opening `What Changed` explanation visible.
+Keep `Reviewer Evidence`, `Why This Matters`, `Trade-offs / Risks`, and the opening `What Changed` explanation visible.
 
 ## Workflow
 
@@ -61,6 +61,7 @@ Keep `Why This Matters`, `Trade-offs / Risks`, and the opening `What Changed` ex
 6. **Walkthrough** — Run `/pr-walkthrough`. Every PR needs a walkthrough package, even when the change is not user-facing. Use browser, terminal, diagram, Remotion, or mixed media as appropriate.
 7. **Describe** — Title from issue, body follows [references/pr-body-template.md](./references/pr-body-template.md). Lead with significance/value/trade-offs, not the diff recap.
 8. **Before/After** — Use screenshots or evidence from visual QA, dogfood, and `/pr-walkthrough`. For non-UI changes, describe behavioral or architectural difference in text. If the PR body gets long, move heavy evidence into `<details>`.
+   For private repos, screenshots in the PR body must use GitHub attachments or `../blob/<ref>/...?...raw=true`; never `raw.githubusercontent.com` or bare repo-relative asset paths.
 9. **Open / Update** — Use `gh pr create --assignee phrazzld --body-file <path>` for new PRs. Use `gh pr edit --body-file <path>` when the branch already has a PR.
 10. **Review Settlement Handoff** — If the final push, `gh pr ready`, or PR update triggered async reviewers:
    - do not post `PR Unblocked` or claim the PR is review-clean

@@ -44,6 +44,7 @@ Every run must leave behind:
    - mixed media walkthrough
 3. Evidence references for each major claim
 4. A PR body `## Walkthrough` section linking the artifact and the protecting check
+5. A top-level `## Reviewer Evidence` block that gets reviewers to the proof in one click
 
 ## Workflow
 
@@ -99,6 +100,17 @@ If no durable automated check exists:
 
 ### 7. Update the PR body
 
+Add a top-level `## Reviewer Evidence` section before the narrative when the PR has user-visible evidence.
+
+For private repositories:
+
+- do not use `raw.githubusercontent.com/...` image links in PR bodies or comments
+- do not use bare repo-relative asset paths like `walkthrough/screenshots/foo.png`
+- prefer GitHub-uploaded attachments for screenshots and video when you can upload through the web UI or browser automation
+- otherwise use GitHub's documented private-repo-safe pattern: `../blob/<ref>/path/to/image.png?raw=true`
+- for repo-hosted video fallback, use an explicit direct-download link such as `../blob/<ref>/path/to/video.mp4?raw=1`
+- add a committed `walkthrough/reviewer-evidence.md` entrypoint when the branch has multiple artifacts
+
 Add a `## Walkthrough` section that includes:
 
 - renderer used
@@ -117,6 +129,7 @@ Add a `## Walkthrough` section that includes:
 - If something important does move, record the real action and its result. Do not ship idle footage that is visually indistinguishable from a screenshot.
 - Remotion is encouraged for high-value communication, not as a substitute for proof.
 - If the PR changes nothing user-visible, narrate invariants, architecture, and verification instead.
+- In private repos, attachment URLs or GitHub-relative blob links are part of the artifact quality bar. Broken media links are a walkthrough failure.
 
 ## References
 

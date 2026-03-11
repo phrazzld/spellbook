@@ -142,6 +142,8 @@ The point is single ownership. One issue should map to one active autopilot lane
     - Use `--body-file` for `gh pr create`, `gh pr edit`, and PR comments
     - `gh pr create --draft --assignee phrazzld --body-file <path>`
     - Add context comment if notable decisions were made
+    - Opening or updating the PR creates the review lane. It does **not** mean the PR is review-clean.
+    - If your final push, `gh pr ready`, or PR edit triggers async reviewers, do not post any "PR Unblocked" or "ready for merge" signal unless `/pr-fix` has passed its live settlement gate on that PR
 15. **Retro** — Ensure `.groom/retro.md` exists first; initialize it with a minimal heading/template if missing. Then append implementation signals:
     ```
     mkdir -p .groom
@@ -238,7 +240,7 @@ NOT stopping conditions: lacks description, seems big, unclear approach.
 
 ## Output
 
-Report: issue worked, spec status, design status, TDD evidence (RED/GREEN), dogfood QA summary (issues found/fixed), walkthrough artifact summary, commits made, PR URL.
+Report: issue worked, spec status, design status, TDD evidence (RED/GREEN), dogfood QA summary (issues found/fixed), walkthrough artifact summary, commits made, PR URL, and whether review cleanup was merely handed off or actually closed via `/pr-fix`.
 
 ## Review Cadence
 

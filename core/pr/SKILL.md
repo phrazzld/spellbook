@@ -20,6 +20,8 @@ Engineer shipping clean, well-documented PRs.
 
 Create a draft PR from current branch. Link to issue, make the significance obvious, give reviewers the value/trade-off context they need at a glance, and attach the walkthrough package that proves the merge case.
 
+`/pr` opens or updates the review lane. It does not certify that the live PR is review-clean after async reviewer automation runs.
+
 ## Latitude
 
 - Stage and commit any uncommitted changes with semantic message
@@ -59,8 +61,12 @@ Keep `Why This Matters`, `Trade-offs / Risks`, and the opening `What Changed` ex
 7. **Describe** — Title from issue, body follows [references/pr-body-template.md](./references/pr-body-template.md). Lead with significance/value/trade-offs, not the diff recap.
 8. **Before/After** — Use screenshots or evidence from visual QA, dogfood, and `/pr-walkthrough`. For non-UI changes, describe behavioral or architectural difference in text. If the PR body gets long, move heavy evidence into `<details>`.
 9. **Open / Update** — Use `gh pr create --draft --assignee phrazzld --body-file <path>` for new PRs. Use `gh pr edit --body-file <path>` when the branch already has a PR.
-10. **Comment** — Add context comment if notable decisions were made, and use `--body-file` for comment bodies.
-11. **Retro** — If this PR closes a GitHub issue, append implementation feedback:
+10. **Review Settlement Handoff** — If the final push, `gh pr ready`, or PR update triggered async reviewers:
+   - do not post `PR Unblocked` or claim the PR is review-clean
+   - route live review reconciliation through `/pr-fix`
+   - only treat the PR as unblocked after `/pr-fix` closes the post-settlement review inventory
+11. **Comment** — Add context comment if notable decisions were made, and use `--body-file` for comment bodies.
+12. **Retro** — If this PR closes a GitHub issue, append implementation feedback:
    ```bash
    /retro append --issue $ISSUE --predicted {effort_label} --actual {actual_effort} \
      --scope "{what_changed_from_spec}" --blocker "{blockers}" --pattern "{insight}"
@@ -78,4 +84,4 @@ Like a colleague leaving context for future-you:
 
 ## Output
 
-PR URL. Retro entry appended to `.groom/retro.md` (if issue-linked).
+PR URL. Retro entry appended to `.groom/retro.md` (if issue-linked). If review automation is pending or unresolved, say that explicitly instead of implying the PR is unblocked.

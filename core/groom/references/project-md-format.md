@@ -69,7 +69,7 @@ that complement AGENTS.md coding style.
 
 ## Lessons Learned
 
-Things we've tried that didn't work. Distilled from `.groom/retro.md`.
+Things we've tried that didn't work. Distilled from `.groom/retro/*.md`.
 
 | Decision | Outcome | Lesson |
 |----------|---------|--------|

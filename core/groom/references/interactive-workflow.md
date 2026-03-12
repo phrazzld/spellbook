@@ -44,7 +44,7 @@ If stale or missing, recommend `/tune-repo`. Do not block grooming.
 ### Step 3: Read Implementation Retrospective
 
 ```bash
-[ -f .groom/retro.md ] && cat .groom/retro.md || echo "No retro data yet"
+find .groom/retro -type f -name '*.md' -print -exec cat {} \; 2>/dev/null || echo "No retro data yet"
 ```
 
 Extract:

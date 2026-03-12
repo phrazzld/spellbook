@@ -107,6 +107,7 @@ Domains: bitcoin, btcpay, bun, docs, landing, lightning, observability, onboardi
 | Skill | Mode | Description |
 |-------|------|-------------|
 | `/design` | Model+User | Full design system: tokens, exploration, Vercel patterns |
+| `/ux-polish` | DMI | Narrow UX refinement: pick one small, meaningful friction point and ship the fix with QA |
 | `/visual-qa` | Model+User | Pre-commit visual regression |
 | `ui-skills` | Reference | Opinionated UI constraints |
 | `/visualize` | DMI | Visual HTML deliverables |

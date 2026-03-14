@@ -15,6 +15,7 @@ usage() {
   echo "  claude | codex | factory | gemini | pi | all   Sync core skills"
   echo "  pack <name> <project-dir>                      Symlink pack into project"
   echo "  pack <name> --global                            Symlink pack globally"
+  echo "  detect <project-dir>                            Auto-detect and load packs"
   echo "  --prune <harness>                               Remove stale symlinks"
   echo ""
   echo "Options:"
@@ -425,6 +426,61 @@ do_pi() {
   sync_specific "$pi_skills" "pi" "${shared_skills[@]}"
 }
 
+# Auto-detect and load packs based on project dependencies
+do_detect() {
+  local project_dir="${1:-.}"
+  project_dir="$(cd "$project_dir" && pwd)"
+  local manifest="$PACKS_DIR/.pack-manifest.json"
+
+  [[ ! -f "$manifest" ]] && { log "ERROR: $manifest not found"; exit 1; }
+
+  # Requires jq
+  command -v jq >/dev/null 2>&1 || { log "ERROR: jq required for pack detection"; exit 1; }
+
+  local packs
+  packs=$(jq -r 'keys[]' "$manifest")
+  local loaded=0
+
+  for pack in $packs; do
+    # Skip manual-only packs
+    local is_manual
+    is_manual=$(jq -r --arg p "$pack" '.[$p].manual // false' "$manifest")
+    [[ "$is_manual" == "true" ]] && continue
+
+    local detect_patterns
+    detect_patterns=$(jq -r --arg p "$pack" '.[$p].detect[]' "$manifest" 2>/dev/null)
+    [[ -z "$detect_patterns" ]] && continue
+
+    local dep_files
+    dep_files=$(jq -r --arg p "$pack" '.[$p].files[]' "$manifest" 2>/dev/null)
+
+    local found=false
+    for dep_file in $dep_files; do
+      local full_path="$project_dir/$dep_file"
+      [[ ! -f "$full_path" ]] && continue
+
+      for pattern in $detect_patterns; do
+        if grep -q "$pattern" "$full_path" 2>/dev/null; then
+          found=true
+          log "Detected '$pattern' in $dep_file → loading pack '$pack'"
+          break 2
+        fi
+      done
+    done
+
+    if $found; then
+      sync_pack "$pack" "$project_dir"
+      ((loaded+=1))
+    fi
+  done
+
+  if [[ "$loaded" -eq 0 ]]; then
+    log "No packs auto-detected for $project_dir"
+  else
+    log "Auto-detected and loaded $loaded pack(s)"
+  fi
+}
+
 # Parse arguments
 DRY_RUN=""
 COMMAND="$1"
@@ -445,6 +501,10 @@ case "$COMMAND" in
   pack)
     [[ $# -lt 2 ]] && { echo "Usage: sync.sh pack <name> <project-dir|--global>"; exit 1; }
     sync_pack "$1" "$2"
+    ;;
+  detect)
+    [[ $# -lt 1 ]] && { echo "Usage: sync.sh detect <project-dir>"; exit 1; }
+    do_detect "$1"
     ;;
   --prune)
     HARNESS="${1:-all}"

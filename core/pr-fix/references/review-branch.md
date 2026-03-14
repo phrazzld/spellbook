@@ -16,12 +16,12 @@ Produce a prioritized action plan from comprehensive multi-reviewer analysis of 
 - Run ALL reviewers concurrently for speed
 - Security-sentinel is **MANDATORY** on every PR regardless of size
 - Skip data-integrity-guardian enhanced mode if no migrations in diff
-- For small PRs (<100 lines): all Moonbridge personas + security-sentinel + 1-2 relevant specialists
+- For small PRs (<100 lines): all personas + security-sentinel + 1-2 relevant specialists
 - For large PRs (>500 lines): consider recommending split
 
 ## Review Team
 
-### Tier 1: Personas (via Moonbridge, parallel)
+### Tier 1: Personas (parallel)
 | Reviewer | Focus |
 |----------|-------|
 | **Grug** | Complexity demons, premature abstraction |

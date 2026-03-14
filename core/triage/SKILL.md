@@ -163,12 +163,22 @@ If systemic issue:
 Issues labeled `auto-detected` + `bug` are created by the observability pipeline.
 Treat as P0 unless evidence suggests otherwise.
 
-## Sentry Integration
+## Sentry MCP Integration
 
-When Sentry MCP configured, use direct queries:
-- "Show unresolved errors in production"
-- "Triage score for issue VOL-456?"
-- "Full context for top error"
+When Sentry MCP is configured, use specific tools per triage phase:
+
+| Phase | Tool | Use |
+|-------|------|-----|
+| Audit | `mcp__sentry__search_issues` | Find unresolved issues by query |
+| Audit | `mcp__sentry__search_events` | Search raw events |
+| Investigate | `mcp__sentry__get_issue_details` | Full context: stack trace, breadcrumbs, tags |
+| Investigate | `mcp__sentry__analyze_issue_with_seer` | AI-powered root cause analysis |
+| Investigate | `mcp__sentry__get_trace_details` | Distributed trace for cross-service issues |
+| Investigate | `mcp__sentry__search_issue_events` | All events for a specific issue |
+| Investigate | `mcp__sentry__get_issue_tag_values` | Filter by environment, browser, user |
+| Verify | `mcp__sentry__search_issues` | Confirm issue stopped after fix deploy |
+| Performance | `mcp__sentry__get_profile` | CPU/memory profiling for performance issues |
+| Manage | `mcp__sentry__update_issue` | Resolve, ignore, or assign issues |
 
 Include Sentry issue link in PR for auto-resolution on deploy.
 

@@ -2,7 +2,7 @@
 
 Templates for each reviewer in the /review-branch system.
 
-## Moonbridge Persona Prompts
+## Persona Prompts
 
 ### Grug
 ```

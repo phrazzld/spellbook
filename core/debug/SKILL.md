@@ -185,7 +185,9 @@ For non-trivial production issues, create `INCIDENT-{timestamp}.md`:
 
 ## Toolkit
 
-- **Sentry MCP**: Production error context, stack traces
+- **Sentry MCP**: `get_issue_details` for full context, `analyze_issue_with_seer` for AI root cause,
+  `get_trace_details` for distributed traces, `search_events` for raw event search,
+  `get_profile` for performance profiling
 - **Git**: bisect, blame, recent deploys
 - **Observability**: vercel/convex logs, sentry-cli
 - **Codex**: Delegate investigation

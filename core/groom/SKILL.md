@@ -82,10 +82,10 @@ Load that file before creating any issues.
 
 Run `/groom` in six phases:
 
-1. **Ground** — load or update `project.md`, load `.groom/BACKLOG.md`, check repo context freshness, read retro, capture user pain, audit backlog health (enforce 20-30 cap), compute health metrics
-2. **Architecture Critique** — three parallel tracks: reference architecture search, domain skill invocation, multi-model thinktank. See `references/architecture-fitness.md`
+1. **Ground** — load or update `project.md`, load `.groom/BACKLOG.md`, check repo context freshness, run `sync.sh detect .` to ensure relevant domain packs are loaded, read retro, capture user pain, audit backlog health (enforce 20-30 cap), compute health metrics
+2. **Architecture Critique** — three parallel tracks: reference architecture search, domain skill invocation, multi-model thinktank. See `references/architecture-fitness.md`. For greenfield modules, load `references/toolchain-preferences.md` before evaluating technology options.
 2.5. **Present Options** — synthesize tracks A-C into 2-3 architectural options (incremental to radical), ask user what range of change is acceptable
-3. **Research** — web, cross-repo, and codebase research, scoped to the direction chosen in 2.5
+3. **Research** — web, cross-repo, and codebase research, scoped to the direction chosen in 2.5. Use `/research web-search` with Exa for reference architecture discovery.
 4. **Exploration** — pitch options, recommend one, discuss, validate with thinktank, then lock direction
 5. **Synthesis** — reduce GitHub backlog to cap (demote to BACKLOG.md, close, merge), then promote from BACKLOG.md or create for missing gaps. Every surviving issue must score >= 70.
 6. **Artifact** — save a dated grooming plan, update `.groom/BACKLOG.md`, visual summary when useful
@@ -107,6 +107,9 @@ Synthesis default:
 - `references/org-standards.md` — required issue format, labels, milestones, readiness scoring
 - `references/project-md-format.md` — `project.md` format
 - `references/project-baseline.md` — baseline project standards
+
+### Technology
+- `references/toolchain-preferences.md` — default tech stack, toolchain decisions, Elixir/OTP routing
 
 ### Backlog Doctrine (absorbed from agent-backlog)
 - `references/backlog-doctrine.md` — two-tier system (GitHub active + BACKLOG.md icebox), ordering, cap enforcement, cadence, smells

@@ -92,6 +92,7 @@ Before delegating any chunk:
 For each logical chunk:
 
 1. **Understand** — Read issue/spec, find existing patterns to follow
+   Before adding >200 LOC of new code, invoke `/research web-search` to find reference implementations.
    Re-read touched modules before each major chunk if the design shifted.
 2. **Delegate** — Clear spec + pattern reference + verify command
 3. **Review** — capture RED→GREEN evidence + `git diff --stat && pnpm typecheck && pnpm lint && pnpm test`

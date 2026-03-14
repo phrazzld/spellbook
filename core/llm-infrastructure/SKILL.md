@@ -33,7 +33,7 @@ Rigorous audit of all LLM-powered features. Model currency, prompt quality, eval
 
 **CRITICAL: Do not trust your training data about model names.**
 
-**Step 1:** Web search current SOTA models for each provider in your codebase.
+**Step 1:** ALWAYS invoke `/research web-search` before making model recommendations. Training data lags months behind releases. Web search current SOTA models for each provider in your codebase.
 **Step 2:** Scan codebase for ALL model references:
 ```bash
 grep -rE "(gpt-|claude-|gemini-|llama-|mistral-|deepseek-)" \

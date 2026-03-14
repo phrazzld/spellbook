@@ -66,7 +66,7 @@ Present: "Here's what I understand. Let me explore the problem space."
    | Agent | Focus |
    |-------|-------|
    | Problem explorer | What's the real problem? Who has it? How painful? |
-   | Web research agent | How do others solve this? Current best practices |
+   | Web research agent | Invoke `/research web-search` or `/research web-deep` — use Exa code context for reference implementations |
    | Codebase explorer | Existing patterns, affected files, reusable utilities |
    | User impact analyst | Who's affected, how much, cost of inaction |
 
@@ -142,7 +142,7 @@ Present: "Here's what I understand. Let me explore the problem space."
    | Agent | Focus |
    |-------|-------|
    | Codebase explorer | Existing patterns, touch points, docs/context + CODEBASE_MAP context |
-   | Web researcher | Best practices, framework docs, how others solve this |
+   | Web researcher | Invoke `/research web-search` — use Exa for reference implementations and best practices |
    | Cross-repo investigator | Prior art in org repos, shared patterns |
 
 2. **Explore** — Generate 3-5 technical approaches. For each:
@@ -151,6 +151,7 @@ Present: "Here's what I understand. Let me explore the problem space."
    - Pattern alignment with existing codebase
    - Tradeoffs (complexity, performance, maintainability, deletability)
    - Effort estimate: S/M/L/XL
+   - Formal verification candidate? (state machine >3 states, concurrent actors, failure/retry)
 
    **Recommend one.** Present all with clear reasoning.
 
@@ -208,7 +209,7 @@ Once both product and technical directions are locked:
 3. **Enrich each issue** — Product spec + technical design on every issue
 4. **Apply standards** — Labels, milestones, org-wide standards (see `groom/references/org-standards.md`)
 5. **Signal readiness** — `status/ready` for `/build` or `/autopilot`
-6. **Stress-test** — Run critique (see `references/critique-personas.md`) to find gaps
+6. **Stress-test** — Run critique (see `references/critique-personas.md`) to find gaps. For designs containing state machines or concurrent protocols, optionally run `/formal-verify loop` to prove safety invariants before marking ready.
 7. **Prefer probe issues first** — if uncertainty remains high, create a cheap experiment issue before the full build issue
 
 Post spec + design as comments on each issue.

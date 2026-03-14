@@ -20,6 +20,39 @@ user-facing slash command.
 - Fallback to Brave on provider failure
 - Optional Perplexity pass allowed only for synthesis, never source of truth
 
+## Exa-First Patterns
+
+### Reference Implementation Search
+Enforces CLAUDE.md "reference architecture first" red line.
+```
+Query: "open source [problem domain] implementation [language/framework]"
+Provider: Exa code context
+```
+
+### Academic/Technical Search
+Formal specifications, algorithm papers, design patterns.
+```
+Query: "[algorithm/protocol] formal specification paper"
+Provider: Exa neural search
+```
+
+### Recency-Filtered
+Model releases, security advisories, deprecation notices.
+```
+Query: "[topic] [year]"
+Provider: Exa with start_published_date filter
+```
+
+### Smart Routing Table
+
+| Query signals | Route to |
+|--------------|----------|
+| Contains "code", "implementation", "example", "how to" | Exa code context |
+| Contains "docs", "documentation", "API reference" | Context7 first, Exa fallback |
+| Contains year, "latest", "current", "new" | Exa with recency filter |
+| Contains "paper", "formal", "specification" | Exa neural search |
+| None of the above | Exa neural (default) |
+
 ## Output Schema
 ```json
 {

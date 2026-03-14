@@ -53,6 +53,21 @@ Extract:
 
 Present: "From past implementations, I see these patterns: [summary]"
 
+### Step 3b: Load BACKLOG.md
+
+Check for `.groom/BACKLOG.md`:
+
+```bash
+[ -f .groom/BACKLOG.md ] && echo "BACKLOG.md exists ($(wc -l < .groom/BACKLOG.md) lines)" || echo "No .groom/BACKLOG.md"
+```
+
+**If exists:** Read it. Note "High Potential" items as promotion candidates.
+Present: "BACKLOG.md has N high-potential ideas and N someday/maybes. Last groomed: {date}."
+
+**If doesn't exist:** Will create during Phase 5 synthesis if any ideas get deferred.
+
+Store as `{backlog_md}` for use during synthesis.
+
 ### Step 4: Capture What's On Your Mind
 
 Ask:
@@ -72,14 +87,18 @@ Run the health dashboard procedure from `references/backlog-health.md`.
 
 Present: "Here's where we stand: X open issues, Y ready for execution, Z need enrichment."
 
-Also evaluate backlog budget:
-- Is the open issue count still legible?
+Also evaluate backlog budget against the hard cap:
+- **Cap check:** >30 open issues → this is a reduction session, no new issues until under cap
+- **Grooming check:** any issue scoring < 70 → must be enriched, rewritten, or demoted
 - Do issues cluster around a few strategic themes?
 - Is there duplicate/refactor/screenshot-only noise?
-- Are there ideas better kept in docs/notes than as open issues?
+- Are there ideas better kept in `.groom/BACKLOG.md` than as open issues?
 
-If the backlog sprawls, declare:
-`This is now a reduction session. Default action is keep/merge/defer/close, not add.`
+If over cap, declare:
+`Over the 30-issue cap (N open). This is a reduction session. Default action is keep/merge/demote/close, not add.`
+
+If any issues score < 70:
+`N issues below grooming threshold. Every GitHub issue must score >= 70 or be demoted to BACKLOG.md.`
 
 ### Step 6: Compute Health Metrics
 

@@ -9,41 +9,80 @@ exploration into a reduced, coherent backlog.
 
 Reduce the backlog before creating anything new.
 
-Use four buckets:
-- **Keep** — current, high-leverage, aligned with locked themes
+Use five buckets:
+- **Keep** — current, high-leverage, aligned with locked themes, scores >= 70
 - **Merge** — overlapping issues collapsed into one canonical issue
-- **Defer** — valid, but outside the current strategic window
+- **Demote** — valid idea, but outside the active window → move to `.groom/BACKLOG.md`
 - **Close** — stale, duplicate, vague, obsolete, or better captured elsewhere
+- **Promote** — idea from `.groom/BACKLOG.md` that now warrants an active issue
 
 Guidance:
 - prefer one deep canonical issue over several shallow siblings
-- screenshot-only or vibe-only issues are not backlog-ready; rewrite or close
+- screenshot-only or vibe-only issues are not backlog-ready; rewrite or demote
 - refactor issues without clear strategic leverage usually merge into a parent
-- future ideas without active priority usually move to docs/notes, not stay open
+- future ideas without active priority → demote to BACKLOG.md, not open issues
+- **hard cap: 20-30 open issues.** If over, demote lowest-priority until under cap
 
 Present the reduction proposal before creating net-new issues:
 
 ```markdown
 ## Backlog Reduction Proposal
 
-### Keep
+### Keep (N issues)
 - #N — why it survives
 
 ### Merge
 - #N + #N -> #N canonical issue
 
-### Defer
-- #N — why later
+### Demote to BACKLOG.md
+- #N — "reason" (will close issue, add entry to BACKLOG.md)
 
 ### Close
-- #N — why it leaves the backlog
+- #N — why it leaves entirely
+
+### Promote from BACKLOG.md
+- "idea title" — why it's now active (will create issue, remove from BACKLOG.md)
 ```
 
-The outcome should be a backlog that can be scanned in minutes and understood as the current roadmap.
+**Post-reduction invariant:** GitHub backlog has 20-30 issues, all scoring >= 70.
+Every deferred idea has a home in `.groom/BACKLOG.md`, not lost.
+
+### Step 1b: Update BACKLOG.md
+
+After the reduction proposal is approved:
+
+1. **Demoted issues** → close on GitHub with comment "Moved to .groom/BACKLOG.md", add entry to BACKLOG.md with original issue context
+2. **Promoted ideas** → remove from BACKLOG.md (they'll become issues in Step 2)
+3. **Stale BACKLOG.md entries** → review and prune ideas that are no longer relevant
+4. **New ideas from session** → add to BACKLOG.md if not making the active cut
+
+BACKLOG.md format:
+
+```markdown
+# Backlog Ideas
+
+Last groomed: {date}
+
+## High Potential (promote next session if capacity)
+- **idea title** — one-line context. Source: #{issue} / user / audit / thinktank.
+- ...
+
+## Someday / Maybe
+- **idea title** — one-line context. Source: ...
+- ...
+
+## Research Prompts
+- **question** — what we'd need to learn before this becomes actionable
+- ...
+
+## Archived This Session
+- ~~idea title~~ — why removed (done, obsolete, absorbed into #N)
+```
 
 ### Step 2: Create Issues Only For Missing Strategic Gaps
 
 Create issues only when they fill a real gap in the reduced roadmap.
+Check `.groom/BACKLOG.md` "High Potential" section first — promote before inventing.
 
 Use the org-standards format:
 - Problem
@@ -97,8 +136,18 @@ GROOM SUMMARY
 
 Themes Explored: [list]
 Directions Locked: [list]
-Backlog Before: N open
-Backlog After: N open
+
+GitHub Backlog:
+  Before: N open → After: N open (cap: 20-30)
+  Demoted to BACKLOG.md: N
+  Promoted from BACKLOG.md: N
+  Merged: N
+  Closed: N
+
+BACKLOG.md:
+  High Potential: N ideas
+  Someday/Maybe: N ideas
+  Archived this session: N
 
 Issues by Priority:
 - P0 (Critical): N
@@ -107,9 +156,9 @@ Issues by Priority:
 - P3 (Nice to Have): N
 
 Readiness Scores:
+- All issues scored >= 70 ✓ (REQUIRED)
 - Excellent (90-100): N
 - Good (70-89): N
-- All issues scored >= 70 ✓
 
 Recommended Execution Order:
 1. [P0] ...
@@ -120,9 +169,9 @@ View all: gh issue list --state open
 ```
 
 Add one verdict:
-- `Backlog is focused`
-- `Backlog still too large`
-- `Backlog reduced but needs one more slash pass`
+- `Backlog is focused` (20-30 issues, 100% groomed)
+- `Backlog over cap` (>30 — needs another slash pass)
+- `BACKLOG.md needs triage` (too many High Potential items without clear priority)
 
 ## Phase 6: Plan Artifact
 
@@ -137,14 +186,12 @@ Write `.groom/plan-{date}.md`:
 ## Issues Created
 - #N: [title] (score: X/100)
 
-## Reduced / Closed / Merged
+## Reduced / Closed / Merged / Demoted
 - keep: [list]
 - merged: [list]
-- deferred: [list]
+- demoted to BACKLOG.md: [list]
 - closed: [list]
-
-## Deferred
-- [topic]: [why deferred, when to revisit]
+- promoted from BACKLOG.md: [list]
 
 ## Research Findings
 [Key findings from Phase 3 worth preserving]

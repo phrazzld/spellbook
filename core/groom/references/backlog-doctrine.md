@@ -1,18 +1,36 @@
 # Backlog Doctrine
 
-## What the backlog is for
+## Two-Tier Backlog
 
-Treat the backlog as the current plan, not as storage for every idea. A good backlog is ordered,
-transparent, and actively maintained. It should make the next decisions obvious.
+GitHub issues are the **active plan** — the work you're committing to execute.
+`.groom/BACKLOG.md` is the **idea icebox** — everything else worth remembering.
+
+| Tier | Location | Cap | Grooming Standard |
+|------|----------|-----|-------------------|
+| Active | GitHub Issues | 20-30 | 100% score >= 70, all labeled, all execution-ready |
+| Icebox | `.groom/BACKLOG.md` | Unlimited | Categorized, dated, pruned each groom session |
+
+Ideas flow between tiers during `/groom` sessions:
+- **Promote:** BACKLOG.md → GitHub issue (idea becomes priority)
+- **Demote:** GitHub issue → BACKLOG.md (issue loses priority, close with link)
+- **Archive:** BACKLOG.md → strikethrough (idea is done, obsolete, or absorbed)
+- **Discard:** either tier → gone (idea has no remaining value)
+
+## What the active backlog is for
+
+The GitHub backlog is the current plan, not storage for every idea. A good backlog
+is ordered, transparent, and actively maintained. It should make the next decisions obvious.
 
 ## Core rules
 
-- Keep the backlog small enough to read end-to-end.
+- **Hard cap: 20-30 open issues.** Over cap triggers reduction, not addition.
+- **100% groomed.** Every issue scores >= 70 on `/issue lint` or gets fixed/demoted.
 - Reduce before adding.
 - Prefer one canonical issue per outcome.
 - Split discovery from delivery.
 - Order work by user value, risk reduction, learning, and enablement.
 - Keep active work narrow. High WIP destroys prioritization.
+- Ideas that aren't execution-ready live in `.groom/BACKLOG.md`, not GitHub.
 
 ## Healthy item shapes
 
@@ -54,10 +72,11 @@ Move items down when they:
 
 ## Cadence
 
-- Triage new intake quickly into keep, merge, defer, or close.
+- Triage new intake quickly into keep, merge, demote, or close.
 - Re-read the active backlog regularly enough to remove stale assumptions.
 - Run pruning passes, not just addition passes.
 - Update the canonical issue body when the plan changes. Do not bury the truth in comments.
+- Review `.groom/BACKLOG.md` every groom session — promote, archive, or leave.
 
 ## Smells
 
@@ -67,6 +86,9 @@ Move items down when they:
 - giant omnibus tickets with unclear done criteria
 - issues that require tribal knowledge to start
 - “investigate” tickets with no decision target
+- >30 open issues (backlog is storage, not strategy)
+- issues scoring < 70 sitting open for weeks (ungroomed noise)
+- BACKLOG.md not updated in 3+ groom sessions (icebox is rotting)
 
 ## Definition of ready
 

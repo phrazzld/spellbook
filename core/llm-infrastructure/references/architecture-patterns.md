@@ -162,3 +162,55 @@ Need ACID + vectors? → Postgres (only option)
 ❌ **LangChain** - Over-engineered, steep learning curve
 ❌ **Pinecone by default** - Expensive ($70-200+/month) when Postgres handles most needs
 ❌ **Building multi-agent systems first** - Start simple
+
+## Harness Engineering
+
+The paradigm where engineers design environments, and agents write code.
+
+### CI/Linters/Tests as Agent Feedback Loops
+Agents learn from automated feedback faster than human review:
+
+```
+Agent writes code → Pre-commit hooks → Type checker → Tests → CI
+                    ↑                                        ↓
+                    └──── Agent reads errors, self-corrects ←┘
+```
+
+**Design feedback for agent consumption:**
+- Error messages should include file path, line number, and fix suggestion
+- Test output should show expected vs actual, not just "FAIL"
+- Lint rules should explain *why*, not just flag violations
+- CI should surface the first meaningful error, not a cascade
+
+### Documentation as Machine-Readable Artifacts
+CLAUDE.md, AGENTS.md, and README files are not just for humans — they're
+the primary configuration interface for coding agents.
+
+**Design principles:**
+- Structure with headers and lists (agents parse these efficiently)
+- Include runnable commands (agents will execute them)
+- State conventions as rules, not suggestions
+- Keep current — stale docs cause agent errors
+
+### Environment-as-Product
+Treat the development environment (tooling, config, docs, CI) as a
+product whose users are AI agents.
+
+**Measure:** How many attempts does an agent need to complete a standard
+task? If >1, improve the environment, not the agent's instructions.
+
+### Session Management
+- One feature per session (bounded scope)
+- Session initialization: pwd, git status, progress file, feature registry
+- Handoff artifacts: written notes for next session
+- Define "done" before starting
+
+### Dependency Layer Enforcement
+Mechanical enforcement of architectural boundaries:
+```
+Types → Config → Repo → Service → Runtime → UI
+  ↑ can import from left, ❌ cannot import from right
+```
+
+Structural tests or lint rules that fail when boundaries are violated
+are more reliable than agent instructions about what not to import.

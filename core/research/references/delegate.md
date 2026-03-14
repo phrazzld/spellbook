@@ -95,7 +95,7 @@ Domain specialists for focused review:
 
 ## How to Delegate
 
-Apply `/llm-communication` principles — state goals, not steps:
+Apply `/context-engineering` instruction design principles — state goals, not steps:
 
 ### To Codex (via CLI)
 
@@ -236,6 +236,6 @@ use the Task tool with `subagent_type: "general-purpose"`.
 
 ## Related
 
-- `/llm-communication` — Prompt writing principles
+- `/context-engineering` — Instruction design and context lifecycle
 - `/pr-fix` — Example implementation
 - `/research thinktank` — Multi-model synthesis

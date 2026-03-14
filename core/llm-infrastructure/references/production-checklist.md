@@ -198,3 +198,76 @@ const judgment = await llm.complete(judgePrompt, {
 - [ ] Sample evaluation on production traffic
 - [ ] Alert thresholds configured (cost, errors, latency)
 - [ ] Iteration plan based on metrics
+
+## Prompt Caching Economics
+
+**Stable prefix design:**
+- Place system prompt and reference docs at the start (cacheable)
+- Append-only conversation history after cached prefix
+- Never insert dynamic content (timestamps, IDs) into cached prefix
+
+**Cache-aware context placement:**
+```
+[System instructions — 2K tokens]    ← CACHED (stable across requests)
+[Reference docs — 8K tokens]        ← CACHED (stable across session)
+[Conversation history — variable]   ← NOT CACHED (changes each turn)
+[Current query]                     ← NOT CACHED
+```
+
+**Economics:**
+- Cache write: ~25% premium on first request
+- Cache read: ~90% discount on subsequent requests
+- Typical hit rates: 80-92% for well-designed prefixes
+- Net cost reduction: 60-90% achievable for conversation workloads
+- Break-even on 2nd request; ROI compounds with every hit
+
+**Anti-pattern:** Varying system prompt content between requests (user-specific
+customization in the cached prefix) — this busts the cache.
+
+## Progressive Autonomy Checklist
+
+Before granting an agent more autonomy, verify:
+
+**HITL → HOTL (human monitors, agent acts):**
+- [ ] Agent succeeds >90% on eval suite for this task type
+- [ ] All failure modes identified and documented
+- [ ] Monitoring dashboards show agent behavior in real-time
+- [ ] Alert thresholds configured for anomalous behavior
+- [ ] Human can intervene within [defined SLA]
+
+**HOTL → HOOL (fully autonomous):**
+- [ ] Agent succeeds >95% on eval suite
+- [ ] Failure modes are all recoverable (no catastrophic failures)
+- [ ] Automated rollback mechanism exists
+- [ ] Cost bounds enforced (per-request and per-day caps)
+- [ ] Audit trail captures all autonomous decisions
+- [ ] Regular eval refresh prevents capability regression
+
+## Error Feedback Pattern
+
+When a tool call or operation fails, feed the error back to the LLM for
+reformulation — don't blindly retry the same call.
+
+```typescript
+async function executeWithFeedback(agent, task, maxAttempts = 3) {
+  let context = task;
+  for (let i = 0; i < maxAttempts; i++) {
+    const action = await agent.plan(context);
+    const result = await execute(action);
+
+    if (result.success) return result;
+
+    // Feed error back to agent for reformulation
+    context = {
+      ...task,
+      previousAttempt: action,
+      error: result.error,
+      instruction: "The previous approach failed. Analyze the error and try a different strategy."
+    };
+  }
+  throw new Error('Agent exhausted retry budget');
+}
+```
+
+**Key distinction:** Retry = same action again. Feedback = inform agent of
+failure so it can adapt. Feedback >> retry for agents.

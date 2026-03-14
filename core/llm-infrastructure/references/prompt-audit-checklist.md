@@ -1,6 +1,6 @@
 # Prompt Quality Audit Checklist
 
-Based on the `llm-communication` skill principles.
+Based on the `context-engineering` skill's instruction design principles.
 
 ## The Core Test
 

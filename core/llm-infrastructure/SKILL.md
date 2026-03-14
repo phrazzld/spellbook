@@ -46,12 +46,15 @@ grep -rE "(gpt-|claude-|gemini-|llama-|mistral-|deepseek-)" \
 
 #### Prompt Quality Audit
 
-Reference `llm-communication` principles. Key patterns:
+Reference `context-engineering` principles. Key patterns:
 - Role + Objective + Latitude pattern
 - Goal-oriented, not step-prescriptive
 - Trust the model to figure out how
 
 Anti-patterns: over-prescriptive steps, excessive hand-holding, defensive over-specification.
+
+#### Agent Security Posture
+- Agent security posture (see `references/agent-security.md`)
 
 #### Eval Coverage Audit
 
@@ -95,16 +98,20 @@ Run full eval suite, security scan, verify tracing, verify CI gate triggers.
 
 ## References
 
-| Reference | Content |
-|-----------|---------|
-| `references/prompt-engineering.md` | Prompt writing principles (Role + Objective + Latitude) |
-| `references/model-research-required.md` | Why you must web search before model decisions |
-| `references/model-selection.md` | Model selection guidance |
-| `references/architecture-patterns.md` | LLM architecture patterns |
-| `references/production-checklist.md` | Production readiness checklist |
-| `references/prompt-audit-checklist.md` | Prompt quality checklist |
-| `references/alternatives.md` | Tool comparison (Promptfoo, Braintrust, etc.) |
-| `references/evaluation.md` | Promptfoo setup, assertions, CI/CD, red teaming |
-| `references/gateway-routing.md` | OpenRouter, LiteLLM, routing strategies |
-| `references/llm-communication.md` | Writing effective prompts and agent instructions |
-| `references/trace-review-loop.md` | Review Langfuse traces before tweaking prompts |
+| Focus | Reference | Content |
+|-------|-----------|---------|
+| Models | `references/model-research-required.md` | MANDATORY before any model recommendation |
+| Models | `references/model-selection.md` | Framework and decision tree |
+| Models | `references/model-verification-hook.md` | Pre-commit hook for model currency |
+| Architecture | `references/architecture-patterns.md` | Complexity ladder, RAG, tool use, caching, harness engineering |
+| Production | `references/production-checklist.md` | Cost, security, observability, caching economics, autonomy checklist |
+| Evaluation | `references/evaluation.md` | Promptfoo setup, agent evals, grader hierarchy, saturation |
+| Security | `references/agent-security.md` | Lethal trifecta, 6 defense patterns, guardrails |
+| Tools | `references/tool-design.md` | Poka-yoke design, semantic returns, tool eval |
+| Multi-Agent | `references/multi-agent-patterns.md` | Workflow patterns, state management, when NOT to |
+| Prompts | `references/prompt-audit-checklist.md` | Audit process and severity levels |
+| Routing | `references/gateway-routing.md` | OpenRouter, LiteLLM, routing strategies |
+| Observability | `references/trace-review-loop.md` | Langfuse trace review process |
+| Alternatives | `references/alternatives.md` | Framework and platform comparison |
+
+> For prompt/context quality principles, see `context-engineering` skill.

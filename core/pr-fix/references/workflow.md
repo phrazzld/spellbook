@@ -77,8 +77,10 @@ If the PR links an issue with `## Acceptance Criteria`, run `verify-ac` as a sec
 Read [reconciliation-ledger.md](./reconciliation-ledger.md) and use the inventory script.
 
 ```bash
-python3 scripts/review_inventory.py $PR > /tmp/pr-fix-review-inventory.json
+python3 <pr-fix-skill-dir>/scripts/review_inventory.py "$PR" > /tmp/pr-fix-review-inventory.json
 ```
+
+Resolve `<pr-fix-skill-dir>` to the directory containing this skill, not the target repo. If your current working directory is not the PR repo, add `--repo owner/name`.
 
 From that inventory, build a working ledger of actionable items across:
 - GraphQL review threads

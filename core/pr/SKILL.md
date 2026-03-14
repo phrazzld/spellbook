@@ -19,6 +19,8 @@ Engineer shipping clean, well-documented PRs.
 ## Objective
 
 Create a live PR from current branch. Link to issue, make the significance obvious, give reviewers the value/trade-off context they need at a glance, and attach the walkthrough package that proves the merge case.
+If the change improves UX or any user-visible interaction, the PR must include a demo artifact a human can watch. Default to video for anything with motion, interaction, timing, or state change; only use stills when the improvement is genuinely static.
+That artifact should be an actual capture of the product surface whenever practical, not a reconstructed storyboard made from logs or screenshots.
 
 `/pr` opens or updates the review lane. It does not certify that the live PR is review-clean after async reviewer automation runs.
 
@@ -59,8 +61,12 @@ Keep `Reviewer Evidence`, `Why This Matters`, `Trade-offs / Risks`, and the open
    Fix all P0/P1 issues found. Iterate until clean. **Do not open a PR until this passes.**
    Include dogfood summary (issues found, fixed) in PR body under Manual QA section.
 6. **Walkthrough** — Run `/pr-walkthrough`. Every PR needs a walkthrough package, even when the change is not user-facing. Use browser, terminal, diagram, Remotion, or mixed media as appropriate.
+   - UX improvements are presumed demoable. Do not settle for prose-only evidence when a reviewer should be able to watch the improvement.
+   - For user-visible interaction changes, default to a real screencast or terminal recording. Only fall back to screenshots when there is no meaningful motion or timing to show.
+   - For CLI UX, treat the terminal as the product surface and record the real interaction.
+   - Demo quality matters. Keep overlays minimal, keep the changed surface readable, and do not let explanatory text obscure the thing being demonstrated.
 7. **Describe** — Title from issue, body follows [references/pr-body-template.md](./references/pr-body-template.md). Lead with significance/value/trade-offs, not the diff recap.
-8. **Before/After** — Use screenshots or evidence from visual QA, dogfood, and `/pr-walkthrough`. For non-UI changes, describe behavioral or architectural difference in text. If the PR body gets long, move heavy evidence into `<details>`.
+8. **Before/After** — Use screenshots or evidence from visual QA, dogfood, and `/pr-walkthrough`. For non-UI changes, describe behavioral or architectural difference in text. If the change is UX-facing, include a watchable artifact and treat static text as support material, not the main proof. If the PR body gets long, move heavy evidence into `<details>`.
    For private repos, screenshots in the PR body must use GitHub attachments or `../blob/<ref>/...?...raw=true`; never `raw.githubusercontent.com` or bare repo-relative asset paths.
 9. **Open / Update** — Use `gh pr create --assignee phrazzld --body-file <path>` for new PRs. Use `gh pr edit --body-file <path>` when the branch already has a PR.
 10. **Review Settlement Handoff** — If the final push, `gh pr ready`, or PR update triggered async reviewers:

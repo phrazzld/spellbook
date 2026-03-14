@@ -67,11 +67,13 @@ Read [references/workflow.md](./references/workflow.md) and execute the phases i
 
 ## Required Tooling
 
-Use the inventory script during review reconciliation:
+Use the shared inventory script bundled with this skill during review reconciliation. Resolve `<pr-fix-skill-dir>` to the directory containing this `SKILL.md` in the installed skills tree or source tree, not the target repo:
 
 ```bash
-python3 scripts/review_inventory.py $PR > /tmp/pr-fix-review-inventory.json
+python3 <pr-fix-skill-dir>/scripts/review_inventory.py "$PR" > /tmp/pr-fix-review-inventory.json
 ```
+
+If you are not running from the PR's repo checkout, also pass `--repo owner/name`.
 
 That inventory is mandatory and is the source of truth for review cleanup.
 

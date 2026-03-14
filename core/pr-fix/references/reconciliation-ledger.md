@@ -17,8 +17,10 @@ The goal is not "counts are zero right now." The goal is:
 Use the inventory script first:
 
 ```bash
-python3 scripts/review_inventory.py $PR > /tmp/pr-fix-review-inventory.json
+python3 <pr-fix-skill-dir>/scripts/review_inventory.py "$PR" > /tmp/pr-fix-review-inventory.json
 ```
+
+Resolve `<pr-fix-skill-dir>` to the directory containing this skill, not the target repo. If you are running from outside the PR repo checkout, add `--repo owner/name`.
 
 The script gathers:
 - review threads

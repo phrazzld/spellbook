@@ -14,7 +14,7 @@ Choose fonts that are beautiful, unique, and interesting. Pair a distinctive dis
 
 ## Color & Theme
 
-Commit to a cohesive aesthetic. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
+Commit to a cohesive aesthetic. Dominant colors with sharp accents outperform timid, evenly-distributed palettes. Draw from IDE themes (Dracula, Nord, Solarized, Tokyo Night) and cultural aesthetics (Japanese minimalism, Bauhaus, Art Nouveau, Swiss design) for unexpected palette inspiration.
 
 **Vary your approach:**
 - High-contrast monochrome

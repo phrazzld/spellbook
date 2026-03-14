@@ -111,6 +111,8 @@ Put the proof before the prose when the PR has user-visible evidence.
 - Surface 1-3 screenshots inline when they materially help
 - State the merge claim in one sentence
 - Include at least one durable artifact from real branch execution
+- For UX work, include a watchable demo artifact unless the change is truly static
+- Prefer an actual capture of the changed surface over a reconstructed or narrated facsimile
 - Do not treat a markdown note or prose summary as sufficient reviewer evidence
 
 For private repositories:
@@ -189,6 +191,8 @@ This is the proof package for the PR.
 - Persistent verification
 - Residual gap
 - Observable artifact from actual execution on this branch
+- For UX work, default the artifact to a real video or terminal recording rather than prose or a static note
+- For UX work, ensure the artifact is readable at normal speed and does not bury the changed surface under explanatory overlays
 
 For the script and rubric, load `../../pr-walkthrough/references/walkthrough-contract.md`.
 

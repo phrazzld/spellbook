@@ -5,8 +5,9 @@ description: |
   /research [query], /research delegate [task], /research thinktank [topic].
   Triggers: "search for", "look up", "research", "delegate", "get perspectives",
   "web search", "find out", "investigate", "introspect", "session analysis",
-  "check readwise", "saved articles", "reading list", "highlights".
-argument-hint: "[query] or [web-search|web-deep|web-news|web-docs|delegate|thinktank|introspect|readwise] [args]"
+  "check readwise", "saved articles", "reading list", "highlights",
+  "what are people saying", "X search", "social sentiment", "trending".
+argument-hint: "[query] or [web-search|web-deep|web-news|web-docs|delegate|thinktank|introspect|readwise|xai] [args]"
 ---
 
 # Research
@@ -26,9 +27,10 @@ This skill consolidates: `web-search`, `delegate`, `thinktank`, `introspect`.
 | Multi-perspective expert validation, consensus | `references/thinktank.md` |
 | Analyze session history, usage patterns, improvement opportunities | `references/introspect.md` |
 | Search saved articles, highlights, reading list | `references/readwise.md` |
+| xAI web/X search, social sentiment, trending | `references/xai-search.md` |
 
 If first argument matches `web-search`, `web-deep`, `web-news`, `web-docs`,
-`delegate`, `thinktank`, `introspect`, or `readwise`, read the corresponding reference.
+`delegate`, `thinktank`, `introspect`, `readwise`, or `xai`, read the corresponding reference.
 If no argument, select based on user intent. If user specifies a sub-capability
 by name (e.g., "delegate this to codex"), route directly.
 
@@ -66,11 +68,15 @@ This applies especially to:
 | Academic papers, formal specs | Exa (search) | Strong academic indexing |
 | Library/framework docs | Context7 | Semantic doc search |
 | Current events, model releases | Exa (with recency filter) | Real-time indexing |
-| General knowledge fallback | WebSearch | Broad coverage |
+| Social sentiment, public discourse, trending | xAI X Search | Real-time X/Twitter data |
+| Web pages with image/video analysis | xAI Web Search | Grounded web + multimodal |
+| General knowledge fallback | WebSearch / Brave | Broad coverage |
 
-**Exa-first.** Exa's code context search finds reference implementations
-that enforce the CLAUDE.md "reference architecture first" red line. Default
-to Exa unless the query is clearly better suited to another provider.
+**Exa-first** for code and technical content. **xAI for social/real-time pulse.**
+Default to Exa unless the query is clearly better suited to another provider.
+Use xAI X Search for "what are people saying about", sentiment, discourse,
+trending topics. Use xAI Web Search when you need grounded web results with
+optional image understanding. See `references/xai-search.md` for API details.
 
 ## Anti-Patterns
 

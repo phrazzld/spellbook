@@ -17,6 +17,7 @@ user-facing slash command.
 - Include citation URL for every claim
 - Prefer Context7 for docs/library lookups
 - Prefer Exa as primary general provider
+- Use xAI for social/real-time and grounded web with multimodal (see `xai-search.md`)
 - Fallback to Brave on provider failure
 - Optional Perplexity pass allowed only for synthesis, never source of truth
 
@@ -51,6 +52,8 @@ Provider: Exa with start_published_date filter
 | Contains "docs", "documentation", "API reference" | Context7 first, Exa fallback |
 | Contains year, "latest", "current", "new" | Exa with recency filter |
 | Contains "paper", "formal", "specification" | Exa neural search |
+| Contains "people saying", "sentiment", "trending", "discourse" | xAI X Search (see `xai-search.md`) |
+| Contains "X/Twitter", specific handles, social | xAI X Search |
 | None of the above | Exa neural (default) |
 
 ## Output Schema
@@ -63,14 +66,14 @@ Provider: Exa with start_published_date filter
       "snippet": "string",
       "published_at": "ISO-8601 or null",
       "score": 0.0,
-      "source_provider": "context7|exa|brave|perplexity"
+      "source_provider": "context7|exa|xai|brave|perplexity"
     }
   ],
   "meta": {
     "query": "string",
     "command": "web|web-deep|web-news|web-docs",
-    "provider_chain": ["context7", "exa", "brave"],
-    "provider_used": "context7|exa|brave|null",
+    "provider_chain": ["context7", "exa", "xai", "brave"],
+    "provider_used": "context7|exa|xai|brave|null",
     "cache_hit": false,
     "time_sensitive": false,
     "recency_days": null,

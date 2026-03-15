@@ -1,92 +1,204 @@
 ---
 name: pr
 description: |
-  Full PR workflow from working directory to live PR.
-  Commits uncommitted changes, analyzes diff, writes description, opens the PR.
-  Use when: opening a pull request, shipping to review, creating PR.
-  Trigger: /pr, "open PR", "create pull request", "ship to review".
+  Tidy, commit, and open a world-class pull request.
+  Organizes working directory, ensures correct branch, creates semantic
+  conventional commits, then opens a high-quality PR with full evidence.
+  Use when: ready to ship, "open a PR", "create PR", "commit and PR",
+  "ship this", "push and PR", "prep for review", "make a PR".
 disable-model-invocation: true
+argument-hint: "[issue-id] [--draft] [--no-push]"
 ---
 
 # /pr
 
-Open a pull request from current branch state.
+From messy working directory to reviewable PR in one command.
 
 ## Role
 
-Engineer shipping clean, well-documented PRs.
+Engineer shipping clean, well-documented work for review.
 
 ## Objective
 
-Create a live PR from current branch. Link to issue, make the significance obvious, give reviewers the value/trade-off context they need at a glance, and attach the walkthrough package that proves the merge case.
-If the change improves UX or any user-visible interaction, the PR must include a demo artifact a human can watch. Default to video for anything with motion, interaction, timing, or state change; only use stills when the improvement is genuinely static.
-That artifact should be an actual capture of the product surface whenever practical, not a reconstructed storyboard made from logs or screenshots.
+Take the current working directory state — however messy — and produce:
+1. A clean branch with semantic conventional commits
+2. A PR that makes the merge case obvious to any reviewer
 
-`/pr` opens or updates the review lane. It does not certify that the live PR is review-clean after async reviewer automation runs.
+## Process
 
-## Latitude
+### 1. Orient
 
-- Stage and commit any uncommitted changes with semantic message
-- Read linked issue from branch name or recent commits
-- Write PR body that explains significance, value, trade-offs, and alternatives, not just changes
-- Run `/pr-walkthrough` and treat its output as required PR evidence
-- Own ship blockers surfaced by the required gates; fix adjacent repo debt when it is the only thing keeping the lane from opening cleanly
-- `dogfood`, `agent-browser`, and `browser-use` are available here; use them for flow QA evidence
-- Load [references/pr-body-template.md](./references/pr-body-template.md) before writing the PR body
-- Treat an existing PR for the same branch or issue as the lane to update, not a reason to create another PR
+```bash
+git status --short
+git log --oneline -5
+git branch --show-current
+git diff --stat HEAD
+```
 
-## PR Body Requirements (MANDATORY)
+Determine:
+- **Current branch** — if on `main`/`master`, create a feature branch from the diff context
+- **Linked issue** — from branch name (`feat/42-thing`), recent commits, or `$ARGUMENTS`
+- **Existing PR** — `gh pr list --head $(git branch --show-current) --json number,url`
 
-Every PR body must follow [references/pr-body-template.md](./references/pr-body-template.md).
-A PR missing template sections is not ready.
+If already on a feature branch with a PR, this is an update flow.
 
-Use `<details>/<summary>` to collapse larger sections such as Alternatives,
-Manual QA, Acceptance Criteria, Test Coverage, Walkthrough evidence, and screenshot-heavy Before / After evidence.
-Keep `Reviewer Evidence`, `Why This Matters`, `Trade-offs / Risks`, and the opening `What Changed` explanation visible.
+### 2. Tidy
 
-## Workflow
+Clean up the working directory before committing:
 
-1. **Duplicate PR Gate** — Before writing anything to GitHub:
-   - Detect the linked issue from branch name, commit messages, or diff context
-   - Preferred: run `python3 scripts/issue_lane.py --repo <owner/name> --issue <N>` when the repo provides it
-   - Check for an existing PR from the current branch
-   - Check for other open PRs already referencing the same issue number
-   - If the current branch already has a PR, update it with `gh pr edit` instead of creating a new one
-   - If another branch already has an open PR for the same issue, stop and surface the duplicate lane unless you are explicitly superseding it
-2. **Clean** — Commit any uncommitted changes with semantic message
-3. **Context** — Read linked issue, diff branch against main, identify relevant tests
-4. **Visual QA** — If diff touches frontend files (`app/`, `components/`, `*.css`), run `/visual-qa`. Fix any P0/P1 issues before opening PR. Capture screenshots for Before/After section.
-5. **Dogfood QA** — Run `/dogfood http://localhost:3000` (start dev server first if not running).
-   `/dogfood` is a skill command (not a PATH CLI check). Use `agent-browser` / `browser-use` for focused repro as needed.
-   Fix all P0/P1 issues found. Iterate until clean. **Do not open a PR until this passes.**
-   Include dogfood summary (issues found, fixed) in PR body under Manual QA section.
-6. **Walkthrough** — Run `/pr-walkthrough`. Every PR needs a walkthrough package, even when the change is not user-facing. Use browser, terminal, diagram, Remotion, or mixed media as appropriate.
-   - UX improvements are presumed demoable. Do not settle for prose-only evidence when a reviewer should be able to watch the improvement.
-   - For user-visible interaction changes, default to a real screencast or terminal recording. Only fall back to screenshots when there is no meaningful motion or timing to show.
-   - For CLI UX, treat the terminal as the product surface and record the real interaction.
-   - Demo quality matters. Keep overlays minimal, keep the changed surface readable, and do not let explanatory text obscure the thing being demonstrated.
-7. **Describe** — Title from issue, body follows [references/pr-body-template.md](./references/pr-body-template.md). Lead with significance/value/trade-offs, not the diff recap.
-8. **Before/After** — Use screenshots or evidence from visual QA, dogfood, and `/pr-walkthrough`. For non-UI changes, describe behavioral or architectural difference in text. If the change is UX-facing, include a watchable artifact and treat static text as support material, not the main proof. If the PR body gets long, move heavy evidence into `<details>`.
-   For private repos, screenshots in the PR body must use GitHub attachments or `../blob/<ref>/...?...raw=true`; never `raw.githubusercontent.com` or bare repo-relative asset paths.
-9. **Open / Update** — Use `gh pr create --assignee phrazzld --body-file <path>` for new PRs. Use `gh pr edit --body-file <path>` when the branch already has a PR.
-10. **Review Settlement Handoff** — If the final push, `gh pr ready`, or PR update triggered async reviewers:
-   - do not post `PR Unblocked` or claim the PR is review-clean
-   - route live review reconciliation through `/pr-fix`
-   - only treat the PR as unblocked after `/pr-fix` closes the post-settlement review inventory
-11. **Comment** — Add context comment if notable decisions were made, and use `--body-file` for comment bodies.
-12. **Retro (Optional)** — If this PR closes a GitHub issue and the repo already uses issue-scoped retro notes, append feedback under `.groom/retro/<issue>.md`.
-   - Never append to a shared `.groom/retro.md`; skip the retro step instead of creating merge-conflict churn.
-   - Only write a retro note when it adds real planning signal.
-   - Prefer the repo's existing issue-scoped retro command/path (for example `/done append --issue ...`).
+- **Cruft** — remove generated files, `.DS_Store`, build artifacts not in `.gitignore`
+- **Gitignore gaps** — add missing entries (e.g., `.env.local`, `node_modules/`, `*.log`)
+- **Consolidate** — if scratch/temp files exist that should be deleted or merged, do it
+- **Unstaged experiments** — if there are throwaway files (debug scripts, scratch notes), confirm before including
 
-## Comment Style
+Do NOT delete anything that looks intentional without asking.
 
-Like a colleague leaving context for future-you:
-- **Concise** — No fluff
-- **High-context** — Reference files, functions, decisions
-- **Useful** — What's not obvious from the diff?
-- **Human** — Some wit welcome
+### 3. Commit
+
+Split changes into logical, semantically meaningful conventional commits.
+
+**Grouping rules:**
+- One concern per commit. A feature addition, its tests, and its docs can be one commit.
+- Separate refactors from features from fixes.
+- Separate dependency changes from code changes.
+- Separate formatting/linting from logic changes.
+
+**Commit message format:**
+```
+<type>(<scope>): <subject>
+
+<body — why, not what>
+```
+
+Types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+
+Subject: imperative, lowercase, no period, ~50 chars.
+Body: explain WHY. Link issue when relevant (`Closes #42`, `Part of #42`).
+
+**Ordering:** infrastructure → refactor → feature → tests → docs → chore
+
+### 4. Quality Gate
+
+Run whatever quality gates the project has before pushing:
+
+```bash
+# Detect and run available gates
+[[ -f package.json ]] && npm run lint 2>/dev/null; npm run typecheck 2>/dev/null; npm test 2>/dev/null
+[[ -f Makefile ]] && make check 2>/dev/null
+[[ -f mix.exs ]] && mix compile --warnings-as-errors && mix test 2>/dev/null
+```
+
+If gates fail: fix, amend or add a fix commit, re-run. Do not push red.
+
+### 5. Push
+
+```bash
+git fetch origin
+# Rebase onto base branch if behind
+git rebase origin/main || git rebase origin/master
+git push origin HEAD -u
+```
+
+Never force push. If rebase conflicts, resolve and continue.
+
+### 6. PR Body
+
+Write the PR body to a temp file using `--body-file`. The body is the merge case,
+not a changelog. Lead with significance, not mechanics.
+
+**Required sections (all PRs):**
+
+#### Visible on first load:
+
+**Reviewer Evidence** — If the PR has user-visible changes, put proof first:
+- Screenshot or video link (prefer GitHub-uploaded attachments)
+- One-sentence merge claim
+- "Start here" pointer for reviewers
+
+**Why This Matters**
+- Problem that existed before this PR
+- Value this PR adds
+- Why now (what triggered this work)
+- Issue link: `Closes #N` or `Part of #N`
+
+**Trade-offs / Risks**
+- What complexity or cost was added
+- What risks remain
+- Why the trade is worth it
+- What reviewers should pressure-test
+
+**What Changed**
+- One paragraph in plain English
+- Mermaid `graph TD` of base branch flow
+- Mermaid `graph TD` of this-PR flow
+- Third diagram (architecture/state/sequence) when meaningful
+- Why the new shape is better
+
+#### Under `<details>`:
+
+**Changes** — File/module summary. Key functions touched.
+
+**Acceptance Criteria** — From linked issue. Checkboxes. If no issue, derive from the diff.
+
+**Alternatives Considered** — Do nothing + one credible alternative + why current approach won.
+
+**Manual QA** — Exact commands, URLs, setup, expected output.
+
+**Test Coverage** — Specific test files. Gaps called out.
+
+**Before / After** — Text always. Screenshots for UI changes.
+
+**Merge Confidence** — Confidence level, strongest evidence, remaining uncertainty.
+
+### 7. Open / Update
+
+```bash
+# New PR
+gh pr create --assignee phrazzld --body-file /tmp/pr-body.md --title "<title>"
+
+# Existing PR
+gh pr edit <number> --body-file /tmp/pr-body.md
+```
+
+**Title:** `<type>(<scope>): <subject>` — under 70 chars. Same format as commits.
+
+If `--draft` flag, add `--draft` to create.
+
+### 8. Post-Open
+
+- Add a context comment if notable design decisions were made
+- If the PR touches frontend, attach screenshots or demo video
+- Report the PR URL
+
+Do NOT claim the PR is "ready to merge" or "review-clean". Opening a PR
+creates the review lane. Review settlement is a separate concern (`/pr-fix`).
+
+## Demo Artifacts
+
+If the change is user-visible:
+- **Motion/interaction/state change** → video (screencast or terminal recording)
+- **Static visual change** → screenshots (before/after)
+- **Internal/API change** → text before/after is sufficient
+
+For private repos, use GitHub-uploaded attachments, not raw URLs.
+
+## Flags
+
+- `--draft` — Open as draft PR
+- `--no-push` — Commit but don't push or create PR
+- `$ARGUMENTS` as issue number — Link to specific issue
+
+## Anti-Patterns
+
+- Opening a PR with uncommitted changes still in the working directory
+- One giant commit for unrelated changes
+- PR title that restates the diff instead of the intent
+- Skipping the "why" — just listing file changes
+- Burying trade-offs or risks
+- Claiming merge readiness before CI and reviews settle
+- Creating a duplicate PR when one already exists for the branch
 
 ## Output
 
-PR URL. Say whether a retro note was intentionally skipped or appended. If review automation is pending or unresolved, say that explicitly instead of implying the PR is unblocked.
+PR URL. Count of commits created. Note any quality gate failures fixed.
+If review automation is pending, say so explicitly.

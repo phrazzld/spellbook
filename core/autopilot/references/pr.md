@@ -22,12 +22,12 @@ That artifact should be an actual capture of the product surface whenever practi
 - Run `/pr-walkthrough` and treat its output as required PR evidence
 - Own ship blockers surfaced by the required gates; fix adjacent repo debt when it is the only thing keeping the lane from opening cleanly
 - `dogfood`, `agent-browser`, and `browser-use` are available here; use them for flow QA evidence
-- Load [references/pr-body-template.md](./references/pr-body-template.md) before writing the PR body
+- Load [pr-body-template.md](./pr-body-template.md) before writing the PR body
 - Treat an existing PR for the same branch or issue as the lane to update, not a reason to create another PR
 
 ## PR Body Requirements (MANDATORY)
 
-Every PR body must follow [references/pr-body-template.md](./references/pr-body-template.md).
+Every PR body must follow [pr-body-template.md](./pr-body-template.md).
 A PR missing template sections is not ready.
 
 Use `<details>/<summary>` to collapse larger sections such as Alternatives,
@@ -55,7 +55,7 @@ Keep `Reviewer Evidence`, `Why This Matters`, `Trade-offs / Risks`, and the open
    - For user-visible interaction changes, default to a real screencast or terminal recording. Only fall back to screenshots when there is no meaningful motion or timing to show.
    - For CLI UX, treat the terminal as the product surface and record the real interaction.
    - Demo quality matters. Keep overlays minimal, keep the changed surface readable, and do not let explanatory text obscure the thing being demonstrated.
-7. **Describe** — Title from issue, body follows [references/pr-body-template.md](./references/pr-body-template.md). Lead with significance/value/trade-offs, not the diff recap.
+7. **Describe** — Title from issue, body follows [pr-body-template.md](./pr-body-template.md). Lead with significance/value/trade-offs, not the diff recap.
 8. **Before/After** — Use screenshots or evidence from visual QA, dogfood, and `/pr-walkthrough`. For non-UI changes, describe behavioral or architectural difference in text. If the change is UX-facing, include a watchable artifact and treat static text as support material, not the main proof. If the PR body gets long, move heavy evidence into `<details>`.
    For private repos, screenshots in the PR body must use GitHub attachments or `../blob/<ref>/...?...raw=true`; never `raw.githubusercontent.com` or bare repo-relative asset paths.
 9. **Open / Update** — Use `gh pr create --assignee phrazzld --body-file <path>` for new PRs. Use `gh pr edit --body-file <path>` when the branch already has a PR.

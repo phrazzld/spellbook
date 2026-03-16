@@ -37,7 +37,7 @@ Conflicts -> CI -> Self-Review -> Review Reconciliation -> Settlement -> Signal
 
 ## Core Workflow
 
-Read [references/workflow.md](./references/workflow.md) and execute the phases in order:
+Read [pr-fix-workflow.md](./pr-fix-workflow.md) and execute the phases in order:
 - assess the PR and list blockers
 - resolve conflicts first
 - fix CI before arguing with reviewers
@@ -53,8 +53,8 @@ Read [references/workflow.md](./references/workflow.md) and execute the phases i
 
 ## Required References
 
-- Review reconciliation: [references/reconciliation-ledger.md](./references/reconciliation-ledger.md)
-- Detailed unblock sequence: [references/workflow.md](./references/workflow.md)
+- Review reconciliation: [pr-fix-reconciliation-ledger.md](./pr-fix-reconciliation-ledger.md)
+- Detailed unblock sequence: [pr-fix-workflow.md](./pr-fix-workflow.md)
 
 ## Hard Stop Rules
 
@@ -93,5 +93,5 @@ Summarize:
 
 ## Absorbed Skills (References)
 
-- **fix-ci** — [references/fix-ci.md](./references/fix-ci.md)
-- **review-branch** — [references/review-branch.md](./references/review-branch.md)
+- **fix-ci** — [pr-fix-fix-ci.md](./pr-fix-fix-ci.md)
+- **review-branch** — [pr-fix-review-branch.md](./pr-fix-review-branch.md)

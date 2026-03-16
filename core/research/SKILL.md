@@ -20,21 +20,37 @@ This skill consolidates: `web-search`, `delegate`, `thinktank`, `introspect`.
 
 ## Routing
 
-| Intent | Sub-capability |
-|--------|---------------|
-| Search the web, find docs/info, `web-search`, `web-deep`, `web-news`, `web-docs`, `/web`, `/web-deep`, `/web-news`, `/web-docs` | `references/web-search.md` |
-| Delegate work to Codex/Gemini/agents, orchestrate multi-AI | `references/delegate.md` |
-| Multi-perspective expert validation, consensus | `references/thinktank.md` |
-| Analyze session history, usage patterns, improvement opportunities | `references/introspect.md` |
-| Search saved articles, highlights, reading list | `references/readwise.md` |
-| xAI web/X search, social sentiment, trending | `references/xai-search.md` |
+### Explicit sub-capability (user names one)
 
-If first argument matches `web-search`, `web-deep`, `web-news`, `web-docs`,
-`delegate`, `thinktank`, `introspect`, `readwise`, or `xai`, read the corresponding reference.
-If no argument, select based on user intent. If user specifies a sub-capability
-by name (e.g., "delegate this to codex"), route directly.
+If first argument matches a keyword, route directly to that reference:
 
-Read the relevant reference and follow its instructions.
+| Keyword | Reference |
+|---------|-----------|
+| `web-search`, `web-deep`, `web-news`, `web-docs` | `references/web-search.md` |
+| `delegate` | `references/delegate.md` |
+| `thinktank` | `references/thinktank.md` |
+| `introspect` | `references/introspect.md` |
+| `readwise` | `references/readwise.md` |
+| `xai` | `references/xai-search.md` |
+
+### No sub-capability (default): PARALLEL FANOUT
+
+**When no keyword is specified, fan out to multiple sources in parallel.**
+Research means gathering signal from many vantage points simultaneously.
+The routing table is a dispatch list, not a switch statement.
+
+For any research question, launch these in parallel (via Agent tool):
+
+1. **Web search** (Exa/WebSearch) — current docs, implementations, pricing, APIs
+2. **Thinktank** (`./thinktank "question" --quick --perspectives 3`) — multi-model expert perspectives
+3. **xAI** — social signal, what practitioners are saying (when relevant)
+4. **Codebase search** (Grep/Glob) — what the project already does (when relevant)
+
+Then **synthesize** across all results: consensus, conflicts, citations, recommendations.
+
+Only narrow to a single source when:
+- The user explicitly names one (e.g., "/research web-search [query]")
+- The question is trivially answerable by one source (e.g., "what version is X?")
 
 ## Use When
 

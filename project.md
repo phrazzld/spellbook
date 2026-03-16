@@ -15,27 +15,28 @@ research-backed (web + multi-model validation before codifying).
 | Term | Definition |
 |------|-----------|
 | Skill | A markdown-first module (SKILL.md + optional references/) that gives agents domain expertise |
-| Core skill | Universal skill synced to all harness config dirs |
-| Pack | Domain-specific skill bundle loaded per-project (e.g., payments, growth) |
-| Harness | An AI agent runtime (Claude Code, Codex, Gemini CLI, Pi) |
-| Umbrella | A skill that absorbs related sub-skills as references, saving budget |
+| Core skill | Universal skill synced to all harness config dirs (11 total: 3 implicit + 8 DMI) |
+| Pack | Domain-specific skill bundle loaded per-project (9 packs: web, design, agent, infra, quality, payments, growth, scaffold, finance) |
+| Harness | An AI agent runtime (Claude Code, Codex, Gemini CLI, Factory, Pi) |
+| Umbrella | A skill that absorbs related sub-skills as references, saving budget (autopilot, debug, reflect, research) |
 | DMI | Disable-model-invocation — user-only skills that cost zero budget |
-| Budget | ~16K char Claude Code description limit; skills consume budget per mode |
-| Ralph | Autonomous issue-to-merged-PR loop |
-| Delivery pipeline | groom → shape → autopilot → pr-fix → pr-polish → merge |
+| Budget | ~16K char Claude Code description limit; ~1.4K used by 3 implicit skills |
+| Delivery pipeline | groom → autopilot (shape → build → pr → settle → merge) |
 
 ## Active Focus
 
 - **Milestone:** Skill Quality — sharpen definitions, triggers, and gate semantics
-- **Key Issues:** #6, #7 (pipeline hardening), existing skills needing refinement
+- **Key Issues:** #24 (description audit), #51 (sync-time validation), #31/#32 (pipeline codification)
 - **Theme:** Make every skill precise enough that agents invoke it correctly first-try
+- **Recent:** Core pruning from 50+ to 11 skills, 37 domain skills to 9 packs, 4 umbrella absorptions
 
 ## Quality Bar
 
 - [ ] Every skill has clear trigger conditions (when to invoke, when NOT to)
+- [ ] All descriptions ≤1024 chars with trigger phrases (enforced by sync.sh)
 - [ ] Skills compose — orchestrators call primitives, never reimplement
 - [ ] Agent-agnostic — no Claude-specific assumptions leak into skill bodies
-- [ ] Budget stays within 16K limit with room for growth
+- [ ] Budget stays within 16K limit with room for growth (~1.4K of ~16K used)
 - [ ] Retro patterns flow back into skill definitions
 
 ## Patterns to Follow
@@ -68,7 +69,9 @@ core/{umbrella}/
 | verify-ac as standalone | Worked but wasn't used | Skills become gates only when delivery workflows name exact stop conditions |
 | Effort predictions | Accurate (retro confirms) | Effort/s and effort/m calibration is reliable for this repo |
 | Umbrella pattern (research/) | 4→1 budget savings | Progressive disclosure works; add sub-caps at zero cost |
+| Core pruning 50+ → 11 | Budget 10.2K → 1.4K | Aggressive pruning + pack architecture works; domain knowledge belongs in packs |
+| Standalone pipeline skills | Fragmented, hard to compose | Absorb related skills into umbrellas; sub-capabilities as references cost zero budget |
 
 ---
-*Last updated: 2026-03-11*
-*Updated during: /groom session*
+*Last updated: 2026-03-15*
+*Updated during: /groom session — post-restructuring backlog overhaul*

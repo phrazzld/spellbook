@@ -30,6 +30,7 @@ for skill_dir in "$REPO_ROOT"/skills/*/; do
 
   # Extract tags from description keywords
   tags=$(echo "$desc" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]-' '\n' | \
+    sed '/^$/d' | \
     grep -v -E '^(the|and|for|use|when|with|this|that|from|into|your|each|are|not|all|can|has|will|been|have|does|its|any|our|you|was)$' | \
     sort -u | head -10 | tr '\n' ',' | sed 's/,$//')
 

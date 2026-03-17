@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-03-17T16:12:26Z
+# Generated: 2026-03-17T16:51:09Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -8,7 +8,7 @@ skills:
     tags: [a,agents,ai,automation,browser,buttons,cli,clicking,data,extracting]
   - name: agent-tools
     description: "\"Run 150+ AI apps via inference.sh CLI - image generation, video creation, LLMs, search, 3D, Twitter automation. Models: FLUX, Veo, Gemini, Grok, Claude, Seedance, OmniHuman, Tavily, Exa, OpenRouter, "
-    tags: [,-,150,3d,ai,apps,automation,claude,cli,creation]
+    tags: [-,150,3d,ai,apps,automation,claude,cli,creation,exa]
   - name: agentic-ui-contract
     description: "Design and implement agentic product flows using the contract: model decides what to do, tools decide how it is done, UI schema decides how it is rendered. Use for chat-first apps, tool-calling agents"
     tags: [agentic,agents,apps,chat-first,contract,decide,decides,design,do,done]
@@ -77,7 +77,7 @@ skills:
     tags: [--,a,application,bugs,detailed,evidence,explore,find,full,issues]
   - name: external-integration-patterns
     description: "\"Patterns for reliable external service integration: env validation, health checks, error handling, observability. Invoke when integrating Stripe, Clerk, Sendgrid, or any external API.\""
-    tags: [,api,checks,clerk,env,error,external,handling,health,integrating]
+    tags: [api,checks,clerk,env,error,external,handling,health,integrating,integration]
   - name: finances-ingest
     description: "Parse new financial exports into the append-only ledger at ~/Documents/finances/. Handles: BofA CSV, Strike annual statement, River activity CSV, Robinhood CSV, Copilot Money transactions export. Dedu"
     tags: [activity,annual,append-only,at,bofa,copilot,csv,dedu,documents,export]
@@ -88,8 +88,8 @@ skills:
     description: "Capture current financial state into the append-only ledger at ~/Documents/finances/. Updates prices (BTC, gold, silver), reads current balance sheet CSVs, and appends a timestamped snapshot to data/s"
     tags: [a,append-only,appends,at,balance,btc,capture,csvs,current,data]
   - name: fly-io
-    description: "\"Fly.io deployment patterns: fly.toml configuration, Machine sizing, volumes, health checks, graceful shutdown, structured logging for log drains, and multi-stage Docker builds. Invoke when deploying "
-    tags: [,builds,checks,configuration,deploying,deployment,docker,drains,fly,graceful]
+    description: "\"Fly.io deployment patterns, production gotchas, and operational knowledge. Volume lifecycle, auto_stop edge cases, secrets staging, health check tuning, SQLite backup (Litestream+Tigris), multi-regio"
+    tags: [auto,backup,cases,check,deployment,edge,fly,gotchas,health,io]
   - name: focus
     description: "Configure the active set of Spellbook primitives for the current project. Reads .spellbook.yaml manifest, pulls skills and agents from GitHub, manages harness-specific setup (Claude Code, Codex, Pi). "
     tags: [active,agents,claude,code,codex,configure,current,github,harness-specific,manages]
@@ -101,7 +101,7 @@ skills:
     tags: [-,best,branches,cd,choosing,ci,commit,commits,creating,enforcement]
   - name: github-app-scaffold
     description: "\"Scaffold and implement GitHub Apps from existing automation ideas using Probot + @octokit/app. Use when turning scripts, bots, or manual GitHub workflows into a proper GitHub App.\""
-    tags: [,a,app,apps,automation,bots,existing,github,ideas,implement]
+    tags: [a,app,apps,automation,bots,existing,github,ideas,implement,manual]
   - name: github-cli-hygiene
     description: "Safe, well-formatted GitHub CLI writes for PRs/issues/reviews using body files and post-write validation."
     tags: [body,cli,files,github,issues,post-write,prs,reviews,safe,using]
@@ -118,8 +118,8 @@ skills:
     description: "Design development environments where AI agents thrive. CI/linters/tests as agent feedback loops, documentation as machine-readable artifacts, mechanical enforcement of architectural boundaries, sessi"
     tags: [agent,agents,ai,architectural,artifacts,as,boundaries,ci,design,development]
   - name: hono
-    description: "\"Hono web framework patterns: app structure, router composition, middleware, request validation, JSX rendering, cookie auth, testing with app.request(), and Node.js server adapter. Invoke when writing"
-    tags: [,adapter,app,auth,composition,cookie,framework,hono,invoke,js]
+    description: "\"Hono web framework patterns, production gotchas, and runtime-specific quirks. Body double-read trap, middleware ordering, TypeScript type inference limits, Context Storage, streaming pitfalls, router"
+    tags: [body,context,double-read,framework,gotchas,hono,inference,limits,middleware,ordering]
   - name: lightning
     description: "Complete Lightning Network lifecycle. Audits channels, routing, invoices. Plans capacity, executes rebalancing, verifies payments. Every run does all."
     tags: [audits,capacity,channels,complete,every,executes,invoices,lifecycle,lightning,network]
@@ -131,16 +131,16 @@ skills:
     tags: [a,agent,finite,fuzzy,in,intent,item,llm,matching,one]
   - name: mobile-migrate
     description: "\"Add an Expo + EAS React Native mobile app to an existing web project, sharing logic, design tokens, auth, and backend integrations. Use when migrating a web codebase into a web+mobile monorepo.\""
-    tags: [,a,add,an,app,auth,backend,codebase,design,eas]
+    tags: [a,add,an,app,auth,backend,codebase,design,eas,existing]
   - name: monorepo-scaffold
     description: "\"Convert single-app repos into a Turborepo monorepo using pnpm workspaces. Use when splitting apps into apps/ and shared code into packages/ with cached pipelines.\""
-    tags: [,a,apps,cached,code,convert,monorepo,packages,pipelines,pnpm]
+    tags: [a,apps,cached,code,convert,monorepo,packages,pipelines,pnpm,repos]
   - name: moonshot
     description: "Identify the single highest-leverage, most innovative addition to the project. Forces divergent thinking beyond the current roadmap. One answer, fully argued. Use when: \"what should we build next\", \"w"
     tags: [addition,answer,argued,beyond,build,current,divergent,forces,fully,highest-leverage]
   - name: naming-conventions
     description: "\"Apply universal naming principles: avoid Manager/Helper/Util, use intention-revealing names, domain language, verb+noun functions. Use when naming variables, functions, classes, reviewing names, or r"
-    tags: [,apply,avoid,classes,domain,functions,helper,intention-revealing,language,manager]
+    tags: [apply,avoid,classes,domain,functions,helper,intention-revealing,language,manager,names]
   - name: next-patterns
     description: "Next.js patterns, best practices, cache components, and upgrade guides. Auto-invoke when: writing Next.js code, configuring next.config, using App Router, implementing caching, upgrading Next.js versi"
     tags: [app,auto-invoke,best,cache,caching,code,components,config,configuring,guides]
@@ -197,7 +197,7 @@ skills:
     tags: [a,absorption,agent,classification,create,disclosure,frontmatter,gates,lifecycle,make]
   - name: slack-app-scaffold
     description: "\"Scaffold Slack apps from existing functionality using Bolt for JavaScript and the Slack CLI. Use when turning a service, script, or workflow into a Slack app with events, commands, modals, or automat"
-    tags: [,a,app,apps,automat,bolt,cli,commands,events,existing]
+    tags: [a,app,apps,automat,bolt,cli,commands,events,existing,functionality]
   - name: standup
     description: "Generate a daily standup report from the last 24 hours of GitHub activity across all repos and orgs. Pulls PRs authored/reviewed, issues engaged, commits pushed, and open PRs needing attention. Synthe"
     tags: [24,a,across,activity,attention,authored,commits,daily,engaged,generate]

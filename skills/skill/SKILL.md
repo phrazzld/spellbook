@@ -5,7 +5,6 @@ description: |
   frontmatter, progressive disclosure, packaging, absorption lifecycle.
   Use when: "create a skill", "make this a skill", "update skill",
   "capture this as a skill", "skill engineering".
-disable-model-invocation: true
 argument-hint: "[create|update|absorb] [skill-name]"
 ---
 
@@ -63,7 +62,7 @@ If any gate fails, don't create the skill. Suggest the right home:
 
 | Type | Characteristics | Mode |
 |------|----------------|------|
-| **Global** | Meta-process, useful everywhere (focus, research, calibrate, reflect, skill) | DMI |
+| **Global** | Meta-process, useful everywhere (focus, research, calibrate, reflect, skill) | Non-DMI (must be chainable by other skills) |
 | **Distributable** | Domain or workflow skill, useful across projects | Default or DMI |
 | **Project-local** | This-repo-only workflow | DMI typically |
 

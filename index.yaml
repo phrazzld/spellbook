@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-03-16T21:22:31Z
+# Generated: 2026-03-17T01:53:38Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -42,6 +42,9 @@ skills:
   - name: canary
     description: "Query errors, check health status, and manage monitoring targets on a self-hosted Canary observability instance. Use when: debugging errors across services, checking uptime/health, managing health che"
     tags: [a,across,canary,che,check,checking,debugging,errors,health,instance]
+  - name: changelog
+    description: "Automated changelogs, semantic versioning, and user-friendly release notes. Audit existing release infrastructure, set up from scratch, or fix gaps. Use when: \"changelog\", \"release notes\", \"semantic v"
+    tags: [audit,automated,changelog,changelogs,existing,fix,gaps,infrastructure,notes,or]
   - name: ci-spend-optimizer
     description: "Audit and reduce GitHub Actions spend across repositories. Use when minutes are exhausted, CI is noisy/duplicative, or multiple AI reviewers run together. Produces top spend drivers, overlap hotspots,"
     tags: [across,actions,ai,audit,ci,drivers,duplicative,exhausted,github,hotspots]
@@ -87,9 +90,6 @@ skills:
   - name: focus
     description: "Configure the active set of Spellbook primitives for the current project. Reads .spellbook.yaml manifest, pulls skills and agents from GitHub, manages harness-specific setup (Claude Code, Codex, Pi). "
     tags: [active,agents,claude,code,codex,configure,current,github,harness-specific,manages]
-  - name: forage
-    description: "Check for relevant skills before starting any domain-specific task. Search pack skills for specialized guidance not in core, load content inline. Invoke PROACTIVELY before: writing code in any framewo"
-    tags: [before,check,code,content,core,domain-specific,framewo,guidance,in,inline]
   - name: formal-verify
     description: "Formal verification of system designs using TLA+, Z3, and Apalache. Finds bugs in design BEFORE implementation. Agent feedback loop: spec → model check → counterexample → fix → repeat. Use for state m"
     tags: [agent,apalache,before,bugs,check,counterexample,design,designs,feedback,finds]
@@ -169,8 +169,8 @@ skills:
     description: "Patterns for Ralph loop tasks. Auto-loaded to provide guidance on completion signals, progress tracking, and iteration patterns. Ralph = autonomous issue-to-merged-PR loop."
     tags: [auto-loaded,autonomous,completion,guidance,issue-to-merged-pr,iteration,loop,on,patterns,progress]
   - name: reflect
-    description: "Session retrospective, codification, and implementation feedback capture. Distill learnings to CLAUDE.md/hooks/rules, propose lean improvements, tune repos for agents, generate changelogs. Invoke for:"
-    tags: [agents,capture,changelogs,claude,codification,distill,feedback,generate,hooks,implementation]
+    description: "Session retrospective, codification, and implementation feedback capture. Distill learnings to CLAUDE.md/hooks/rules, propose lean improvements, tune repos for agents. Invoke for: \"done\", \"wrap up\", \""
+    tags: [agents,capture,claude,codification,distill,done,feedback,hooks,implementation,improvements]
   - name: research
     description: "Web research, multi-AI delegation, and multi-perspective validation. /research [query], /research delegate [task], /research thinktank [topic]. Triggers: \"search for\", \"look up\", \"research\", \"delegate"
     tags: [delegate,delegation,look,multi-ai,multi-perspective,query,research,search,task,thinktank]
@@ -221,99 +221,6 @@ skills:
     tags: [applications,behavior,brow,browser,capturing,debugging,frontend,functionality,local,logs]
 
 agents:
-  - name: aesthetician
-    description: "Visual excellence, design craft, trend-awareness, and distinctive aesthetics"
-  - name: agent-updater
-    description: "Codify review feedback patterns into automated agent enforcement rules"
-  - name: algorithm-archaeologist
-    description: "Analyze algorithmic decisions, alternatives, and CS learning opportunities"
-  - name: api-design-specialist
-    description: "REST/GraphQL API design, HTTP semantics, error responses, and versioning"
-  - name: architecture-guardian
-    description: "Module boundaries, coupling analysis, and enforcing Modularity + Explicitness tenets"
-  - name: beck
-    description: "TDD + simple design — Red. Green. Refactor"
-  - name: bitcoin-auditor
-    description: "Deep Bitcoin integration analysis — node config, wallet security, UTXO management"
-  - name: carmack
-    description: "Direct implementation + shippability — Focus is deciding what NOT to do"
-  - name: complexity-archaeologist
-    description: "Detect Ousterhout red flags and complexity patterns that violate simplicity principles"
-  - name: config-auditor
-    description: "External service configuration review — env vars, webhooks, API keys, deployment config"
-  - name: copy-reviewer
-    description: "Adversarial copy review. 6 lenses, 0-100 each. Composite >= 90 to pass"
-  - name: cs-concept-connector
-    description: "Connect code implementations to fundamental CS theory and principles"
-  - name: data-integrity-guardian
-    description: "Database safety, migration review, transaction boundaries, and referential integrity"
-  - name: dependency-health-monitor
-    description: "Dependency management, security vulnerabilities, and version health"
-  - name: design-systems-architect
-    description: "Design systems, component architecture, visual consistency, and frontend UI patterns"
-  - name: documentation-quality-reviewer
-    description: "Documentation clarity, completeness, maintainability, and naming quality"
-  - name: error-handling-specialist
-    description: "Error handling, graceful degradation, error messages, and logging strategies"
-  - name: fowler
-    description: "Refactoring + code smells — Code for humans, not computers"
-  - name: go-concurrency-reviewer
-    description: "Go concurrency patterns, race condition detection, and goroutine safety"
-  - name: grug
-    description: "Complexity demon hunter — complexity very, very bad"
-  - name: helper
-    description: "General-purpose helper for all development tasks"
-  - name: hindsight-reviewer
-    description: "Retrospective architectural review — Would you do it the same way from scratch?"
-  - name: infrastructure-guardian
-    description: "Project infrastructure for quality gates, testing, CI/CD, and deployment"
-  - name: interview-coach
-    description: "Mock interview scenarios and communication practice for FAANG technical interviews"
-  - name: interview-pattern-scout
-    description: "Identify classic interview patterns in codebase and find gaps for FAANG prep"
-  - name: jobs
-    description: "Craft + simplicity + excellence — Simple can be harder than complex"
-  - name: learning-codifier
-    description: "Transform learnings from recent work into permanent, executable knowledge"
-  - name: leetcode-problem-generator
-    description: "Create custom LeetCode-style practice problems targeting interview pattern gaps"
-  - name: lightning-auditor
-    description: "Deep Lightning Network analysis — channels, liquidity, routing, and node security"
-  - name: maintainability-maven
-    description: "Code maintainability, documentation quality, naming conventions, and comprehension barriers"
-  - name: observability-advocate
-    description: "Logging, monitoring, and alerting coverage analysis — ensure bugs scream loudly"
-  - name: ousterhout
-    description: "Deep modules + information hiding — Deep modules manage complexity"
-  - name: pattern-extractor
-    description: "Extract reusable code patterns into clean abstractions and comprehensive tests"
-  - name: performance-pathfinder
-    description: "Performance bottleneck detection, algorithmic efficiency analysis, and optimization"
-  - name: performance-professor
-    description: "Identify performance bottlenecks that teach fundamental CS concepts"
-  - name: pioneer
-    description: "Innovation, R&D opportunities, LLM/AI frontiers, and Gordian knot solutions"
-  - name: posthog-auditor
-    description: "Deep PostHog integration analysis — SDK config, event tracking, privacy, feature flags"
-  - name: product-visionary
-    description: "High-value features, product opportunities, and competitive gaps"
-  - name: react-pitfalls
-    description: "Review React/Next.js code for common runtime pitfalls and anti-patterns"
-  - name: security-sentinel
-    description: "Security vulnerability detection, authentication/authorization analysis, defensive coding"
-  - name: skill-builder
-    description: "Transform multi-step workflows into executable, reusable skills"
-  - name: state-management-analyst
-    description: "Frontend state management patterns, data flow, and state synchronization"
-  - name: stripe-auditor
-    description: "Deep Stripe integration analysis — config, webhooks, subscriptions, security"
-  - name: test-strategy-architect
-    description: "Test coverage, testing pyramid, TDD patterns, and test quality review"
-  - name: torvalds
-    description: "Pragmatic engineering — Talk is cheap. Show me the code"
-  - name: user-experience-advocate
-    description: "User-facing quality, product value, error messages, accessibility, and friction points"
-  - name: visionary
-    description: "Accelerate the user's articulated vision — 100% aligned with their stated goals"
+  []
 
 # Collections are defined in collections.yaml

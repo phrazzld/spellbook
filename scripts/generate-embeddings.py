@@ -53,6 +53,10 @@ EXTERNAL_SOURCES = [
         "source": "Leonxlnx/taste-skill",
         "layout": "multi-root",  # SKILL.md in top-level dirs (not under skills/)
     },
+    {
+        "source": "garrytan/gstack",
+        "layout": "multi-root",  # QA, ship, review, retro, etc. as top-level dirs
+    },
 ]
 
 

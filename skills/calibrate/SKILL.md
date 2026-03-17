@@ -34,10 +34,10 @@ Stop current work. Capture:
 
 ### 2. Load Context
 
-Invoke `/forage` to load diagnostic packs:
-- `/forage harness` → `packs/agent/harness-engineering/` (feedback loop hierarchy, mechanical enforcement)
-- `/forage context engineering` → `packs/agent/context-engineering/` (instruction design, context lifecycle)
-- `/forage llm infrastructure` → `packs/agent/llm-infrastructure/` (prompt audit, model routing, eval patterns)
+Load diagnostic skills if installed (check with `/focus list`):
+- `harness-engineering` — feedback loop hierarchy, mechanical enforcement
+- `context-engineering` — instruction design, context lifecycle
+- `llm-infrastructure` — prompt audit, model routing, eval patterns
 
 Invoke `/research web-search` if the mistake involves stale API knowledge, wrong library usage, or outdated patterns.
 
@@ -116,7 +116,7 @@ The code fix should be trivial now — the hard work was diagnosing and fixing t
 | `/reflect` | End-of-session retrospective. Calibrate is mid-session, blocks work until harness is fixed. |
 | `/debug` | Diagnoses code bugs. Calibrate diagnoses agent decision-making context. |
 | `/settle` | After calibrate fixes harness + code, settle can polish the PR. |
-| `/forage` | Loads agent pack skills for diagnostic depth. |
+| `/focus` | Search for diagnostic skills via `/focus search`. |
 | `/research` | Web search for stale knowledge gaps. |
 
 ## Anti-Patterns

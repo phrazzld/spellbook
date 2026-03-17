@@ -8,7 +8,7 @@ Staff engineer onboarding a new team member who happens to be an AI. Build the c
 
 ## Objective
 
-Transform a repository from "generic AI agent target" to "finely tuned agent workspace" where autonomous skills (/build, /autopilot, /pr-fix) operate with full project awareness.
+Transform a repository from "generic AI agent target" to "finely tuned agent workspace" where autonomous skills (/autopilot, /debug, /pr) operate with full project awareness.
 
 ## Philosophy
 
@@ -54,15 +54,14 @@ Detect:
 - routing gaps
 - likely stale docs
 
-### Phase 2: Cartographer
+### Phase 2: Codebase Map
 
-Invoke `/cartographer` to produce or refresh `docs/CODEBASE_MAP.md`.
+Produce or refresh `docs/CODEBASE_MAP.md` by reading the codebase directly.
 
-If `docs/CODEBASE_MAP.md` exists and is recent, run in update mode.
+If `docs/CODEBASE_MAP.md` exists and is recent, update rather than rewrite.
 
 Output:
 - system overview
-- architecture diagrams
 - module guide
 - data flow
 - conventions
@@ -184,7 +183,7 @@ Document the recommendation. Do not build the skill in this run unless explicitl
 ## Output
 
 Report:
-- Cartographer: CODEBASE_MAP.md created/updated
+- Codebase map: CODEBASE_MAP.md created/updated
 - Context index: created/updated subsystems
 - Routing table: created/updated triggers
 - Drift watchlist: created/updated mappings

@@ -3,9 +3,9 @@ name: reflect
 description: |
   Session retrospective, codification, and implementation feedback capture.
   Distill learnings to CLAUDE.md/hooks/rules, propose lean improvements,
-  tune repos for agents, generate changelogs.
+  tune repos for agents.
   Invoke for: "done", "wrap up", "what did we learn", "retro", "session end",
-  "reflect", "distill", "tune repo", "changelog", "organic reflection".
+  "reflect", "distill", "tune repo".
 disable-model-invocation: true
 argument-hint: "[--skip-commit] [--focus area] [append --issue N]"
 ---
@@ -22,7 +22,6 @@ a codified artifact or gets explicitly justified as not worth codifying.
 | Codify learnings, update CLAUDE.md, hooks, skills | `references/distill.md` |
 | Propose lean process improvements | `references/organic-reflection.md` |
 | Specialize agents for a repo, tune context | `references/tune-repo.md` |
-| Generate semantic changelog | `references/changelog.md` |
 
 ## Process
 
@@ -57,12 +56,12 @@ For EACH friction point and bug, evaluate targets in order:
 
 ```
 Hook      -> Prevent automatically? (pre-edit)
-Lint rule -> Catch at edit time? -> invoke /guardrail
+Lint rule -> Catch at edit time?
 Agent     -> Reviewer catches this?
 Skill     -> Reusable workflow?
-Memory    -> Auto-memory captures this?
 CLAUDE.md -> Convention/philosophy?
 Docs      -> Reference doc needs update?
+Memory    -> User/project-specific context? (last resort)
 ```
 
 **Default: codify. Exception: justify not codifying.**
@@ -105,11 +104,11 @@ For each item:
 | Target | Location | Format |
 |--------|----------|--------|
 | Hook | `~/.claude/settings.json` + `~/.claude/hooks/` | Script |
-| Agent | `~/.claude/agents/` | YAML config |
-| Skill | `~/.claude/skills/*/SKILL.md` | Frontmatter + markdown |
-| Memory | `~/.claude/projects/*/memory/*.md` | Notes |
-| CLAUDE.md | `~/.claude/CLAUDE.md` Staging section | Concise pattern |
-| Docs | Repo `CLAUDE.md`, `AGENTS.md`, `docs/` | Varies |
+| Agent | `.claude/agents/` | YAML + markdown |
+| Skill | `.claude/skills/*/SKILL.md` | Frontmatter + markdown |
+| CLAUDE.md | Repo `CLAUDE.md` | Concise pattern |
+| Docs | `AGENTS.md`, `docs/` | Varies |
+| Memory | `~/.claude/projects/*/memory/*.md` | Last resort |
 
 ### 5. Report
 
@@ -177,11 +176,10 @@ During planning, `/groom` reads `.groom/retro/*.md` and extracts:
 
 | Consumes | Produces |
 |----------|----------|
-| Session context | Updated CLAUDE.md staging |
-| `git diff`, `git log` | New/updated skill files |
+| Session context | Updated CLAUDE.md / AGENTS.md |
+| `git diff`, `git log` | New/updated skills, agents |
 | Task list state | New/updated hooks |
-| Error logs | Auto-memory entries |
-| | `.groom/retro/<issue>.md` entries |
+| Error logs | `.groom/retro/<issue>.md` entries |
 
 **Hands off to:** `/commit` (if artifacts to commit)
 

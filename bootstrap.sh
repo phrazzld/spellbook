@@ -8,7 +8,7 @@ set -euo pipefail
 # Run: curl -sL https://raw.githubusercontent.com/phrazzld/spellbook/master/bootstrap.sh | bash
 
 REPO="phrazzld/spellbook"
-RAW="https://raw.githubusercontent.com/$REPO/main"
+RAW="https://raw.githubusercontent.com/$REPO/master"
 
 info()  { printf '\033[0;34m%s\033[0m\n' "$*"; }
 ok()    { printf '\033[0;32m%s\033[0m\n' "$*"; }
@@ -97,8 +97,8 @@ if [ -d "$HOME/.codex" ] || command -v codex &>/dev/null; then
   installed=$((installed + 1))
 fi
 
-# Agents (generic .agents convention)
-if [ -d "$HOME/.agents" ]; then
+# Agents (generic .agents convention) — skip if skills dir is a symlink to another repo
+if [ -d "$HOME/.agents" ] && [ ! -L "$HOME/.agents/skills" ]; then
   info "Detected: .agents"
   install_globals "$HOME/.agents/skills"
   installed=$((installed + 1))

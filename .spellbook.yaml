@@ -1,0 +1,22 @@
+# .spellbook.yaml — Spellbook repo
+# Note: focus, research, calibrate, reflect, skill are global (not listed here)
+skills:
+  - debug
+  - autopilot
+  - groom
+  - settle
+  - moonshot
+  - pr
+  - skill-builder
+  - skill-creator
+  - context-engineering
+  - harness-engineering
+  - codified-context-architecture
+agents:
+  - ousterhout
+  - grug
+  - carmack
+  - jobs
+  - complexity-archaeologist
+  - documentation-quality-reviewer
+  - maintainability-maven

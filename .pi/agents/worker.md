@@ -1,6 +1,6 @@
 ---
 name: worker
-description: agent-skills implementation specialist for high-signal, low-bloat execution
+description: spellbook implementation specialist for high-signal, low-bloat execution
 tools: read, grep, find, ls, bash, edit, write
 ---
 

@@ -1,7 +1,7 @@
 # Pi Bootstrap Report
 
-- Domain: agent-skills
-- Repo: /Users/phaedrus/Development/agent-skills
+- Domain: spellbook
+- Repo: /Users/phaedrus/Development/spellbook
 - Generated: 2026-03-02T15:52:10.837Z
 - Package manager: unknown
 - Stack hints: none
@@ -23,7 +23,7 @@ A unified skills monorepo (~74 skills) for multi-model AI agents (Claude, Codex,
 ## Repo Structure
 
 ```
-agent-skills/
+spellbook/
 ├── core/           # ~74 skills, synced to ~/.claude/skills/
 │   ├── groom/
 │   ├── autopilot/
@@ -213,7 +213,7 @@ Pi agents are running stale, partially-overwritten skill contracts. Fixes applie
 
 ## Foundation Workflow Pattern
 
-The `agent-skills` repository is unique because its product is **agent capability itself**. The foundation must treat "Instructions as Code" with the same rigors as a software library: validation, optimization, and distribution.
+The `spellbook` repository is unique because its product is **agent capability itself**. The foundation must treat "Instructions as Code" with the same rigors as a software library: validation, optimization, and distribution.
 
 1.  **Instruction-as-Code Audit:** Instead of manual counting, use a meta-skill to audit the "Instruction Budget" (Claude's 16k char limit).
 2.  **Density Optimization:** Systematically move verbose, non-essential instructions from "Model+User" (always loaded) to "DMI" (user-invoked) to maximize the "intelligence density" of the active context.

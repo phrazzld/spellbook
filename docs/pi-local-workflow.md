@@ -1,6 +1,6 @@
 # Pi Local Workflow
 
-This repository is bootstrapped for agent-skills using repo-local Pi config under .pi/.
+This repository is bootstrapped for Spellbook using repo-local Pi config under .pi/.
 
 ## Recommended run pattern
 

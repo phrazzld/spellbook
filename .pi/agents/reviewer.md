@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: agent-skills review specialist for correctness, quality gates, and long-term maintainability
+description: spellbook review specialist for correctness, quality gates, and long-term maintainability
 tools: read, grep, find, ls, bash
 ---
 

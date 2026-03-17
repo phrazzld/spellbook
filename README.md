@@ -1,213 +1,82 @@
-# Agent Skills
+# Spellbook
 
-Portable skill library for AI coding agents. Works with Claude Code, Codex, Gemini, Factory, and Pi.
+Portable library of agent primitives (skills + agents) for multi-model AI harnesses. Works with Claude Code, Codex, Gemini, Factory, and Pi.
 
-Skills are Markdown-first with a handful of Python helper scripts. No application code, no dependencies. They teach agents *how to work*: debugging methodology, PR workflows, design systems, incident response, and dozens of domain-specific playbooks.
-
-## Why
-
-AI agents are only as good as their instructions. Generic prompts produce generic work. These skills encode opinionated, battle-tested workflows that turn agents into effective teammates.
-
-**The budget problem:** Claude Code allocates ~16K chars for skill descriptions. Naive skill libraries overflow this budget and most skills get silently dropped. This repo solves it with three tiers:
-
-| Tier | Location | Distribution | Budget cost |
-|------|----------|-------------|-------------|
-| **Core** | `core/` | `sync.sh claude` → global | Per-mode |
-| **Pack** | `packs/` | `sync.sh pack <name> <project>` → per-project | Per-mode |
-| **Repo-local** | `<repo>/.claude/skills/` | Lives in destination repo | Per-mode |
-
-Invocation modes within each tier:
-
-| Mode | Triggered by | Budget cost |
-|------|-------------|-------------|
-| **Model+User** | Agent decides or user invokes | Consumes budget |
-| **Reference** | Auto-loaded when relevant | Consumes budget |
-| **DMI** | User only (`/command`) | **Free** |
+Markdown-first. No application code, no dependencies. Primitives teach agents *how to work*: debugging, PR workflows, design systems, incident response, and domain-specific playbooks.
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/phrazzld/agent-skills.git
-cd agent-skills
-
-# Sync core skills to your agent harness
-./scripts/sync.sh claude    # → ~/.claude/skills/
-./scripts/sync.sh codex     # → ~/.codex/skills/
-./scripts/sync.sh all       # All harnesses
-
-# Load domain packs per-project
-./scripts/sync.sh pack payments ~/Development/cerberus
-./scripts/sync.sh pack growth ~/Development/cerberus-web
-./scripts/sync.sh pack scaffold ~/Development/new-project
-./scripts/sync.sh pack finance --global
-
-# Preview without changes
-./scripts/sync.sh claude --dry-run
-
-# Remove stale symlinks after updates
-./scripts/sync.sh --prune all
+# Bootstrap (one-time per machine)
+curl -sL https://raw.githubusercontent.com/phrazzld/spellbook/main/bootstrap.sh | bash
 ```
 
-Skills are symlinked, not copied. Edit once, every harness sees the change.
-
-## Context Architecture
-
-This repo now ships starter cold-memory artifacts under `docs/context/`:
-
-- `docs/context/INDEX.md`
-- `docs/context/ROUTING.md`
-- `docs/context/DRIFT-WATCHLIST.md`
-- `docs/context/SUBSYSTEM-TEMPLATE.md`
-
-They are scaffolds, not encyclopedias. `/tune-repo` is expected to replace the
-starter rows with repo-specific subsystem docs and routing rules.
-
-## Skills
-
-### Delivery Pipeline
-
-| Skill | Mode | Description |
-|-------|------|-------------|
-| `/groom` | DMI | Backlog grooming, health checks, hygiene |
-| `/shape` | DMI | Product + technical planning (absorbs spec, architect, brainstorming) |
-| `/autopilot` | Model+User | Autonomous delivery: shape → build → walkthrough → commit → PR |
-| `/build` | Model+User | Implementation with TDD workflow |
-| `/simplify` | DMI | First-principles repo simplification: understand, redesign, refactor, PR |
-| `/commit` | DMI | Semantic commits with quality gates |
-| `/pr-walkthrough` | DMI | Mandatory walkthrough package: script, artifact, evidence, persistent check |
-| `/pr` | DMI | PR creation with mandatory sections |
-| `/pr-fix` | Model+User | Unblock PRs: conflicts, CI, review feedback, refactoring |
-| `/pr-polish` | Model+User | Hindsight review and quality elevation |
-
-### Quality & Debugging
-
-| Skill | Mode | Description |
-|-------|------|-------------|
-| `/check-quality` | DMI | Audit quality gates: tests, CI, hooks |
-| `/debug` | Model+User | Four-phase systematic debugging |
-| `/test-coverage` | DMI | TDD workflow, Vitest config, coverage audit |
-| `/distill` | Model+User | Repo knowledge distillation and session codification |
-| `/done` | DMI | Session retrospective and codification |
-| `/triage` | Model+User | Incident response → postmortem → verification |
-
-### Audit / Fix / Log
-
-Three unified skills replace 36 domain-specific check/fix/log skills:
+This installs two global skills: `/focus` (primitive manager) and `/research` (multi-source web research). Everything else is project-local.
 
 ```bash
-/audit stripe           # Audit any domain
-/fix docs               # Fix issues (model-invocable for autonomous work)
-/log-issues production  # Create GitHub issues from findings
+# In any project:
+/focus init                    # Analyze project, generate .spellbook.yaml
+/focus                         # Pull declared primitives from GitHub
+/focus add stripe              # Add a skill to manifest
+/focus search "webhook handler" # Semantic search across all sources
 ```
 
-Domains: bitcoin, btcpay, bun, docs, landing, lightning, observability, onboarding, payments, posthog, product-standards, production, stripe, virality.
+## How It Works
 
-### Design & Visual
-
-| Skill | Mode | Description |
-|-------|------|-------------|
-| `/design` | Model+User | Full design system: tokens, exploration, Vercel patterns |
-| `/ux-polish` | DMI | Narrow UX refinement: pick one small, meaningful friction point and ship the fix with QA |
-| `/visual-qa` | Model+User | Pre-commit visual regression |
-| `ui-skills` | Reference | Opinionated UI constraints |
-| `/visualize` | DMI | Visual HTML deliverables |
-| `pencil-renderer` | Reference | Pencil MCP rendering |
-| `/pencil-to-code` | DMI | Convert Pencil designs to code |
-
-### Agent Infrastructure
-
-| Skill | Mode | Description |
-|-------|------|-------------|
-| `/agent-browser` | Model+User | Playwright CLI for AI agents |
-| `delegate` | Reference | Multi-AI orchestration primitive |
-| `agent-tools` | Reference | Agent tool patterns |
-| `/agentic-bootstrap` | DMI | Bootstrap `.pi/` for autonomous repos |
-| `break-the-frame` | Reference | Detect dead creative frames and force reframing |
-| `codified-context-architecture` | Reference | Place project knowledge into constitutions, routing, and cold-memory docs |
-| `prompt-context-engineering` | Reference | Production prompt design |
-| `llm-communication` | Reference | Effective LLM instructions |
-| `/llm-infrastructure` | Model+User | LLM evaluation, gateway routing, prompt ops |
-
-### Ops, Testing & Infrastructure
-
-| Skill | Mode | Description |
-|-------|------|-------------|
-| `/changelog` | DMI | Changelog infrastructure and automation |
-| `/security-scan` | DMI | Whole-codebase vulnerability analysis |
-| `/sysadmin` | DMI | System health checks |
-| `/sysadmin-ops` | DMI | Incident triage and recovery |
-| `/observability` | DMI | Observability setup |
-| `/dogfood` | DMI | Exploratory QA with repro evidence |
-| `webapp-testing` | Reference | Playwright test patterns |
-| `database` | Reference | Schema design, migrations, Convex patterns |
-| `guardrail` | DMI | Safety rails |
-
-### References (auto-loaded)
-
-`git-mastery` · `naming-conventions` · `external-integration-patterns` · `ui-skills` · `business-model-preferences` · `toolchain-preferences` · `next-patterns` · `database` · `delegate` · `cli-reference` · `ralph-patterns` · `skill-builder` · `agentic-ui-contract` · `webapp-testing` · `break-the-frame` · `codified-context-architecture`
-
-## Domain Packs
-
-Packs are loaded per-project via `sync.sh pack <name> <project-dir>`.
-
-### payments
-`bitcoin` · `lightning` · `stripe`
-
-### growth
-`brand` · `content` · `growth` · `ai-media` · `og-hero-image` · `app-screenshots` · `audit-website` · `product-marketing-context`
-
-### scaffold
-`github-app-scaffold` · `slack-app-scaffold` · `monorepo-scaffold` · `mobile-migrate` · `bun`
-
-### finance
-`finances-ingest` · `finances-report` · `finances-snapshot` · `crypto-gains`
-
-## Repo-Local Skills
-
-These skills are hardcoded to specific projects and live in their repos:
-
-| Skill | Repo |
-|-------|------|
-| `deploy` | `cerberus-mono/.claude/skills/` |
-| `flywheel-qa` | `caesar-in-a-year/.claude/skills/` |
-| `moneta-ingest` | `moneta/.claude/skills/` |
-| `moneta-reconcile` | `moneta/.claude/skills/` |
-| `tax-check` | `moneta/.claude/skills/` |
-
-## Anatomy of a Skill
-
-```
-core/debug/
-├── SKILL.md              # Frontmatter + skill definition
-└── references/
-    ├── investigation.md   # Absorbed from /investigate
-    └── systematic.md      # Absorbed from /systematic-debugging
-```
-
-`SKILL.md` frontmatter:
+Projects declare what they need in `.spellbook.yaml`:
 
 ```yaml
----
-name: debug
-description: |
-  Investigate local development issues: test failures, type errors,
-  runtime bugs, build problems. Use when something is broken and you
-  need to find the root cause. Not for production incidents (use /triage).
----
+skills:
+  - debug
+  - autopilot
+  - anthropics/skills@frontend-design    # external source
+agents:
+  - ousterhout
+  - grug
+```
+
+`/focus` reads the manifest, pulls primitives from GitHub, and installs them into the project's local harness directory (`.claude/skills/`, `.claude/agents/`). Managed primitives are marked with a `.spellbook` file — project-local primitives without the marker are never touched.
+
+### Multi-Source Discovery
+
+Spellbook indexes skills from multiple GitHub repos using Gemini Embedding 2 for semantic search. When you run `/focus init` or `/focus search`, it matches your project context or query against the full index.
+
+Unqualified names (`debug`) resolve to `phrazzld/spellbook`. External skills use fully qualified names (`owner/repo@skill-name`) to avoid collisions.
+
+See `embeddings.json` for the pre-computed index and `scripts/generate-embeddings.py` for the generator.
+
+## Repo Structure
+
+```
+spellbook/
+├── skills/              # All skills, flat
+├── agents/              # Agent definitions, flat
+├── embeddings.json      # Pre-computed semantic search index
+├── index.yaml           # Generated text catalog
+├── collections.yaml     # Named skill groups (human browsing)
+├── bootstrap.sh         # One-command global install
+└── scripts/
+    ├── generate-index.sh
+    ├── generate-embeddings.py
+    └── search-embeddings.py
 ```
 
 ## Adding a Skill
 
-1. Create `core/{name}/SKILL.md` with frontmatter
-2. Choose mode: default (model+user), `disable-model-invocation: true` (DMI), or `user-invocable: false` (reference)
-3. Run `./scripts/sync.sh all`
+1. Create `skills/{name}/SKILL.md` with frontmatter
+2. Add `references/`, `scripts/`, `assets/` as needed
+3. Run `./scripts/generate-index.sh && python3 scripts/generate-embeddings.py`
+4. Commit and push — consumers get it on next `/focus`
 
 ## Principles
 
-- **Deep modules** — hide complexity behind simple interfaces
-- **Compose, don't duplicate** — orchestrators call primitives
-- **Budget-aware** — use DMI for user-only workflows
-- **Agent-agnostic** — works across Claude, Codex, Gemini, Pi
+- **Flat over nested** — every skill at `skills/{name}/`
+- **Manifest-driven** — projects declare needs, `/focus` delivers
+- **Harness-agnostic** — works across Claude Code, Codex, Pi, Factory, Gemini
+- **Nuke and rebuild** — `/focus` deletes and recreates managed primitives each sync
+- **Embeddings-first discovery** — semantic search, not keyword matching
+- **Multi-source** — index skills from any GitHub repo, not just this one
+- **Always project-local** — `/focus` installs to project dirs, never global
 
 ## License
 

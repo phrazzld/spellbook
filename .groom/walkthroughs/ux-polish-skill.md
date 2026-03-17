@@ -55,13 +55,13 @@ Evidence:
 - `core/ux-polish/references/polish-rubric.md`
 - `README.md`
 - `python3 core/skill-builder/scripts/validate_skill.py core/ux-polish`
-- `python3 core/skill-creator/scripts/package_skill.py core/ux-polish /tmp/agent-skills-packages`
+- `python3 core/skill-creator/scripts/package_skill.py core/ux-polish /tmp/spellbook-packages`
 - `./scripts/sync.sh all`
 
 ## Persistent Verification
 
 - `python3 core/skill-builder/scripts/validate_skill.py core/ux-polish`
-- `python3 core/skill-creator/scripts/package_skill.py core/ux-polish /tmp/agent-skills-packages`
+- `python3 core/skill-creator/scripts/package_skill.py core/ux-polish /tmp/spellbook-packages`
 
 ## Residual Risk
 

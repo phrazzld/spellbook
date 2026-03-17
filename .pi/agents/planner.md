@@ -1,6 +1,6 @@
 ---
 name: planner
-description: agent-skills planning specialist grounded in repo-native constraints and delivery goals
+description: spellbook planning specialist grounded in repo-native constraints and delivery goals
 tools: read, grep, find, ls, bash
 ---
 

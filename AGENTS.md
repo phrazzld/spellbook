@@ -1,7 +1,7 @@
-# AGENTS.md — agent-skills
+# AGENTS.md — Spellbook
 
 ## Scope
-- agent-skills repository-specific Pi foundation.
+- Spellbook repository-specific foundation.
 - Optimized for local agent workflows.
 
 ## Engineering doctrine

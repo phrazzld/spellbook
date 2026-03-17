@@ -1,4 +1,4 @@
-# Backlog — agent-skills
+# Backlog — Spellbook
 
 Ideas, deferred work, someday/maybes. Promoted to GitHub Issues when ready.
 
@@ -16,7 +16,7 @@ Spawn 3 Agent Team workers implementing the same spec independently on separate 
 ## Ideas
 
 ### Cross-repo harness sync audit
-After core restructuring, repos consuming skills via symlinks may reference old skill names or paths. Need an audit of all repos that depend on agent-skills to verify their CLAUDE.md, AGENTS.md, and .claude/skills/ symlinks are current.
+After core restructuring, repos consuming skills via symlinks may reference old skill names or paths. Need an audit of all repos that depend on spellbook to verify their CLAUDE.md, AGENTS.md, and .claude/skills/ symlinks are current.
 
 **Signal:** First user report of a broken skill reference in a consuming repo.
 

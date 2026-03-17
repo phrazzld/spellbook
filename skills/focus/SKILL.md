@@ -102,10 +102,15 @@ and follow it exactly. The init flow is 8 phases — do not shortcut it.
    make an agent most effective here? Think from the project's needs, not
    from what the catalog has.
 3. **Search AFTER thinking.** Match wishlist items against the catalog.
-4. **Identify gaps.** Wishlist items with no catalog match are skill gaps —
-   offer to create new skills for them. This is how spellbook grows.
+4. **Identify gaps — the most valuable output.** Wishlist items with no
+   catalog match are skill gaps. These represent knowledge NOT in the model's
+   training data: process, domain-specific best practices, integration gotchas,
+   failure modes. Actively push to create new skills for every gap. This is
+   how spellbook grows — and these gap-born skills are the highest-leverage
+   ones because they encode what the model can't already do.
 5. **Present the full picture:** analysis, wishlist, matches, AND gaps.
-   Get explicit confirmation before writing the manifest.
+   Lead with gaps as opportunities, not afterthoughts. Get explicit
+   confirmation before writing the manifest.
 
 ### 3. Resolve Skill References
 

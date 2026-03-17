@@ -34,7 +34,17 @@ curl -sfL https://raw.githubusercontent.com/phrazzld/spellbook/master/index.yaml
 ```
 Read descriptions and match manually.
 
-### 3. Present Results
+### 3. Filter Globals
+
+Remove results matching any global skill or agent from the output.
+These are already available via bootstrap:
+
+**Skills:** autopilot, calibrate, context-engineering, debug, focus, groom,
+harness-engineering, moonshot, pr, reflect, research, settle, skill
+
+**Agents:** beck, carmack, grug, ousterhout
+
+### 4. Present Results
 
 ```markdown
 ## Spellbook Search: "webhook handling"
@@ -50,7 +60,7 @@ Read descriptions and match manually.
 - `/focus add anthropics/skills@mcp-builder` — add external skill
 ```
 
-### 4. Offer to Add
+### 5. Offer to Add
 
 If the user wants a result, offer to add it to the manifest and sync.
 External skills are added with their fully qualified name.

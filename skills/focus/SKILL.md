@@ -26,12 +26,38 @@ MANIFEST_FILE:     .spellbook.yaml
 MARKER_FILE:       .spellbook
 ```
 
+## Global Skills (Already Available)
+
+These skills are installed globally by `bootstrap.sh` and are always available.
+**Never suggest, fetch, or install these — they're already present:**
+
+| Skill | Purpose |
+|-------|---------|
+| autopilot | Full delivery pipeline |
+| calibrate | Mid-session harness postmortem |
+| context-engineering | Context lifecycle for AI agents |
+| debug | Investigate, audit, triage, fix |
+| focus | This skill — primitive management |
+| groom | Backlog grooming and doctrine |
+| harness-engineering | Design agent-friendly environments |
+| moonshot | Highest-leverage innovation |
+| pr | Tidy, commit, open world-class PR |
+| reflect | Session retrospective, codification |
+| research | Multi-source retrieval and validation |
+| settle | Unblock PR: fix, polish, simplify |
+| skill | Create skills from procedural knowledge |
+
+**Global agents:** beck, carmack, grug, ousterhout
+
+Focus manages **domain skills** — the project-specific knowledge primitives
+that complement the always-available process layer.
+
 ## Routing
 
 | Command | Action |
 |---------|--------|
 | `/focus` | Sync from manifest. If no manifest, run init. |
-| `/focus init` | Analyze project, generate `.spellbook.yaml` |
+| `/focus init` | Analyze project from first principles, generate `.spellbook.yaml` |
 | `/focus sync` | Force re-pull all managed primitives |
 | `/focus add <name>` | Add skill, agent, or collection to manifest and sync |
 | `/focus remove <name>` | Remove from manifest and delete locally |
@@ -46,8 +72,8 @@ suggest manifest changes, then sync.
 ## Invariant: Always Project-Local
 
 Focus installs ONLY into the current project directory. Never into global
-harness directories (~/.claude/, ~/.codex/, etc.). The only global primitive
-is focus itself (installed by bootstrap.sh).
+harness directories (~/.claude/, ~/.codex/, etc.). The only global primitives
+are the bootstrap set (above).
 
 If the user wants primitives available everywhere, they navigate to their
 global config directory and run focus there. Focus does not decide scope —
@@ -60,7 +86,6 @@ the working directory decides scope.
 Determine which agent harness is running:
 
 ```bash
-# Check environment and filesystem signals
 if [ -n "${CLAUDE_CODE:-}" ] || [ -d ".claude" ]; then HARNESS="claude-code"
 elif [ -n "${CODEX:-}" ] || [ -d ".codex" ]; then HARNESS="codex"
 elif [ -d ".agents" ]; then HARNESS="agents"
@@ -81,19 +106,7 @@ Load harness-specific reference from `references/harnesses/${HARNESS}.md`.
 
 If `.spellbook.yaml` exists at project root, read it.
 
-If not, run the init flow (see `references/init.md`):
-1. **Deeply analyze the project**: read CLAUDE.md, package.json, go.mod, mix.exs,
-   directory structure, README, recent git history. Understand what this project
-   IS, what tech it uses, what domains it touches.
-2. **Semantic search**: run `python3 ${CLAUDE_SKILL_DIR}/scripts/search.py --project-dir . --top 20 --json`
-   This fetches the embeddings index from GitHub (cached locally), embeds the
-   project context, and returns ranked matches across all sources.
-3. For each candidate, ask: "Would this primitive provide value in THIS repo?"
-   Reject any without a concrete use case.
-4. Generate `.spellbook.yaml` with recommended primitives (skills AND agents)
-5. Present to user with reasoning for each inclusion. Get confirmation before writing.
-
-**Discernment over coverage.** 8 precisely-relevant primitives beats 25 with noise.
+If not, run the init flow (see `references/init.md`).
 
 ### 3. Resolve Skill References
 
@@ -103,11 +116,13 @@ Each skill is either unqualified or fully qualified:
 debug                                    → source: phrazzld/spellbook
 anthropics/skills@frontend-design        → source: anthropics/skills
 vercel-labs/agent-skills@vercel-react-best-practices → source: vercel-labs/agent-skills
-Leonxlnx/taste-skill@design-taste-frontend → source: Leonxlnx/taste-skill
 ```
 
 Unqualified names resolve to `phrazzld/spellbook`. External skills use
 `owner/repo@skill-name` format to avoid name collisions.
+
+**Critical filter:** If a resolved skill name matches any global skill
+(see table above), skip it silently. Global skills are never project-installed.
 
 ### 4. Nuke Managed Primitives
 
@@ -115,7 +130,6 @@ Scan the local harness skills and agents directories. Find ALL directories
 containing a `.spellbook` marker file. Delete them entirely.
 
 ```bash
-# Find and remove all Spellbook-managed directories
 find "${SKILLS_DIR}" -name ".spellbook" -maxdepth 2 | while read marker; do
   rm -rf "$(dirname "$marker")"
 done
@@ -129,47 +143,11 @@ Everything else is invisible to focus and will not be modified or deleted.
 
 ### 5. Install Primitives
 
-For each resolved skill:
-
-```bash
-SKILL_NAME="debug"  # example
-TARGET="${SKILLS_DIR}/${SKILL_NAME}"
-mkdir -p "$TARGET"
-
-# Download SKILL.md
-curl -sfL "${SPELLBOOK_RAW}/skills/${SKILL_NAME}/SKILL.md" -o "$TARGET/SKILL.md"
-
-# Download references/ if they exist
-# Use GitHub API to list directory contents, then download each file
-REFS=$(curl -sf "https://api.github.com/repos/${SPELLBOOK_REPO}/contents/skills/${SKILL_NAME}/references" | \
-  python3 -c "import sys,json; [print(f['path']) for f in json.load(sys.stdin) if f['type']=='file']" 2>/dev/null) || true
-if [ -n "$REFS" ]; then
-  mkdir -p "$TARGET/references"
-  echo "$REFS" | while read path; do
-    name=$(basename "$path")
-    curl -sfL "${SPELLBOOK_RAW}/${path}" -o "$TARGET/references/$name"
-  done
-fi
-
-# Download scripts/ and assets/ similarly if they exist
-
-# Write .spellbook marker
-cat > "$TARGET/.spellbook" << EOF
-source: ${SPELLBOOK_REPO}
-name: ${SKILL_NAME}
-installed: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-EOF
-```
+For each resolved skill, download from its source. See `references/sync.md`.
 
 ### 5b. Install Agents
 
-Agents are markdown files (not directories). Install to the agents dir:
-
-```bash
-AGENT_NAME="ousterhout"  # example
-curl -sfL "${SPELLBOOK_RAW}/agents/${AGENT_NAME}.md" -o "${AGENTS_DIR}/${AGENT_NAME}.md"
-```
-
+Agents are markdown files (not directories). Install to the agents dir.
 For Claude Code, agent files are used as-is (markdown + YAML frontmatter).
 For Codex, translate to TOML format during install (see harness references).
 
@@ -184,18 +162,18 @@ See `references/harnesses/claude-code.md` and `references/harnesses/codex.md`.
 ## Focus Complete
 
 **Harness**: Claude Code
-**Manifest**: .spellbook.yaml (12 skills, 1 collection, 0 agents)
+**Manifest**: .spellbook.yaml (5 domain skills, 2 agents)
+**Global layer**: 13 skills + 4 agents (via bootstrap, not shown)
 
-### Installed
+### Installed (domain)
 | Type | Name | Status |
 |------|------|--------|
-| skill | debug | installed |
-| skill | autopilot | installed |
-| collection/payments | stripe, bitcoin, lightning | installed |
+| skill | stripe | installed |
+| skill | next-patterns | installed |
+| agent | stripe-auditor | installed |
 
 ### Unchanged (not managed by Spellbook)
 - my-custom-deploy-skill/
-- project-specific-lint/
 
 ### Errors
 (none)
@@ -207,56 +185,41 @@ See `references/harnesses/claude-code.md` and `references/harnesses/codex.md`.
 Focus will delete and recreate these on every sync.
 
 **Unmanaged**: Any directory WITHOUT a `.spellbook` marker file.
-Focus will never read, modify, or delete these. They are the project's own
-primitives, managed outside Spellbook.
-
-The `.spellbook` marker contains:
-
-```yaml
-source: phrazzld/spellbook
-name: debug
-installed: 2026-03-16T15:30:00Z
-```
+Focus will never read, modify, or delete these.
 
 ## .spellbook.yaml Manifest Format
 
 ```yaml
 # .spellbook.yaml — checked into git, harness-agnostic
+# Only domain/workflow skills go here. Process skills are global.
 skills:
-  - debug
-  - autopilot
-  - groom
+  - stripe
+  - next-patterns
   - anthropics/skills@frontend-design
-  - vercel-labs/agent-skills@vercel-react-best-practices
 agents:
-  - ousterhout
-  - test-strategy-architect
+  - stripe-auditor
 ```
-
-Unqualified names = `phrazzld/spellbook`. Qualified names use FQN format.
-No harness config — focus handles translation per-harness.
 
 ## Smart Selection
 
 When invoked with a task description:
 
 1. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/search.py "<task description>" --top 15 --json`
-2. Check which primitives are already in the manifest
-3. Suggest additions (with reasoning and similarity scores)
-4. Ask user to confirm before modifying manifest
-5. Sync
+2. **Filter out global skills** — never suggest what's already available
+3. Check which remaining primitives are already in the manifest
+4. Suggest additions (with reasoning and similarity scores)
+5. Ask user to confirm before modifying manifest
+6. Sync
 
 ## Anti-Patterns
 
 - **Never install to global directories.** ~/.claude/, ~/.codex/ are off-limits.
-  The working directory IS the scope. No exceptions. No "reasonable choice."
+- **Never suggest global skills.** They're already available. Don't waste the
+  user's time recommending what they already have.
 - Never touch directories without `.spellbook` markers
 - Never install primitives not declared in the manifest
 - Never skip the nuke step — stale state causes subtle bugs
 - Never hardcode paths — always derive from harness detection
 - **Never bulk-add a collection without filtering.** Every expanded skill must
-  pass the "useful in THIS repo" test. If `agent-browser` is in the `agent`
-  collection but the project has no web component, don't install it.
-- **Never skip agent syncing.** Agents are first-class primitives. If the
-  manifest declares agents, install them. If init is running, recommend
-  relevant agents alongside skills.
+  pass the "useful in THIS repo" test.
+- **Never skip agent syncing.** Agents are first-class primitives.

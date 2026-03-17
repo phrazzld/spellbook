@@ -12,9 +12,7 @@ Audit a domain, create GitHub issues for every finding.
 
 ## Domains
 
-**Dynamic.** Scan `audit/references/*-checklist.md` and
-`audit/generated-references/*-checklist.md` for available domains. Core domains
-always present; pack domains appear after `sync.sh pack <name>`.
+**Dynamic.** Scan `references/*-checklist.md` for available domains.
 
 ## Process
 

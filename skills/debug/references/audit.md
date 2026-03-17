@@ -1,14 +1,7 @@
 # /audit
 
 > **Dynamic domain routing.** Domains are discovered by scanning checklist files
-> in `references/*-checklist.md` and `generated-references/*-checklist.md`.
-> Core checklists ship with the skill. Pack checklists appear after loading a
-> pack via `sync.sh pack <name> <project>`, which symlinks pack audit-references
-> into `generated-references/`. The `--list` flag scans both directories.
->
-> After absorption into debug, the audit checklists live at
-> `core/debug/references/audit-*-checklist.md` (core) and pack checklists
-> should be symlinked into `core/debug/generated-references/` at pack load time.
+> in `references/*-checklist.md`. The `--list` flag scans this directory.
 
 Structured domain audit. One skill, all domains.
 
@@ -24,28 +17,22 @@ Structured domain audit. One skill, all domains.
 
 ## Available Domains
 
-**Dynamic.** Domains are discovered by scanning `references/*-checklist.md` and
-`generated-references/*-checklist.md`.
-
-Core domains ship with this skill. Pack domains (payments, growth, scaffold)
-appear after loading a pack via `sync.sh pack <name> <project>`, which
-symlinks pack checklists into `generated-references/`.
+**Dynamic.** Domains are discovered by scanning `references/*-checklist.md`.
 
 To list available domains:
 ```bash
-find audit/references audit/generated-references -maxdepth 1 -name '*-checklist.md' 2>/dev/null | sed 's|.*audit/[^/]*/||;s|-checklist.md||' | sort -u
+find references -maxdepth 1 -name '*-checklist.md' 2>/dev/null | sed 's|.*/||;s|-checklist.md||' | sort -u
 ```
 
 ## Process
 
 ### 1. Load Domain Checklist
 
-Read `references/{domain}-checklist.md`, or `generated-references/{domain}-checklist.md`
-if the domain came from a loaded pack.
+Read `references/{domain}-checklist.md`.
 
-If `--list`, scan both checklist directories and list unique domain names.
+If `--list`, scan the checklist directory and list unique domain names.
 
-If `--all`, load all checklist files from both directories. Auto-detect
+If `--all`, load all checklist files. Auto-detect
 applicable domains from project (check package.json deps, config files,
 directory structure) and skip N/A domains.
 

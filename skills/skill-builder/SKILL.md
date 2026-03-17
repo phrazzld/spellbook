@@ -57,14 +57,14 @@ An umbrella skill consolidates related skills into one budget entry with referen
 1. Create umbrella `SKILL.md` with routing table mapping intent → reference file
 2. Copy each absorbed skill's body (minus frontmatter) → `references/{name}.md`
 3. Move `scripts/`, `assets/`, existing `references/` into umbrella (merge, prefix if collisions)
-4. Delete old `core/{name}/` directory
-5. `./scripts/sync.sh all`
+4. Delete old skill directory
+5. Run `./scripts/generate-index.sh` and `python3 scripts/generate-embeddings.py`
 
 ### Canonical Examples
 
-- `core/design/` — 11 skills absorbed, mode-based routing
-- `core/audit/` — dynamic domain routing via `references/{domain}-checklist.md`
-- `core/research/` — 4 skills absorbed (web-search, delegate, thinktank, introspect)
+- `skills/design/` — 11 skills absorbed, mode-based routing
+- `skills/debug/` — dynamic domain routing via `references/{domain}-checklist.md`
+- `skills/research/` — 4 skills absorbed (web-search, delegate, thinktank, introspect)
 
 ### Budget Impact
 

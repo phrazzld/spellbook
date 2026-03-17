@@ -84,7 +84,7 @@ Load that file before creating any issues.
 
 Run `/groom` in six phases:
 
-1. **Ground** — load or update `project.md`, load `.groom/BACKLOG.md`, check repo context freshness, run `sync.sh detect .` to ensure relevant domain packs are loaded, read retro, capture user pain, audit backlog health (enforce 20-30 cap), compute health metrics
+1. **Ground** — load or update `project.md`, load `.groom/BACKLOG.md`, check repo context freshness, read retro, capture user pain, audit backlog health (enforce 20-30 cap), compute health metrics
 2. **Architecture Critique** — four parallel tracks:
    - **A. Reference search** — `/research web-search` for existing implementations
    - **B. Domain skills** — invoke relevant domain skills for current-state audit

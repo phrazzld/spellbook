@@ -13,9 +13,7 @@ Audit. Fix. Verify. One issue at a time.
 
 ## Domains
 
-**Dynamic.** Scan `audit/references/*-checklist.md` and
-`audit/generated-references/*-checklist.md` for available domains. Core domains
-always present; pack domains appear after `sync.sh pack <name>`.
+**Dynamic.** Scan `references/*-checklist.md` for available domains.
 
 ## Process
 

@@ -39,6 +39,7 @@ If none installed, the skill still produces specs — manual verification or CI 
 | Intent | Reference |
 |--------|-----------|
 | Write TLA+/PlusCal spec from requirements | `references/tlaplus-spec.md` |
+| TS-first approach: start in TypeScript, map to TLA+ | `references/ts-first-approach.md` |
 | Z3 constraint solving, counterexamples | `references/z3-verify.md` |
 | Symbolic model checking with Apalache | `references/apalache.md` |
 | Full spec→check→fix feedback loop | `references/agent-loop.md` |

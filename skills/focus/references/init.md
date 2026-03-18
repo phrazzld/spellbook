@@ -134,18 +134,31 @@ Only write manifest after explicit confirmation.
 propose creating a new skill. Present a concrete 1-2 sentence description
 of what each gap skill would contain, then ask which ones to create.
 
-When creating gap skills, invoke `/skill` which will run the full research
-and context-engineering pipeline to produce a world-class skill. Don't
-create shallow placeholder skills — the whole point is to encode knowledge
-the model doesn't already have.
+**Default: create in spellbook.** Most domain skills (Electron patterns, Supabase
+integration, testing frameworks, cloud providers) are broadly applicable. If another
+project could ever use it, it belongs in the spellbook repo — not project-local.
 
-For each approved gap skill:
+**Project-local only when:** The skill encodes knowledge specific to THIS repo that
+no other project would use — internal module APIs, company-specific conventions,
+proprietary infrastructure, or repo-specific deployment workflows.
 
-1. Use `/skill create {name}` — this runs research, context-engineering, and
+When in doubt, ask: "Would I want this skill if I started a new project with the
+same tech stack?" If yes → spellbook.
+
+When creating gap skills, invoke `/primitive` which runs the full research
+and context-engineering pipeline. Don't create shallow placeholder skills —
+the whole point is to encode knowledge the model doesn't already have.
+
+For each gap the user approves:
+
+1. Use `/primitive create {name}` — runs research, context-engineering, and
    harness-engineering to craft a skill that goes beyond training data
-2. Create a branch in a spellbook worktree
-3. Open a PR with the new skill
-4. Add the skill name to the manifest (available after merge + re-index)
+2. Create a branch in the local spellbook repo (or a worktree)
+3. Write the skill to `skills/{name}/SKILL.md` in the spellbook repo
+4. Generalize: strip project-specific references, use generic examples
+5. Also create matching agents if the domain warrants auditing (e.g., `electron-architect`, `supabase-auditor`)
+6. Open a PR with the new skill(s) and agent(s)
+7. Add the skill name to the project's manifest (available after merge + re-index)
 
 This is how spellbook grows — organically from real project needs, with
 each new skill encoding domain knowledge that makes agents genuinely

@@ -11,6 +11,7 @@ Requires: GEMINI_API_KEY or GOOGLE_API_KEY env var.
 Optional: GITHUB_TOKEN for higher rate limits on external sources.
 """
 
+import hashlib
 import json
 import os
 import re
@@ -52,6 +53,19 @@ def load_external_sources() -> list[dict]:
             entry["skills_path"] = src["skills_path"]
         sources.append(entry)
     return sources
+
+
+def _local_skills_hash() -> str:
+    """SHA-256 of all local SKILL.md content, sorted by path.
+
+    Used by pre-commit hook to detect when embeddings.json is stale.
+    """
+    h = hashlib.sha256()
+    for skill_md in sorted(SKILLS_DIR.glob("*/SKILL.md")):
+        h.update(skill_md.read_bytes())
+    for agent_md in sorted(AGENTS_DIR.glob("*.md")) if AGENTS_DIR.exists() else []:
+        h.update(agent_md.read_bytes())
+    return h.hexdigest()
 
 
 def _parse_registry_minimal(text: str) -> dict:
@@ -420,11 +434,17 @@ def main():
     for item, embedding in zip(items, all_embeddings):
         item["embedding"] = embedding
 
+    # Content hash of local skills for staleness detection.
+    # Pre-commit hook compares this against current SKILL.md content
+    # to warn when embeddings are out of sync.
+    local_hash = _local_skills_hash()
+
     output = {
         "model": MODEL,
         "dimensions": dims,
         "sources": list(sources.keys()),
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "local_content_hash": local_hash,
         "count": len(items),
         "items": items,
     }

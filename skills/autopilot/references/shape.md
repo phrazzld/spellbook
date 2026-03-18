@@ -11,7 +11,7 @@ to implementation-ready issue(s) in one interactive session.
 
 | Situation | Use |
 |-----------|-----|
-| Full backlog session, many issues | `/groom` |
+| Full backlog session, many issues | `/refine` |
 | Full planning for one idea: product + technical + discussion | **`/shape`** |
 | Just need quick autonomous delivery | `/autopilot` |
 

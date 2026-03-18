@@ -112,8 +112,7 @@ python3 scripts/search-embeddings.py --project-dir /path/to/project
 
 1. Create `skills/{name}/SKILL.md` with frontmatter
 2. Add references/, scripts/, assets/ as needed
-3. Run `python3 scripts/generate-embeddings.py`
-4. Commit and push — consumers get it on next `/focus`
+3. Commit and push — pre-commit hook auto-regenerates index.yaml and embeddings.json
 
 ## Principles
 
@@ -133,3 +132,6 @@ python3 scripts/search-embeddings.py --project-dir /path/to/project
 - Default scratch output goes to `/tmp`, not repo-relative paths
 - Never require stable shared filenames for PR-local evidence
 - Commit artifacts only when the repo explicitly wants them versioned
+- **Focus output is committed to git, never gitignored.** Harness install
+  directories (`.claude/skills/`, `.agents/`, `.codex/`) are project artifacts,
+  not build output. They are checked into the consuming repo's git history.

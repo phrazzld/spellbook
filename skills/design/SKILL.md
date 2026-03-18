@@ -22,7 +22,7 @@ Reference skills preserved verbatim in `references/`:
 - `references/frontend-design.md` (Anthropic)
 - `references/vercel-react-best-practices.md` (Vercel)
 - `references/vercel-composition-patterns.md` (Vercel)
-- `references/ui-rules.md` — 152 severity-tagged UI rules (quick-lookup by severity; overlaps with detailed references above)
+- `references/ui-rules.md` — severity-tagged UI gotchas (quick-lookup by severity; overlaps with detailed references above)
 
 If auditing UI quality, reviewing component implementation, or checking accessibility → load `references/ui-rules.md`.
 

@@ -9,6 +9,7 @@ implementation-constraints.md) — this file is the triage view, those are deep 
 - **CRITICAL** — Breaks UX, causes user confusion or data loss
 - **HIGH** — Noticeable degradation, professional vs amateur signal
 - **MEDIUM** — Polish item, compounds with other issues
+- **LOW** — Refinement, matters at scale
 
 ---
 

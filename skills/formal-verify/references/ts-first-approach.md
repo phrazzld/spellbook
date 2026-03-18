@@ -101,7 +101,7 @@ will skip it. Start with the smallest bounds that still catch real bugs (usually
 
 ## Workflow
 
-```
+```text
 TS state machine → unit tests pass → generate TLA+ → TLC model check
     ↑                                      ↓
     ← fix the DESIGN (not the spec) ← counterexample found

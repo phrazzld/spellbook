@@ -19,6 +19,7 @@ Find root cause. Fix it. Prove it works.
 | Intent | Sub-capability |
 |--------|---------------|
 | Debug a bug, test failure, unexpected behavior | This file (below) |
+| Flaky test investigation | `references/flaky-test-investigation.md` |
 | Incident lifecycle: triage, investigate, postmortem | `references/triage.md` |
 | Domain audit: "audit stripe", "audit quality" | `references/audit.md` |
 | Audit then fix highest priority issue | `references/fix.md` |
@@ -26,6 +27,7 @@ Find root cause. Fix it. Prove it works.
 
 If first argument matches a domain name (stripe, quality, etc.), route to `references/audit.md`.
 If "triage", "incident", "postmortem", "production down" → `references/triage.md`.
+If "flaky", "flake", "intermittent", "nondeterministic test" → `references/flaky-test-investigation.md`.
 If "fix" → `references/fix.md`. If "log issues" → `references/log-issues.md`.
 Otherwise, this is a debugging session — continue below.
 

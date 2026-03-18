@@ -17,13 +17,13 @@ global:
       - calibrate
       - context-engineering
       - debug
-      - groom
       - harness-engineering
+      - land
       - moonshot
       - pr
+      - primitive
+      - refine
       - reflect
-      - settle
-      - skill
 
   # Design philosophy agents: installed by bootstrap.sh, always available.
   agents:

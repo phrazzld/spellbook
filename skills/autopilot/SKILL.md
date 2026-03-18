@@ -22,7 +22,7 @@ Full delivery pipeline. From issue to merged PR in one command, or invoke sub-ca
 | Spec, plan, design a feature — "shape this", "write a spec" | `references/shape.md` |
 | Implement, code, TDD — "build this", "implement" | `references/build.md` |
 | Create/update a PR — "open PR", "create PR" | Standalone `/pr` skill |
-| Unblock, polish, simplify PR — "fix PR", "CI red", "simplify" | Standalone `/settle` skill |
+| Unblock, polish, simplify PR — "fix PR", "CI red", "simplify" | Standalone `/land` skill |
 | Verify acceptance criteria — "verify ACs" | `references/verify-ac.md` |
 | Lint, typecheck, test gates — "check quality" | `references/check-quality.md` |
 | TDD enforcement, coverage — "test coverage" | `references/test-coverage.md` |
@@ -32,7 +32,7 @@ Full delivery pipeline. From issue to merged PR in one command, or invoke sub-ca
 
 If invoked as `/autopilot [issue-id]`, run the full pipeline (below).
 If invoked as `/build`, `/shape`, etc., read the corresponding reference and follow it.
-If invoked as `/pr-fix`, `/pr-polish`, or `/simplify`, route to standalone `/settle`.
+If invoked as `/pr-fix`, `/pr-polish`, or `/simplify`, route to standalone `/land`.
 
 ## Role
 

@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-03-18T13:33:11Z
+# Generated: 2026-03-18T13:39:30Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -108,9 +108,6 @@ skills:
   - name: github-cli-hygiene
     description: "Safe, well-formatted GitHub CLI writes for PRs/issues/reviews using body files and post-write validation."
     tags: [body,cli,files,github,issues,post-write,prs,reviews,safe,using]
-  - name: groom
-    description: "Interactive backlog grooming, backlog doctrine, and automated cleanup. Explore, brainstorm, research, synthesize into prioritized GitHub issues. Backlog strategy, ordering, pruning, agent-ready issue "
-    tags: [agent-ready,automated,backlog,brainstorm,cleanup,doctrine,explore,github,grooming,interactive]
   - name: growth
     description: "Growth and marketing orchestrator: SEO, ads, CRO, analytics, pricing, launches, referrals, competitor analysis, and pSEO generation. Covers the full growth stack from baseline SEO to scaled paid acqui"
     tags: [acqui,ads,analysis,analytics,baseline,competitor,covers,cro,full,generation]
@@ -123,6 +120,9 @@ skills:
   - name: hono
     description: "\"Hono web framework patterns, production gotchas, and runtime-specific quirks. Body double-read trap, middleware ordering, TypeScript type inference limits, Context Storage, streaming pitfalls, router"
     tags: [body,context,double-read,framework,gotchas,hono,inference,limits,middleware,ordering]
+  - name: land
+    description: "Unblock, polish, and simplify a PR until it's genuinely merge-ready. Three phases: fix (CI/conflicts/reviews), polish (architecture/tests/docs), simplify (complexity reduction). Runs all three in sequ"
+    tags: [a,architecture,ci,complexity,conflicts,docs,fix,genuinely,in,it]
   - name: lightning
     description: "Complete Lightning Network lifecycle. Audits channels, routing, invoices. Plans capacity, executes rebalancing, verifies payments. Every run does all."
     tags: [audits,capacity,channels,complete,every,executes,invoices,lifecycle,lightning,network]
@@ -171,12 +171,18 @@ skills:
   - name: pr
     description: "Tidy, commit, and open a world-class pull request. Organizes working directory, ensures correct branch, creates semantic conventional commits, then opens a high-quality PR with full evidence. Use when"
     tags: [a,branch,commit,commits,conventional,correct,creates,directory,ensures,evidence]
+  - name: primitive
+    description: "Engineer agent primitives: skills, agents, hooks, CLAUDE.md rules. Create, update, absorb, brainstorm, audit, and clean up primitives across the harness. Routes to the right primitive type for the job"
+    tags: [absorb,across,agent,agents,audit,brainstorm,claude,clean,create,engineer]
   - name: product-marketing-context
     description: "Shared product-marketing context for growth-pack skills. Read this before writing copy, planning launches, doing CRO, pricing, SEO, social content, or campaign strategy. Builds a minimal context bundl"
     tags: [a,before,builds,bundl,campaign,content,context,copy,cro,doing]
   - name: ralph-patterns
     description: "Patterns for Ralph loop tasks. Auto-loaded to provide guidance on completion signals, progress tracking, and iteration patterns. Ralph = autonomous issue-to-merged-PR loop."
     tags: [auto-loaded,autonomous,completion,guidance,issue-to-merged-pr,iteration,loop,on,patterns,progress]
+  - name: refine
+    description: "Interactive backlog refinement, backlog doctrine, and automated cleanup. Explore, brainstorm, research, synthesize into prioritized GitHub issues. Backlog strategy, ordering, pruning, agent-ready issu"
+    tags: [agent-ready,automated,backlog,brainstorm,cleanup,doctrine,explore,github,interactive,issu]
   - name: reflect
     description: "Session retrospective, codification, and implementation feedback capture. Distill learnings to CLAUDE.md/hooks/rules, propose lean improvements, tune repos for agents. Invoke for: \"done\", \"wrap up\", \""
     tags: [agents,capture,claude,codification,distill,done,feedback,hooks,implementation,improvements]
@@ -186,18 +192,12 @@ skills:
   - name: security-scan
     description: "Whole-codebase vulnerability analysis leveraging 1M context window. Loads entire project source, runs deep security analysis in a single pass. OWASP Top 10, cross-module data flow tracing, dependency "
     tags: [10,1m,a,analysis,context,cross-module,data,deep,dependency,entire]
-  - name: settle
-    description: "Unblock, polish, and simplify a PR until it's genuinely merge-ready. Three phases: fix (CI/conflicts/reviews), polish (architecture/tests/docs), simplify (complexity reduction). Runs all three in sequ"
-    tags: [a,architecture,ci,complexity,conflicts,docs,fix,genuinely,in,it]
   - name: skill-builder
     description: "Create new agent skills from procedural knowledge. Invoke PROACTIVELY when: - Discovering a reusable workflow pattern worth preserving - User asks to \"capture this as a skill\" or \"make this reusable\" "
     tags: [-,a,agent,as,asks,capture,create,discovering,invoke,knowledge]
   - name: skill-creator
     description: "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workfl"
     tags: [a,an,be,capabilities,claude,create,creating,effective,existing,extends]
-  - name: skill
-    description: "Engineer agent primitives: skills, agents, hooks, CLAUDE.md rules. Create, update, absorb, brainstorm, audit, and clean up primitives across the harness. Routes to the right primitive type for the job"
-    tags: [absorb,across,agent,agents,audit,brainstorm,claude,clean,create,engineer]
   - name: slack-app-scaffold
     description: "\"Scaffold Slack apps from existing functionality using Bolt for JavaScript and the Slack CLI. Use when turning a service, script, or workflow into a Slack app with events, commands, modals, or automat"
     tags: [a,app,apps,automat,bolt,cli,commands,events,existing,functionality]

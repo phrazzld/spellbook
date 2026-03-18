@@ -73,7 +73,7 @@ If a risky subsystem had no relevant doc, record that retrieval miss explicitly.
 If this session implemented a GitHub issue, append implementation feedback:
 
 ```
-{repo}/.groom/retro/<issue>.md
+{repo}/.refine/retro/<issue>.md
 ```
 
 Capture:
@@ -83,7 +83,7 @@ Capture:
 - Blockers encountered
 - Reusable pattern for future scoping
 
-This feeds `/groom`'s planning feedback loop.
+This feeds `/refine`'s planning feedback loop.
 
 **Manual invoke:** `/reflect append --issue 42 --predicted m --actual l --scope "Added retry logic" --blocker "Undocumented API"`
 
@@ -136,7 +136,7 @@ For each item:
 ## Retro Storage
 
 ```
-{repo}/.groom/retro/<issue>.md
+{repo}/.refine/retro/<issue>.md
 ```
 
 Created automatically if missing. One file per issue to avoid branch-hot append conflicts.
@@ -156,7 +156,7 @@ Created automatically if missing. One file per issue to avoid branch-hot append 
 
 ### How /groom Uses Retro
 
-During planning, `/groom` reads `.groom/retro/*.md` and extracts:
+During planning, `/refine` reads `.refine/retro/*.md` and extracts:
 - Effort calibration ("Payment issues take 1.5x estimates")
 - Scope patterns ("Webhook issues always need retry logic")
 - Blocker patterns ("External API docs frequently wrong")
@@ -178,11 +178,11 @@ During planning, `/groom` reads `.groom/retro/*.md` and extracts:
 | Session context | Updated CLAUDE.md / AGENTS.md |
 | `git diff`, `git log` | New/updated skills, agents |
 | Task list state | New/updated hooks |
-| Error logs | `.groom/retro/<issue>.md` entries |
+| Error logs | `.refine/retro/<issue>.md` entries |
 
 **Hands off to:** `/commit` (if artifacts to commit)
 
 ## Related
 
-- `/groom` -- Reads `.groom/retro/*.md` during planning
+- `/refine` -- Reads `.refine/retro/*.md` during planning
 - `/pr` -- May append issue-scoped retro signals

@@ -114,7 +114,7 @@ The code fix should be trivial now — the hard work was diagnosing and fixing t
 |-------|-------------|
 | `/reflect` | End-of-session retrospective. Calibrate is mid-session, blocks work until harness is fixed. |
 | `/debug` | Diagnoses code bugs. Calibrate diagnoses agent decision-making context. |
-| `/settle` | After calibrate fixes harness + code, settle can polish the PR. |
+| `/land` | After calibrate fixes harness + code, settle can polish the PR. |
 | `/focus` | Search for diagnostic skills via `/focus search`. |
 | `/research` | Web search for stale knowledge gaps. |
 

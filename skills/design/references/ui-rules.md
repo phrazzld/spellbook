@@ -1,7 +1,8 @@
 # UI Rules — Battle-Tested Gotchas
 
-152 severity-tagged rules across 12 categories. Anti-patterns paired with correct patterns.
-Sourced from raphaelsalaja/userinterface-wiki and production experience.
+Quick-lookup reference: 152 severity-tagged rules across 12 categories.
+Some rules overlap with detailed references (motion-craft.md, mobile-excellence.md,
+implementation-constraints.md) — this file is the triage view, those are deep dives.
 
 ## Severity Guide
 

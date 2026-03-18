@@ -53,9 +53,6 @@ sources:
     layout: multi-root
   - repo: garrytan/gstack
     layout: multi-root
-  - repo: raphaelsalaja/userinterface-wiki
-    layout: flat
-    skills_path: .
 
 # Named skill groups for bulk activation via /focus.
 # Resolved from .spellbook.yaml collection references.

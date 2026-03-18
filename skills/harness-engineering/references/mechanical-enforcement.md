@@ -79,7 +79,7 @@ npx @redocly/cli lint openapi.yaml || exit 1
 npx ajv validate -s config.schema.json -d config/*.json || exit 1
 
 # Validate CLAUDE.md frontmatter
-python scripts/validate_skill_frontmatter.py core/*/SKILL.md || exit 1
+python scripts/validate_skill_frontmatter.py skills/*/SKILL.md || exit 1
 ```
 
 **Why pre-commit?** CI feedback takes minutes. Pre-commit takes seconds.

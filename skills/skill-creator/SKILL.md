@@ -211,7 +211,7 @@ Sub-capabilities become reference files loaded on-demand via progressive disclos
 ### Structure
 
 ```text
-core/{umbrella-name}/
+skills/{umbrella-name}/
 ├── SKILL.md              # Routing table + description (consumes budget)
 ├── references/
 │   ├── {sub-cap-1}.md    # Former standalone skill body
@@ -247,9 +247,9 @@ Body contains:
 
 ### Canonical Examples
 
-- `core/design/` — 11 skills, mode-based routing (Explore/Extend/Audit/Sprint)
-- `core/audit/` — dynamic domain routing via argument (`/audit stripe`)
-- `core/research/` — 4 skills, intent + argument routing
+- `skills/design/` — 11 skills, mode-based routing (Explore/Extend/Audit/Sprint)
+- `skills/audit/` — dynamic domain routing via argument (`/audit stripe`)
+- `skills/research/` — 4 skills, intent + argument routing
 
 See `/skill-builder` for absorption lifecycle and quality gates.
 

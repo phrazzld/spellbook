@@ -159,7 +159,7 @@ The point is single ownership and meaningful progress. One issue should map to o
    - Delete compatibility scaffolding in greenfield/pre-user paths unless a real contract requires it
 8. **Visual QA** — If diff touches frontend files (`app/`, `components/`, `*.css`), run `/visual-qa --fix`. Fix P0/P1 before proceeding.
 9. **Agentic QA** — If diff touches prompts, model routing, tool schemas, or agent instructions, run `/llm-infrastructure` and inspect trace/eval coverage before shipping.
-10. **Triad Review** — Mandatory review gate before PR. Spawn three agents in parallel:
+10. **Triad Review** — Mandatory review gate before PR. Prefer three agents in parallel:
 
     | Agent | Focus | Kill signal |
     |-------|-------|-------------|
@@ -173,6 +173,11 @@ The point is single ownership and meaningful progress. One issue should map to o
     - **Ship / Don't Ship** verdict
     - Top 3 concerns (if any), each with file:line and specific fix
     - One sentence: what's the single best thing about this code?
+
+    If the harness requires explicit user approval before subagent delegation,
+    ask once for approval or run the same Ousterhout, Carmack, and Grug review
+    lanes yourself sequentially. Do not skip the triad because parallel
+    delegation is unavailable.
 
     **Gate**: All three must say "Ship" to proceed. Fix concerns and re-run
     until consensus. If they disagree, the concern raised by the dissenter
@@ -308,7 +313,8 @@ If the user's own dev server was already running (no `$DEV_PID`), leave it alone
 ## Triad Review Details
 
 The triad (Ousterhout + Carmack + Grug) replaces ad-hoc simplification
-reviews. They run in parallel, each reading the same diff independently.
+reviews. They run in parallel when the harness permits delegation; otherwise
+run the same reviewers yourself sequentially against the same diff.
 
 **Why these three:**
 - **Ousterhout** catches structural rot — shallow modules, information leakage,
@@ -331,6 +337,12 @@ Spawn three Agent calls in parallel, each with:
   Top 3 concerns (file:line + specific fix).
   One sentence: best thing about this code."
 ```
+
+**No-delegation fallback:**
+- Ask once for delegation approval if the harness gates subagent spawning.
+- If approval is unavailable, run the Ousterhout, Carmack, and Grug prompts
+  yourself, one after another.
+- Keep the same reviewer-wins gate: any single "Don't Ship" blocks progress.
 
 ## Stopping Conditions
 

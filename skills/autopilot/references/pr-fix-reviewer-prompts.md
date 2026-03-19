@@ -1,6 +1,8 @@
 # Reviewer Prompt Templates
 
 Templates for each reviewer in the /review-branch system.
+Use them with subagents when available, or as sequential self-review lanes
+when the harness blocks delegation.
 
 ## Persona Prompts
 

@@ -23,6 +23,20 @@ argument-hint: "[idea|issue] [--spec-only] [--design-only] [--critique persona] 
 | Shape Up methodology | R/S notation, fit checks, spikes, slicing | `references/shaping-methodology.md` |
 | Breadboarding | Affordance mapping, vertical slicing | `references/breadboarding.md` |
 
+## Executive / Worker Split
+
+Keep the strongest available model on shaping decisions:
+- problem framing, option generation, and recommendation
+- spec intent contracts and design tradeoff calls
+- critique synthesis and final scope lock
+
+Delegate bounded research work to smaller worker subagents:
+- codebase mapping and pattern collection
+- targeted prior-art or reference searches
+- draft writeups for one option, one subsystem, or one risk area
+
+Workers can prepare options; the lead chooses the direction and writes the final spec/design.
+
 ## Workflow
 
 ### Phase 1: Understand
@@ -76,6 +90,8 @@ Accept: raw idea (string), issue ID, or observation.
 ### Phase 3: Technical Exploration
 
 1. **Investigate** — Read locked spec, codebase, research patterns.
+   Delegate codebase mapping and reference gathering to smaller workers if the
+   surface area is broad, then synthesize their findings on the lead model.
 
 2. **Explore** — 3-5 technical approaches. For each:
    - Architecture sketch, files to modify/create
@@ -95,6 +111,10 @@ Accept: raw idea (string), issue ID, or observation.
    | `grug` | Too many layers? |
 
 4. **Discuss** — No limit on rounds. Design isn't ready until user says so.
+
+Use the strongest available models for critique, recommendation, and scope-lock
+decisions. Smaller workers can draft comparison tables or subsystem notes, but
+they do not choose the design.
 
 5. **Draft design** — Post on issue:
 

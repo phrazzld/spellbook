@@ -33,6 +33,22 @@ Take PR `$ARGUMENTS` (or the current branch's PR) through three phases until it 
 - Complexity reduced where possible
 - Docs current
 
+## Executive / Worker Split
+
+Keep the strongest available model on review-heavy executive work:
+- deciding which review comments are valid, in scope, or rejected
+- hindsight architecture review and simplification choices
+- confidence assessment and final merge-readiness judgment
+
+Delegate bounded remediation work to smaller worker subagents:
+- fixing one comment thread or one failing check at a time
+- gathering review evidence, reproducing CI failures, and drafting narrow patches
+- mechanical cleanups, focused test additions, and doc refreshes with clear ownership
+
+If the harness supports model choice, use small worker-class models for these
+bounded tasks and reserve frontier models for review disposition, architecture,
+and final settlement calls.
+
 ## Process
 
 ### Phase 1: Fix — Unblock the PR
@@ -50,6 +66,10 @@ Read `../autopilot/references/pr-fix.md` and follow it completely.
    - **Invalid:** reply with clear reasoning
 5. **Async settlement** — after pushing fixes, wait for reviewer bots to re-run.
    Do not declare success while automation can still add findings.
+
+Dispatch the fixes themselves to smaller worker subagents when the scope is
+clear and bounded. Keep comment disposition, reviewer communication, and the
+final "is this settled?" judgment on the lead model.
 
 **Exit gate:** CI green, no open review threads, no unresolved comments.
 
@@ -72,6 +92,9 @@ Read `../autopilot/references/pr-polish.md` and follow it completely.
 4. **Docs** — update any docs/comments that are stale after the changes.
 5. **Confidence assessment** — how confident are we this won't break anything?
    Treat confidence as an explicit deliverable with evidence.
+
+Use the strongest available model for hindsight review and confidence judgment.
+Use smaller workers for narrow polish follow-through once the direction is clear.
 
 **Exit gate:** Architecture clean, tests solid, docs current, confidence stated.
 

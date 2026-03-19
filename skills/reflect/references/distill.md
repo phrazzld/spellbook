@@ -175,19 +175,16 @@ Scan the session for:
 - Repeated explanations that should become cold-memory docs
 - Retrieval misses that exposed undocumented subsystems
 
-### Codification Targets (highest leverage first)
+### Codification Targets
 
-1. **Hook** — Should this be guaranteed/blocked? (most deterministic)
-2. **Lint rule** — Can a lint rule catch this at edit time? → invoke `/guardrail`
-3. **Agent** — Should a reviewer catch this pattern?
-4. **Skill** — Is this a reusable workflow?
-5. **CLAUDE.md** — Is this philosophy/convention?
-6. **Cold-memory doc** — Does `docs/context/<subsystem>.md` need to exist or be updated?
+Apply codification hierarchy from `/calibrate` — highest reliability level wins:
 
-Lint rules are ideal for: import boundaries, naming conventions, deprecated API usage, auth enforcement, architectural layering violations.
+```
+Type system > Lint rule > Hook > Test > CI > Skill/reference > CLAUDE.md > Memory
+```
 
-Compatibility shims added only to preserve current structure are codification
-targets too: either document the real contract or delete the shim.
+Lint rules are ideal for: import boundaries, naming conventions, deprecated API usage,
+auth enforcement, architectural layering violations.
 
 ### Anti-Patterns
 

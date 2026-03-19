@@ -6,7 +6,7 @@ description: |
   tune repos for agents.
   Invoke for: "done", "wrap up", "what did we learn", "retro", "session end",
   "reflect", "distill", "tune repo".
-argument-hint: "[--skip-commit] [--focus area] [append --issue N]"
+argument-hint: "[distill|improve|tune-repo|append] [context]"
 ---
 
 # /reflect
@@ -76,16 +76,10 @@ Use the codification hierarchy (Phase 3) to determine the right remediation targ
 
 ### 3. Codification Pass
 
-For EACH friction point and bug, evaluate targets in order:
+Apply codification hierarchy from `/calibrate`. Highest reliability level wins:
 
 ```
-Hook      -> Prevent automatically? (pre-edit)
-Lint rule -> Catch at edit time?
-Agent     -> Reviewer catches this?
-Skill     -> Reusable workflow?
-CLAUDE.md -> Convention/philosophy?
-Docs      -> Reference doc needs update?
-Memory    -> User/project-specific context? (last resort)
+Type system > Lint rule > Hook > Test > CI > Skill/reference > CLAUDE.md > Memory
 ```
 
 **Default: codify. Exception: justify not codifying.**
@@ -160,33 +154,15 @@ For each item:
 
 ## Retro Storage
 
-```
-{repo}/.refine/retro/<issue>.md
-```
+See `references/retro-format.md` for entry format and how `/refine` consumes retros.
 
-Created automatically if missing. One file per issue to avoid branch-hot append conflicts.
+Storage: `{repo}/.refine/retro/<issue>.md` — one file per issue.
 
-### Retro Entry Format
+## Scripts
 
-```markdown
-## Entry: #{issue} -- {title} ({date})
-
-**Effort:** predicted {predicted} -> actual {actual}
-**Scope changes:** {what changed}
-**Blockers:** {what blocked}
-**Pattern:** {reusable insight}
-
----
-```
-
-### How /groom Uses Retro
-
-During planning, `/refine` reads `.refine/retro/*.md` and extracts:
-- Effort calibration ("Payment issues take 1.5x estimates")
-- Scope patterns ("Webhook issues always need retry logic")
-- Blocker patterns ("External API docs frequently wrong")
-- Domain insights ("Bitcoin wallet needs regtest testing")
-- Bloat patterns ("Agent kept layering fallback paths instead of deleting old code")
+| Script | Purpose |
+|--------|---------|
+| `scripts/gather_evidence.sh [N]` | Gather recent commits, changed files, uncommitted work |
 
 ## Anti-Patterns
 

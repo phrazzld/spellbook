@@ -18,7 +18,7 @@ Prompt:
 Goal: identify reusable patterns from Claude/Codex without migrating bloat.
 
 Prompt:
-- Scan `~/.claude/skills`, `~/.codex/commands`, `~/.codex/agents` for only relevant patterns.
+- Scan harness skill/agent directories (e.g. `~/.agents/skills/`, `~/.codex/agents/`) for reusable patterns.
 - Return keep/drop/later recommendations with reasons.
 
 ## Lane C — Pi Capability Mapper

@@ -19,7 +19,7 @@ Create, update, or absorb agent primitives (skills and subagents).
 | Destination | When | Location | Marker |
 |------------|------|----------|--------|
 | **Spellbook** | Reusable across projects | `skills/{name}/` in spellbook repo | N/A (source) |
-| **Project-local** | Specific to this project | `.claude/skills/{name}/` in this repo | **No `.spellbook` marker** |
+| **Project-local** | Specific to this project | Project-local skills dir (e.g. `.claude/skills/`, `.codex/skills/`) | **No `.spellbook` marker** |
 
 **The `.spellbook` marker means "managed by focus, will be blown away on sync."**
 Project-local skills must NOT have this marker.
@@ -32,11 +32,11 @@ Project-local skills must NOT have this marker.
 Before creating any primitive, pass all 4:
 
 1. **Reusable** — used more than once?
-2. **Non-trivial** — more than a one-liner for CLAUDE.md?
+2. **Non-trivial** — more than a one-liner for AGENTS.md?
 3. **Specific** — concrete enough to be actionable?
 4. **Verified** — tested in practice?
 
-If any gate fails → suggest the right home: CLAUDE.md rule, hook, agent definition, or memory.
+If any gate fails → suggest the right home: AGENTS.md rule, hook, agent definition, or memory.
 
 ## Classify
 
@@ -73,7 +73,7 @@ If any gate fails → suggest the right home: CLAUDE.md rule, hook, agent defini
 - Adding `.spellbook` markers to project-local skills (focus will delete them)
 - Skipping quality gates because "it seems useful"
 - Creating a skill that duplicates an existing one (search embeddings first)
-- Shallow skills that are just a checklist (prefer CLAUDE.md or a hook)
+- Shallow skills that are just a checklist (prefer AGENTS.md or a hook)
 - Skipping the research phase — skills without research are reformatted training data
 - Writing generic advice the model already knows instead of specific, hard-won knowledge
 - Building mini-CLIs into `argument-hint` instead of keeping one happy path

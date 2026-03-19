@@ -2,7 +2,7 @@
 name: calibrate
 description: |
   Mid-session harness postmortem. When the agent makes a wrong decision,
-  diagnose WHY the harness (CLAUDE.md, skills, hooks, lints, types, tests)
+  diagnose WHY the harness (AGENTS.md, skills, hooks, lints, types, tests)
   failed to prevent it — fix the harness BEFORE fixing the code.
   Use when: agent did the wrong thing, "calibrate", "why did you do that",
   "fix your instructions", "don't do that again", "harness gap",
@@ -46,7 +46,7 @@ Trace the decision back through the context chain. Ask each question:
 
 | Layer | Question |
 |-------|----------|
-| CLAUDE.md | Did it address this? Was the instruction ambiguous? |
+| AGENTS.md | Did it address this? Was the instruction ambiguous? |
 | Skills | Were loaded skills misleading or incomplete? |
 | References | Were referenced docs stale or wrong? |
 | Hooks/lints | Should a mechanical check have caught this? |
@@ -68,11 +68,11 @@ Hook            — pre-edit/pre-commit, mechanical prevention
 Test            — run-time, catches behavior
 CI              — push-time, catches integration
 Skill/reference — wrong workflow instructions
-CLAUDE.md       — missing or wrong convention
+AGENTS.md       — missing or wrong convention
 Memory          — missing user preference or project context
 ```
 
-Always fix at the highest reliable level that applies. A hook beats a CLAUDE.md rule. A type beats a hook.
+Always fix at the highest reliable level that applies. A hook beats an AGENTS.md rule. A type beats a hook.
 
 ### 5. Fix the Harness
 
@@ -86,14 +86,14 @@ Codification targets (same cascade as `/reflect`):
 
 | Target | Location |
 |--------|----------|
-| Hook | `~/.claude/settings.json` + `~/.claude/hooks/` |
+| Hook | Harness config (e.g. settings.json + hooks/) |
 | Lint rule | Project lint config |
 | Type | Source code type definitions |
 | Test | Test suite |
 | CI | CI config |
-| Skill | `.claude/skills/` SKILL.md (if spellbook-managed, also log upstream) |
-| CLAUDE.md | Project or global CLAUDE.md |
-| Memory | `~/.claude/projects/*/memory/*.md` |
+| Skill | Project-local skills dir (if spellbook-managed, also log upstream) |
+| AGENTS.md | Project or global AGENTS.md |
+| Memory | Harness memory system |
 
 ### 6. Verify
 
@@ -121,7 +121,7 @@ The code fix should be trivial now — the hard work was diagnosing and fixing t
 ## Anti-Patterns
 
 - Fixing the code first ("I'll update the instructions later" — you won't)
-- Adding a CLAUDE.md rule when a hook/lint/type would be more reliable
+- Adding an AGENTS.md rule when a hook/lint/type would be more reliable
 - Over-codifying: not every mistake needs a new rule — sometimes it's a one-off
 - Vague instructions: "be careful with X" instead of a specific, testable rule
 - Skipping verification: the fix must demonstrably prevent recurrence

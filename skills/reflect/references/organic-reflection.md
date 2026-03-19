@@ -31,7 +31,7 @@ Always evaluate both:
 
 3. **Config source context**
    - Existing repo assets (`prompts/`, `skills/`, `extensions/`, `docs/`)
-   - Legacy sources (`~/.claude/skills`, `~/.codex/commands`, `~/.codex/agents`)
+   - Harness-installed skills and agents (e.g. `~/.agents/skills/`, `~/.codex/agents/`)
 
 4. **Pi capability constraints**
    - Prompt templates, skills, extensions, packages

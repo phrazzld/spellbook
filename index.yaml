@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-03-19T16:20:53Z
+# Generated: 2026-03-19T16:32:37Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -37,8 +37,8 @@ skills:
     description: "Pricing philosophy and business model constraints. Auto-invoke when: evaluating pricing, checkout flows, subscription logic, tier structures."
     tags: [auto-invoke,business,checkout,constraints,evaluating,flows,logic,model,philosophy,pricing]
   - name: calibrate
-    description: "Mid-session harness postmortem. When the agent makes a wrong decision, diagnose WHY the harness (CLAUDE.md, skills, hooks, lints, types, tests) failed to prevent it — fix the harness BEFORE fixing the"
-    tags: [a,agent,before,claude,decision,diagnose,failed,fix,fixing,harness]
+    description: "Mid-session harness postmortem. When the agent makes a wrong decision, diagnose WHY the harness (AGENTS.md, skills, hooks, lints, types, tests) failed to prevent it — fix the harness BEFORE fixing the"
+    tags: [a,agent,agents,before,decision,diagnose,failed,fix,fixing,harness]
   - name: canary
     description: "Query errors, check health status, and manage monitoring targets on a self-hosted Canary observability instance. Use when: debugging errors across services, checking uptime/health, managing health che"
     tags: [a,across,canary,che,check,checking,debugging,errors,health,instance]
@@ -190,8 +190,8 @@ skills:
     description: "Interactive backlog refinement, backlog doctrine, and automated cleanup. Explore, brainstorm, research, synthesize into prioritized GitHub issues. Backlog strategy, ordering, pruning, agent-ready issu"
     tags: [agent-ready,automated,backlog,brainstorm,cleanup,doctrine,explore,github,interactive,issu]
   - name: reflect
-    description: "Session retrospective, codification, and implementation feedback capture. Distill learnings to CLAUDE.md/hooks/rules, propose lean improvements, tune repos for agents. Invoke for: \"done\", \"wrap up\", \""
-    tags: [agents,capture,claude,codification,distill,done,feedback,hooks,implementation,improvements]
+    description: "Session retrospective, codification, and implementation feedback capture. Distill learnings to AGENTS.md/hooks/rules, propose lean improvements, tune repos for agents. Invoke for: \"done\", \"wrap up\", \""
+    tags: [agents,capture,codification,distill,done,feedback,hooks,implementation,improvements,invoke]
   - name: research
     description: "Web research, multi-AI delegation, and multi-perspective validation. /research [query], /research delegate [task], /research thinktank [topic]. Triggers: \"search for\", \"look up\", \"research\", \"delegate"
     tags: [delegate,delegation,look,multi-ai,multi-perspective,query,research,search,task,thinktank]

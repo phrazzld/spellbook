@@ -99,6 +99,6 @@ description: |
 - [ ] No trigger terms in description
 - [ ] Scripts without execute permission
 - [ ] references/ files never loaded
-- [ ] Contradicts CLAUDE.md guidance
+- [ ] Contradicts AGENTS.md guidance
 - [ ] Duplicates another skill's purpose
 - [ ] Core happy path requires memorizing multiple flags

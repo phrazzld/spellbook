@@ -58,7 +58,7 @@ Portable core (shared): `name`, `description`, prompt body, `model`, `skills`, `
 | Destination | Location |
 |------------|----------|
 | **Spellbook** | `agents/{name}.md` in spellbook repo |
-| **Project-local** | `.claude/agents/{name}.md` in project repo |
+| **Project-local** | Project-local agents dir (e.g. `.claude/agents/`, `.codex/agents/`) |
 
 Focus only manages agent files it installed (with matching `.spellbook` marker).
 Project-local agents without a marker are left alone.

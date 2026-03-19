@@ -36,7 +36,7 @@ The `description` field is for THE MODEL, not humans. It's the primary trigger s
 - Everything beyond routing logic goes to `references/` and `scripts/`
 - If approaching 150 lines, extract to references
 - Tables of contents, not walls of prose
-- Same principle applies to CLAUDE.md and AGENTS.md
+- Same principle applies to AGENTS.md and all context-management docs
 
 The filesystem hierarchy IS the architecture:
 
@@ -78,7 +78,7 @@ failures, add what's missing.
 
 6. **Store scripts, don't generate code.** For deterministic operations, ship scripts in `scripts/`. They run without loading into context. Token-efficient and reliable.
 
-7. **SKILL.md is a routing index.** Points at references for detail. Same principle applies to CLAUDE.md and AGENTS.md — all context management documents should evolve toward short punchy indexes.
+7. **SKILL.md is a routing index.** Points at references for detail. Same principle applies to AGENTS.md and all context-management documents — they should evolve toward short punchy indexes.
 
 8. **One level deep.** References link directly from SKILL.md. Never chain references → references.
 

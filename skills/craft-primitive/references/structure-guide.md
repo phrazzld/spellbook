@@ -27,7 +27,7 @@ skill-name/
 
 ## The Tight Index Principle
 
-**SKILL.md, CLAUDE.md, and AGENTS.md should evolve toward being short punchy
+**SKILL.md, AGENTS.md, and all context-management docs should evolve toward being short punchy
 indexes / tables of contents that point at references.**
 
 Progressive disclosure is the default for all context management, not just skills.
@@ -92,4 +92,4 @@ Move content to `references/` when:
 | Location | When |
 |----------|------|
 | Spellbook `skills/` | Reusable across projects |
-| Project `.claude/skills/` | Team conventions, domain rules, project architecture |
+| Project-local (e.g. `.agents/skills/`) | Team conventions, domain rules, project architecture |

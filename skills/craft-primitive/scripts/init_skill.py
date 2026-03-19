@@ -7,7 +7,7 @@ Usage:
 
 Examples:
     init_skill.py my-new-skill --path skills
-    init_skill.py my-api-helper --path .claude/skills
+    init_skill.py my-api-helper --path .agents/skills
 """
 
 import sys
@@ -110,7 +110,7 @@ def main():
         print("Usage: init_skill.py <skill-name> --path <path>")
         print("\nExamples:")
         print("  init_skill.py my-new-skill --path skills")
-        print("  init_skill.py my-api-helper --path .claude/skills")
+        print("  init_skill.py my-api-helper --path .agents/skills")
         sys.exit(1)
 
     skill_name = sys.argv[1]

@@ -2,7 +2,7 @@
 name: reflect
 description: |
   Session retrospective, codification, and implementation feedback capture.
-  Distill learnings to CLAUDE.md/hooks/rules, propose lean improvements,
+  Distill learnings to AGENTS.md/hooks/rules, propose lean improvements,
   tune repos for agents.
   Invoke for: "done", "wrap up", "what did we learn", "retro", "session end",
   "reflect", "distill", "tune repo".
@@ -18,7 +18,7 @@ a codified artifact or gets explicitly justified as not worth codifying.
 
 | Intent | Sub-capability |
 |--------|---------------|
-| Codify learnings, update CLAUDE.md, hooks, skills | `references/distill.md` |
+| Codify learnings, update AGENTS.md, hooks, skills | `references/distill.md` |
 | Propose lean process improvements | `references/organic-reflection.md` |
 | Specialize agents for a repo, tune context | `references/tune-repo.md` |
 
@@ -59,7 +59,7 @@ When a session reveals something MISSING (not broken, not friction — absent):
 | `missing_skill` | Had to improvise a workflow that should be reusable | Skill (create or enhance) |
 | `missing_tool` | Needed a capability no available tool provided | Hook or MCP integration |
 | `repeated_failure` | Same class of error across multiple sessions | Guardrail or lint rule |
-| `wrong_info` | Acted on stale/incorrect CLAUDE.md or reference | Update source doc |
+| `wrong_info` | Acted on stale/incorrect AGENTS.md or reference | Update source doc |
 | `permission_friction` | Correct action blocked by permission model | Hook or settings adjustment |
 
 Omit the Gaps bucket when the session was clean — no gaps means no gaps.
@@ -79,7 +79,7 @@ Use the codification hierarchy (Phase 3) to determine the right remediation targ
 Apply codification hierarchy from `/calibrate`. Highest reliability level wins:
 
 ```
-Type system > Lint rule > Hook > Test > CI > Skill/reference > CLAUDE.md > Memory
+Type system > Lint rule > Hook > Test > CI > Skill/reference > AGENTS.md > Memory
 ```
 
 **Default: codify. Exception: justify not codifying.**
@@ -108,7 +108,7 @@ This feeds `/refine`'s planning feedback loop.
 
 ### 3.6. Tune Repo
 
-Run `/reflect tune-repo` to refresh context artifacts and update CLAUDE.md/AGENTS.md
+Run `/reflect tune-repo` to refresh context artifacts and update AGENTS.md
 if drift detected.
 
 ### 4. Execute Codification
@@ -121,12 +121,12 @@ For each item:
 
 | Target | Location | Format |
 |--------|----------|--------|
-| Hook | `~/.claude/settings.json` + `~/.claude/hooks/` | Script |
-| Agent | `.claude/agents/` | YAML + markdown |
-| Skill | `.claude/skills/*/SKILL.md` | Frontmatter + markdown |
-| CLAUDE.md | Repo `CLAUDE.md` | Concise pattern |
+| Hook | Harness config (e.g. settings.json + hooks/) | Script |
+| Agent | Project-local agents dir | YAML + markdown |
+| Skill | Project-local skills dir | Frontmatter + markdown |
+| AGENTS.md | Repo `AGENTS.md` | Concise pattern |
 | Docs | `AGENTS.md`, `docs/` | Varies |
-| Memory | `~/.claude/projects/*/memory/*.md` | Last resort |
+| Memory | Harness memory system | Last resort |
 
 ### 5. Report
 
@@ -176,7 +176,7 @@ Storage: `{repo}/.refine/retro/<issue>.md` — one file per issue.
 
 | Consumes | Produces |
 |----------|----------|
-| Session context | Updated CLAUDE.md / AGENTS.md |
+| Session context | Updated AGENTS.md |
 | `git diff`, `git log` | New/updated skills, agents |
 | Task list state | New/updated hooks |
 | Error logs | `.refine/retro/<issue>.md` entries |

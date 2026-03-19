@@ -12,7 +12,7 @@ Transform a repository from "generic AI agent target" to "finely tuned agent wor
 
 ## Philosophy
 
-- CLAUDE.md is the constitution, not the encyclopedia. Keep it token-cheap.
+- AGENTS.md is the constitution, not the encyclopedia. Keep it token-cheap.
 - Policy in tracked files. State in memory. Procedures in skills.
 - Use tiered context: hot memory, routing, cold memory.
 - Document invariants, not obvious mechanics.
@@ -31,7 +31,7 @@ git remote get-url origin
 Read what already exists:
 
 ```bash
-ls CLAUDE.md AGENTS.md docs/CODEBASE_MAP.md docs/context/ docs/adr/ 2>/dev/null || true
+ls AGENTS.md docs/CODEBASE_MAP.md docs/context/ docs/adr/ 2>/dev/null || true
 ```
 
 ## Workflow
@@ -40,7 +40,6 @@ ls CLAUDE.md AGENTS.md docs/CODEBASE_MAP.md docs/context/ docs/adr/ 2>/dev/null 
 
 Inventory the current context architecture:
 
-- `CLAUDE.md`
 - `AGENTS.md`
 - `docs/CODEBASE_MAP.md`
 - `docs/context/INDEX.md`
@@ -84,41 +83,27 @@ Rules:
 - include file paths, key APIs, invariants, and failure modes
 - stop if you are writing encyclopedias
 
-### Phase 4: CLAUDE.md Audit + Update
+### Phase 4: AGENTS.md Audit + Update
 
-Read current `CLAUDE.md`, Cartographer output, and `docs/context/`.
+Read current `AGENTS.md`, Cartographer output, and `docs/context/`.
 
-CLAUDE.md should cover only:
+AGENTS.md is the primary agent instruction file — constitution + operational playbook.
 
-1. What this repo is
-2. Essential commands
-3. Architecture at high level
-4. Quality gates
-5. Gotchas
-6. Environment/deployment if non-obvious
+Cover:
 
-Hard constraint: 200 lines max.
+1. What this repo is + essential commands
+2. Architecture at high level + quality gates
+3. Gotchas + environment/deployment if non-obvious
+4. Commit/testing/PR conventions
+5. Coding style beyond linting
+6. Security boundaries
+7. Routing rules pointing to `docs/context/ROUTING.md`
 
-Preserve accurate existing content. Merge, don't churn.
-
-### Phase 5: AGENTS.md Scaffold
-
-AGENTS.md is the operational playbook for AI agents. It covers what CLAUDE.md doesn't: how to work here.
-
-Sections:
-
-1. Commit conventions
-2. Testing guidelines
-3. PR guidelines
-4. Coding style beyond linting
-5. Issue workflow
-6. Definition of done
-7. Security boundaries
-8. Routing rules pointing to `docs/context/ROUTING.md`
+Hard constraint: 200 lines max. Preserve accurate existing content. Merge, don't churn.
 
 If AGENTS.md exists, audit and correct drift.
 
-### Phase 6: ADR Inventory
+### Phase 5: ADR Inventory
 
 Scan for undocumented architectural decisions:
 
@@ -129,13 +114,9 @@ git log --oneline --all --grep="decision\\|migrate\\|replace\\|switch\\|deprecat
 
 Create at most 5 ADRs per run. Focus on decisions that would confuse a new agent.
 
-### Phase 7: Memory Seeding
+### Phase 6: Memory Seeding
 
-Extract repo-specific gotchas into:
-
-```text
-~/.claude/projects/<escaped-repo-path>/memory/MEMORY.md
-```
+Extract repo-specific gotchas into harness memory (e.g. project-scoped memory files).
 
 Good entries:
 - CLI quirks
@@ -144,11 +125,11 @@ Good entries:
 - intentional weirdness
 
 Bad entries:
-- anything already in CLAUDE.md
+- anything already in AGENTS.md
 - generic framework knowledge
 - temporary branch state
 
-### Phase 8: Guardrail Discovery
+### Phase 7: Guardrail Discovery
 
 Analyze codebase + context docs for invariants worth enforcing:
 
@@ -161,7 +142,7 @@ Analyze codebase + context docs for invariants worth enforcing:
 
 Report candidates for `/guardrail`. Do not generate the rules here.
 
-### Phase 9: Skill Gap Analysis
+### Phase 8: Skill Gap Analysis
 
 Assess whether the repo needs project-specific skills:
 
@@ -173,7 +154,7 @@ Document the recommendation. Do not build the skill in this run unless explicitl
 
 ## Anti-Patterns
 
-- Writing CLAUDE.md as a novel
+- Writing AGENTS.md as a novel
 - Overwriting accurate docs with generic generated prose
 - Creating ADRs for obvious decisions
 - Seeding memory with speculation
@@ -187,8 +168,7 @@ Report:
 - Context index: created/updated subsystems
 - Routing table: created/updated triggers
 - Drift watchlist: created/updated mappings
-- CLAUDE.md: sections added/updated, final line count
-- AGENTS.md: created or audited, sections covered
+- AGENTS.md: sections added/updated, final line count
 - ADRs: new ADRs created
 - Memory: entries seeded
 - Guardrail candidates: recommended patterns

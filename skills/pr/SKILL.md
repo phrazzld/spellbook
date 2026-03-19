@@ -23,6 +23,20 @@ Take the current working directory state — however messy — and produce:
 1. A clean branch with semantic conventional commits
 2. A PR that makes the merge case obvious to any reviewer
 
+## Executive / Worker Split
+
+Keep the strongest available model on shipping judgment:
+- commit grouping and semantic boundaries
+- PR title/body narrative, trade-offs, and reviewer guidance
+- final decision that the branch is coherent enough to publish
+
+Delegate bounded support work to smaller worker subagents when useful:
+- inventorying changed files and evidence
+- drafting narrow summaries for one module or one verification lane
+- collecting screenshots, command output, or other reviewer artifacts
+
+Do not delegate the final commit plan or PR story. Workers gather material; the lead packages it.
+
 ## Process
 
 ### 1. Orient

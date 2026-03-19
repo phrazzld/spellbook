@@ -59,6 +59,20 @@ codex exec "DEBUG: $SYMPTOMS. Reproduce, isolate root cause, propose fix." \
   --output-last-message /tmp/codex-debug.md 2>/dev/null
 ```
 
+## Executive / Worker Split
+
+Keep the strongest available model on debugging judgment:
+- ranking hypotheses and deciding what to test next
+- declaring root cause proven
+- choosing the remediation and deciding when evidence is sufficient
+
+Delegate bounded evidence work to smaller worker subagents:
+- tracing one subsystem or one hypothesis
+- comparing working vs broken implementations
+- gathering logs, reproductions, and targeted test cases
+
+Workers gather proof. The lead decides what the proof means.
+
 ## Multi-Hypothesis Mode (Agent Teams)
 
 When >2 plausible root causes and single investigation would anchor on one:
@@ -67,6 +81,9 @@ When >2 plausible root causes and single investigation would anchor on one:
 2. Each teammate gets one hypothesis to prove/disprove
 3. Teammates challenge each other's findings
 4. Lead synthesizes consensus root cause
+
+Prefer smaller worker-class models for these investigators unless a hypothesis
+demands frontier-level reasoning. Keep the synthesis on the strongest model.
 
 Use when: ambiguous stack trace, multiple services, flaky failures.
 Don't use when: obvious single cause, config issue, simple regression.

@@ -74,6 +74,12 @@ not an archive of every bug, nit, brainstorm, review comment, or screenshot.
 
 **Model diversity for architecture.** Use thinktank + CLI agents for diverse perspectives on design decisions.
 
+**Executive / worker split.** Keep backlog priorities, architectural direction,
+issue acceptance, and final roadmap synthesis on the strongest available model.
+Push bounded gruntwork to smaller worker subagents: repo audits, reference
+searches, issue-body rewrites for one item at a time, dedupe passes, and other
+mechanical backlog cleanup with explicit ownership.
+
 ## Org-Wide Standards
 
 All issues MUST comply with `groom/references/org-standards.md`.
@@ -94,6 +100,10 @@ Run `/groom` in six phases:
      on the current architecture. Each answers: "What's the single biggest
      structural problem? What would you change first?"
 
+   Run tracks A-B with smaller workers when possible. Keep the synthesis of
+   tracks C-D, the architectural recommendation, and the final backlog priority
+   calls on the strongest available model.
+
    For greenfield modules, load `references/toolchain-preferences.md` before
    evaluating technology options. See `references/architecture-fitness.md`.
 
@@ -103,6 +113,9 @@ Run `/groom` in six phases:
 3. **Research** — web, cross-repo, and codebase research, scoped to the direction chosen in 2.5. Use `/research web-search` with Exa for reference architecture discovery.
 4. **Exploration** — pitch options, recommend one, discuss. Lock direction.
 5. **Synthesis** — reduce GitHub backlog to cap (demote to BACKLOG.md, close, merge), then promote from BACKLOG.md or create for missing gaps. Every surviving issue must score >= 70.
+
+During synthesis, workers may draft or lint one issue at a time, but the lead
+model owns final inclusion, ordering, and issue acceptance.
 6. **Artifact** — save a dated grooming plan, update `.groom/BACKLOG.md`, visual summary when useful
 
 Synthesis default:

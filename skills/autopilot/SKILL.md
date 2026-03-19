@@ -66,6 +66,26 @@ Do not introduce heuristic-only semantic pipelines (regex ladders, keyword score
 
 Deterministic logic is limited to strict mechanics: schema checks, exact parsing, permission/safety gates.
 
+## Executive / Worker Split
+
+Keep the strongest available model on executive work:
+- issue selection and lane ownership
+- spec/design approval and tradeoff calls
+- triage of review feedback and out-of-scope decisions
+- acceptance-criteria judgment, merge-confidence judgment, and PR narrative
+
+Delegate bounded gruntwork to smaller worker subagents:
+- codebase reading and evidence gathering
+- isolated implementation chunks with disjoint file ownership
+- targeted test repair, CI investigation, and mechanical refactors
+- walkthrough capture and other artifact preparation after requirements are clear
+
+If the harness supports model choice, prefer worker-class models for execution
+(for example GPT-5.4-Mini, GPT-5.3-Codex-Spark, or Sonnet-class workers) and
+reserve frontier models for strategy, adversarial review, and final sign-off.
+
+Never delegate the final ship / don't ship call. Workers propose; the lead decides.
+
 ## Priority Selection
 
 **Always work on the highest-priority eligible issue.**
@@ -129,6 +149,10 @@ The point is single ownership and meaningful progress. One issue should map to o
    - If design contains a state machine or concurrent protocol, run `/formal-verify loop`.
    - If thinktank surfaces a materially better approach, revise the design before building.
 7. **Build (TDD Enforced)** — Invoke `/build` and require RED→GREEN evidence per acceptance criterion:
+   - Before changing code, split implementation into bounded worker tasks. Give each worker
+     a concrete scope, owned files, and explicit tests/evidence to return.
+   - Prefer smaller worker-class models for implementation, mechanical cleanup, and test repair.
+     Keep executive control of design changes, scope changes, and final acceptance on the lead model.
    - RED: failing targeted tests before implementation
    - GREEN: same tests passing after implementation
    - If test harness is broken, stop and flag blocker (no implementation without explicit user bypass)
@@ -142,6 +166,8 @@ The point is single ownership and meaningful progress. One issue should map to o
     | `ousterhout` | Module depth, information hiding, interface simplicity. Flag shallow modules, pass-throughs, leaky abstractions. | Any red flag = must fix |
     | `carmack` | Shippability, unnecessary abstraction, speculative generality. "Would you ship this today?" | Any "don't ship" = must fix |
     | `grug` | Complexity demons. Is this simple enough for grug brain? Too many layers? Over-engineered? | Any "complexity bad" = must fix |
+
+    Use the strongest available review-capable models for this gate.
 
     Each agent reads the full diff (`git diff main...HEAD`). Each outputs:
     - **Ship / Don't Ship** verdict

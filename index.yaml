@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-03-19T17:00:14Z
+# Generated: 2026-03-19T17:26:22Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -222,6 +222,9 @@ skills:
   - name: sysadmin
     description: "System health diagnostics and maintenance for macOS. Resource usage, disk space, memory pressure, Docker, Homebrew, stuck processes. Quick health checks and safe maintenance actions."
     tags: [actions,checks,diagnostics,disk,docker,health,homebrew,macos,maintenance,memory]
+  - name: tailor-verification
+    description: "Craft repo-specific verification agents and an orchestrator skill from the target repo's actual stack. Discover test runners, auth, routes, page objects, dev server, and browser/MCP tooling, then map "
+    tags: [actual,agents,an,auth,browser,craft,dev,discover,map,mcp]
   - name: ui-skills
     description: "Opinionated constraints for building better interfaces with agents."
     tags: [agents,better,building,constraints,interfaces,opinionated]

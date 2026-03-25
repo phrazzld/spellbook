@@ -1,19 +1,11 @@
 # .spellbook.yaml — Spellbook repo
 #
-# Global skills (via bootstrap): assess-depth, assess-tests, autopilot,
-#   calibrate, context-engineering, craft-primitive, debug, focus, groom,
-#   harness-engineering, health-check, moonshot, pr, reflect, research,
-#   rethink, settle, shape
-# Global agents (via bootstrap): beck, carmack, drift-sentinel, grug, ousterhout
+# Global skills (via bootstrap): autopilot, code-review, debug, groom,
+#   harness, reflect, research, shape
+# Global agents (via bootstrap): planner, builder, critic, beck, carmack, grug, ousterhout
 #
-# This manifest declares ONLY project-local domain/workflow primitives
-# that are specific to working on the spellbook repo itself.
+# This repo has no project-local primitives beyond the globals.
+# All skills and agents are defined here as source, not as consumers.
 
-skills:
-  - codified-context-architecture
-
-agents:
-  - jobs
-  - complexity-archaeologist
-  - documentation-quality-reviewer
-  - maintainability-maven
+skills: []
+agents: []

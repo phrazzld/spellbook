@@ -180,17 +180,21 @@ Bootstrap a new project with quality gates:
 2. Linting (ESLint/Biome/clippy with strict rules)
 3. Type checking
 4. Pre-commit hooks
-5. CI pipeline
+5. Local CI via Dagger (`dagger init --sdk=python`, then define quality gates as Dagger Functions).
+   See spellbook's own `ci/` for reference. Prefer Dagger over GitHub Actions for the inner loop.
 6. CLAUDE.md with project-specific instructions
+7. `backlog.d/` directory for file-driven backlog
 
 ## Workflow: Tidy
 
 1. **Backlog audit** — count open items, check against 30-item cap
-2. Archive completed items to `backlog.d/_done/`
+2. Archive completed items (`Status: done`) to `backlog.d/_done/`
 3. Delete stale items (>30 days untouched, no longer relevant)
-4. Verify each remaining item has Goal + Oracle
-5. Reorder remaining by priority
-6. If BACKLOG.md / icebox exists, review it once, migrate any still-relevant items, then delete the legacy file so `backlog.d/` remains the only backlog source of truth
+4. Flag items stuck in `in-progress` with no recent commits — these are abandoned, not active
+5. Verify each remaining item has Goal + Oracle
+6. Verify completed items have a "What Was Built" section — if not, add one from git log
+7. Reorder remaining by priority
+8. If BACKLOG.md / icebox exists, review it once, migrate any still-relevant items, then delete the legacy file so `backlog.d/` remains the only backlog source of truth
 
 ## Gotchas
 

@@ -161,6 +161,14 @@ For any harness component, apply the Norman test:
 Prevention hierarchy: Type system > Hook > Lint > Test > Skill > Prose.
 Prose is the burner label. Hooks are the redesigned stove.
 
+### Local CI via Dagger
+
+If the project has a `dagger.json`, it has a Dagger CI pipeline. Run `dagger call check`
+to execute all quality gates locally before push. Individual gates are also callable
+(e.g., `dagger call lint-shell`). When scaffolding a new project or adding CI,
+prefer Dagger (pipelines as code) over GitHub Actions YAML for the inner dev loop.
+See spellbook's own `ci/` directory for a reference implementation.
+
 ### Hooks are the highest-leverage investment
 
 Hooks run on every tool use. CLAUDE.md is read once. A hook that blocks

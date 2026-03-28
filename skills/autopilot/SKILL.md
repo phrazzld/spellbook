@@ -24,6 +24,8 @@ make proceed/fix/escalate decisions. Never delegate the ship/don't-ship call.
 ### 1. Pick work
 
 Read `backlog.d/` for highest-priority ready item, or accept explicit argument.
+**Immediately** update the item's status to `in-progress` and commit the change.
+This prevents other agents from picking the same item.
 
 ### 2. Shape
 
@@ -108,10 +110,13 @@ a monitor — detect everything, notify selectively (the Ramp pattern).
 ### 9. Ship
 
 Once review, QA, demo, and observability all pass:
+- Run `dagger call check` (if configured) — all local CI gates must pass before push
 - Squash or create semantic commits
 - Open PR if collaborating (context packet + demo artifacts in body)
 - Or commit directly if solo project
-- Run quality gates (lint, typecheck, test) before push
+- Update the backlog item: status → `done`, check off oracle criteria, add a
+  "What Was Built" section with implementation notes and any workarounds discovered.
+  This context is essential for future agents working on related items.
 
 ### 10. Retro (optional)
 
@@ -156,6 +161,8 @@ When invoked with `--overnight` or for autonomous multi-hour sessions:
 - **Skipping QA:** "Tests pass" is not QA. Drive the running app and verify it works for real.
 - **Skipping demo artifacts:** No GIF/screenshot = no proof it works. If you can't demo it, you can't ship it.
 - **Silent failure paths:** New code that catches exceptions and returns fallbacks is hiding bugs. Fail loud, monitor everything.
+- **Forgetting to update the backlog item:** The backlog item is a living document. Mark status changes, check off oracles, add "What Was Built" and "Workarounds" sections. The next agent working a related item will thank you.
+- **Skipping local CI:** If `dagger.json` exists, run `dagger call check` before push. Don't rely on remote CI to catch what you can catch locally in seconds.
 
 ## Stopping Conditions
 

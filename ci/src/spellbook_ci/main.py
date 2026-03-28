@@ -7,48 +7,6 @@ import anyio
 import dagger
 from dagger import DefaultPath, Doc, Ignore, dag, function, object_type
 
-# Files to check per gate
-SHELL_FILES = [
-    "bootstrap.sh",
-    "scripts/generate-index.sh",
-    "scripts/check-vendored-copies.sh",
-    "skills/reflect/scripts/gather_evidence.sh",
-    "harnesses/claude/hooks/shaping-ripple.sh",
-]
-
-PYTHON_HOOK_FILES = [
-    "harnesses/claude/hooks/check-todo-quality.py",
-    "harnesses/claude/hooks/codex-post-feedback.py",
-    "harnesses/claude/hooks/codex-session-init.py",
-    "harnesses/claude/hooks/disk-space-guard.py",
-    "harnesses/claude/hooks/env-var-newline-guard.py",
-    "harnesses/claude/hooks/exa-research-reminder.py",
-    "harnesses/claude/hooks/exclusion-guard.py",
-    "harnesses/claude/hooks/fix-what-you-touch.py",
-    "harnesses/claude/hooks/github-cli-guard.py",
-    "harnesses/claude/hooks/permission-auto-approve.py",
-    "harnesses/claude/hooks/portable-code-guard.py",
-    "harnesses/claude/hooks/session-health-check.py",
-    "harnesses/claude/hooks/stop-quality-gate.py",
-    "harnesses/claude/hooks/time-context.py",
-    "harnesses/claude/hooks/destructive-command-guard.py",
-    "harnesses/claude/hooks/block-master-push.py",
-]
-
-PYTHON_SCRIPT_FILES = [
-    "scripts/embeddings_cache.py",
-    "scripts/gemini_embeddings.py",
-    "scripts/generate-embeddings.py",
-    "scripts/lib/search_core.py",
-    "scripts/search-embeddings.py",
-]
-
-YAML_FILES = [
-    "index.yaml",
-    "registry.yaml",
-    ".spellbook.yaml",
-]
-
 
 def _lint_container(source: dagger.Directory) -> dagger.Container:
     """Base container with shellcheck and yamllint installed."""
@@ -87,11 +45,17 @@ class SpellbookCi:
         ],
     ) -> str:
         """Validate YAML files parse correctly."""
-        ctr = _lint_container(source)
-        # yamllint with relaxed config — just check valid YAML, not style
-        for f in YAML_FILES:
-            ctr = ctr.with_exec(["python3", "-c", f"import yaml; yaml.safe_load(open('{f}'))"])
-        return await ctr.stdout()
+        # Discover yaml files, pass as argv (not f-string interpolation)
+        return await (
+            _lint_container(source)
+            .with_exec([
+                "sh", "-c",
+                "find . -maxdepth 2 -name '*.yaml' -o -name '*.yml' "
+                "| xargs python3 -c "
+                "'import sys,yaml; [yaml.safe_load(open(f)) for f in sys.argv[1:]]'",
+            ])
+            .stdout()
+        )
 
     @function
     async def lint_shell(
@@ -103,10 +67,16 @@ class SpellbookCi:
         ],
     ) -> str:
         """Run shellcheck on all bash scripts (errors only)."""
-        ctr = _lint_container(source)
-        # --severity=error: only actual errors, not style warnings
-        ctr = ctr.with_exec(["shellcheck", "--severity=error"] + SHELL_FILES)
-        return await ctr.stdout()
+        # Discover .sh files from filesystem
+        return await (
+            _lint_container(source)
+            .with_exec([
+                "sh", "-c",
+                "find . -name '*.sh' -not -path './ci/*' "
+                "| xargs shellcheck --severity=error",
+            ])
+            .stdout()
+        )
 
     @function
     async def lint_python(
@@ -118,11 +88,16 @@ class SpellbookCi:
         ],
     ) -> str:
         """Syntax-check all Python files via py_compile."""
-        ctr = _lint_container(source)
-        all_py = PYTHON_HOOK_FILES + PYTHON_SCRIPT_FILES
-        for f in all_py:
-            ctr = ctr.with_exec(["python3", "-m", "py_compile", f])
-        return await ctr.stdout()
+        # Discover .py files from filesystem
+        return await (
+            _lint_container(source)
+            .with_exec([
+                "sh", "-c",
+                "find . -name '*.py' -not -path './ci/*' "
+                "| xargs -I{} python3 -m py_compile {}",
+            ])
+            .stdout()
+        )
 
     @function
     async def check_frontmatter(
@@ -134,81 +109,9 @@ class SpellbookCi:
         ],
     ) -> str:
         """Validate SKILL.md and agent frontmatter: required fields, line limits."""
-        script = r'''
-import sys, os, yaml
-
-errors = []
-
-# Check skills
-for name in sorted(os.listdir("skills")):
-    path = f"skills/{name}/SKILL.md"
-    if not os.path.isfile(path):
-        continue
-    with open(path) as f:
-        content = f.read()
-    lines = content.splitlines()
-
-    # Line count check
-    if len(lines) > 500:
-        errors.append(f"{path}: {len(lines)} lines (max 500)")
-
-    # Parse frontmatter
-    if not content.startswith("---"):
-        errors.append(f"{path}: missing frontmatter")
-        continue
-    parts = content.split("---", 2)
-    if len(parts) < 3:
-        errors.append(f"{path}: malformed frontmatter")
-        continue
-    try:
-        fm = yaml.safe_load(parts[1])
-    except yaml.YAMLError as e:
-        errors.append(f"{path}: invalid YAML frontmatter: {e}")
-        continue
-    if not fm or not isinstance(fm, dict):
-        errors.append(f"{path}: empty frontmatter")
-        continue
-    if "name" not in fm:
-        errors.append(f"{path}: missing 'name' in frontmatter")
-    if "description" not in fm:
-        errors.append(f"{path}: missing 'description' in frontmatter")
-
-# Check agents
-for name in sorted(os.listdir("agents")):
-    if not name.endswith(".md"):
-        continue
-    path = f"agents/{name}"
-    with open(path) as f:
-        content = f.read()
-    if not content.startswith("---"):
-        errors.append(f"{path}: missing frontmatter")
-        continue
-    parts = content.split("---", 2)
-    if len(parts) < 3:
-        errors.append(f"{path}: malformed frontmatter")
-        continue
-    try:
-        fm = yaml.safe_load(parts[1])
-    except yaml.YAMLError as e:
-        errors.append(f"{path}: invalid YAML frontmatter: {e}")
-        continue
-    if not fm or not isinstance(fm, dict):
-        errors.append(f"{path}: empty frontmatter")
-        continue
-    if "name" not in fm:
-        errors.append(f"{path}: missing 'name' in frontmatter")
-    if "description" not in fm:
-        errors.append(f"{path}: missing 'description' in frontmatter")
-
-if errors:
-    for e in errors:
-        print(f"FAIL: {e}", file=sys.stderr)
-    sys.exit(1)
-print(f"OK: all frontmatter valid")
-'''
         return await (
             _lint_container(source)
-            .with_exec(["python3", "-c", script])
+            .with_exec(["python3", "scripts/check-frontmatter.py"])
             .stdout()
         )
 

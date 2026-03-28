@@ -1,7 +1,7 @@
 # /deps skill: semantic dependency management
 
 Priority: medium
-Status: ready
+Status: in-progress
 Estimate: L
 
 ## Goal

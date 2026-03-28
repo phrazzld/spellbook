@@ -62,9 +62,12 @@ Before investigation, the orchestrator gathers baseline context:
 
 1. Read `project.md` if it exists — store as project context for investigator prompts
 2. Read `backlog.d/` — note existing items, their status, and any gaps
-3. Read `.groom/retro/` if it exists — extract effort calibration and blocker patterns
-4. **Cap check:** if >30 backlog items open, declare a reduction session (no new items until under cap)
-5. Ask the user: "Anything on your mind? Bugs, friction, missing features?"
+3. If `git-bug` is installed, read `git-bug bug status:open --format json` — note open issues
+   alongside backlog.d items. Filter out claimed items (those with `refs/claims/<id>` refs
+   or `claimed:*` labels).
+4. Read `.groom/retro/` if it exists — extract effort calibration and blocker patterns
+5. **Cap check:** if >30 backlog items open, declare a reduction session (no new items until under cap)
+6. Ask the user: "Anything on your mind? Bugs, friction, missing features?"
 
 This takes <2 minutes. Do not block on missing artifacts — note their absence and proceed.
 
@@ -156,7 +159,11 @@ Gate: all three returned structured reports.
 Gate: themes extracted with evidence and recommendations. Not raw findings.
 ### 4. DISCUSS — Present one theme at a time. Recommend, don't list.
 Gate: user decides per theme (explore deeper / write item / skip).
-### 5. WRITE — Create backlog.d/ files for approved themes
+### 5. WRITE — Create backlog.d/ files or git-bug issues for approved themes
+Shaped work (goal + oracle + sequence) → `backlog.d/` files.
+Raw bugs/findings (need investigation) → `git-bug bug new -t "..." -m "..." --non-interactive`,
+then label with `git-bug bug label new <id> "priority/pN" "domain/X"`.
+After creating git-bug issues, sync: `git-bug push origin`.
 Gate: every item has Goal + Non-Goals + Oracle.
 Use `references/agent-issue-writing.md` for issue quality standards.
 ### 6. PRIORITIZE — Reorder backlog.d/ by value/effort ratio
@@ -193,8 +200,12 @@ Bootstrap a new project with quality gates:
 4. Flag items stuck in `in-progress` with no recent commits — these are abandoned, not active
 5. Verify each remaining item has Goal + Oracle
 6. Verify completed items have a "What Was Built" section — if not, add one from git log
-7. Reorder remaining by priority
-8. If BACKLOG.md / icebox exists, review it once, migrate any still-relevant items, then delete the legacy file so `backlog.d/` remains the only backlog source of truth
+7. **git-bug audit** (if installed):
+   - Close stale bugs (>30 days untouched, no activity)
+   - List claims: `source scripts/lib/claims.sh && claim_list` — release any orphaned claims
+   - Check for `claimed:*` labels where no matching `refs/claims/` ref exists
+8. Reorder remaining by priority
+9. If BACKLOG.md / icebox exists, review it once, migrate any still-relevant items, then delete the legacy file so `backlog.d/` remains the only backlog source of truth
 
 ## Gotchas
 

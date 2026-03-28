@@ -2,16 +2,22 @@
 
 Issue quality tooling. Three subcommands for different needs.
 
+Supports both GitHub Issues (`gh issue`) and git-bug issues (`git-bug bug`).
+**Routing heuristic:** hex prefix (e.g. `abc1234`) → git-bug; `#N` → GitHub Issues.
+If `git-bug` is not installed, fall back to `gh issue` for all operations.
+
 ## Subcommands
 
-### `/issue lint [#N|--all]`
+### `/issue lint [#N|<bug-id>|--all]`
 
 Score issues against org-standards readiness rubric.
 
 #### Process
 
 1. Load `groom/references/org-standards.md` for scoring rubric
-2. Fetch issue(s): `gh issue view N --json title,body,labels,milestone`
+2. Fetch issue(s):
+   - GitHub: `gh issue view N --json title,body,labels,milestone`
+   - git-bug: `git-bug bug show <bug-id> --format json`
 3. Score each section per rubric (0-100 total)
 4. Classify findings as errors (blocking) or warnings (informational)
 5. Report score and findings
@@ -89,13 +95,15 @@ After linting, run `/issue enrich` on issues scoring < 70.
 
 ---
 
-### `/issue enrich [#N]`
+### `/issue enrich [#N|<bug-id>]`
 
 Fill missing issue sections using sub-agent research.
 
 #### Process
 
-1. Fetch issue: `gh issue view N --json title,body,labels,milestone`
+1. Fetch issue:
+   - GitHub: `gh issue view N --json title,body,labels,milestone`
+   - git-bug: `git-bug bug show <bug-id> --format json`
 2. Run `/issue lint N` to identify gaps
 3. For each missing section, spawn appropriate sub-agent:
 
@@ -114,16 +122,19 @@ Fill missing issue sections using sub-agent research.
 
 #### Issue Update
 
+**GitHub:**
 ```bash
 gh issue edit N --body "$(cat <<'EOF'
 [enriched issue body]
 EOF
 )"
+gh issue edit N --add-label "effort/m"
 ```
 
-Add labels:
+**git-bug:**
 ```bash
-gh issue edit N --add-label "effort/m"
+git-bug bug comment new <bug-id> -m "[enriched body]" --non-interactive
+git-bug bug label new <bug-id> "effort/m"
 ```
 
 #### Output
@@ -144,7 +155,7 @@ Added:
 
 ---
 
-### `/issue decompose [#N]`
+### `/issue decompose [#N|<bug-id>]`
 
 Split oversized issues into atomic sub-issues.
 
@@ -157,7 +168,9 @@ Split oversized issues into atomic sub-issues.
 
 #### Process
 
-1. Fetch issue: `gh issue view N --comments`
+1. Fetch issue:
+   - GitHub: `gh issue view N --comments`
+   - git-bug: `git-bug bug show <bug-id> --format json` + `git-bug bug comment <bug-id>`
 2. Analyze scope: file count, directory spread, acceptance criteria clusters
 3. Identify natural boundaries (by module, by concern, by dependency)
 4. Create child issues, each:

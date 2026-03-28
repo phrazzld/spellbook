@@ -19,6 +19,21 @@ spellbook/
 └── bootstrap.sh   # Discovers skills/agents from filesystem, symlinks to harness dirs
 ```
 
+## Issue Tracking
+
+Issues are stored as git objects via **git-bug** (distributed, offline-first).
+`backlog.d/` holds shaped work ready to build; git-bug holds raw issues/bugs.
+GitHub Issues is a read-only bridge synced via `git-bug push origin`.
+
+```bash
+git-bug bug                          # list open issues
+git-bug bug new -t "title" -m "..."  # create issue
+git-bug bug status close <id>        # close issue
+git-bug push origin                  # sync to GitHub bridge
+```
+
+Agent coordination uses atomic claims: `source scripts/lib/claims.sh && claim_acquire <id>`.
+
 ## Workflow
 
 ```

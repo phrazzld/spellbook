@@ -1,6 +1,8 @@
 # /log-issues
 
-Audit a domain, create GitHub issues for every finding.
+Audit a domain, create issues for every finding.
+Uses git-bug if installed (issues travel with repo, offline-first).
+Falls back to GitHub Issues (`gh issue create`) if git-bug is absent.
 
 ## Usage
 
@@ -25,6 +27,12 @@ If `--all`, run all applicable domain checklists.
 
 ### 2. Deduplicate
 
+**git-bug (preferred):**
+```bash
+git-bug bug --label "domain/{domain}" --status open --format json
+```
+
+**GitHub (fallback):**
 ```bash
 gh issue list --state open --label "domain/{domain}" --limit 50
 ```
@@ -35,6 +43,33 @@ Skip findings that match existing open issues (by title similarity).
 
 For each new finding:
 
+**git-bug (preferred):**
+```bash
+git-bug bug new \
+  --title "[P{0-3}] {Domain} - {description}" \
+  --message "$(cat <<'EOF'
+## Problem
+{What's wrong}
+
+## Impact
+{Business/security/user impact}
+
+## Location
+{File:line if applicable}
+
+## Suggested Fix
+{Code snippet or skill to run}
+
+---
+Created by `/log-issues`
+EOF
+)" \
+  --non-interactive
+# Then add labels:
+git-bug bug label new <bug-id> "priority/p{0-3}" "domain/{domain}" "type/{bug|enhancement|chore}"
+```
+
+**GitHub (fallback):**
 ```bash
 gh issue create \
   --title "[P{0-3}] {finding description}" \
@@ -69,14 +104,22 @@ EOF
 
 **Body sections:** Problem, Impact, Location, Suggested Fix
 
-### 5. Report
+### 5. Sync (git-bug only)
+
+After creating all issues, push to sync with GitHub bridge:
+```bash
+git-bug push origin
+```
+
+### 6. Report
 
 ```
 Created 7 issues for domain/stripe:
-  - [P0] #123: Missing webhook signature verification
-  - [P1] #124: No customer portal configured
-  - [P1] #125: Subscription status not checked
+  - [P0] abc1234: Missing webhook signature verification
+  - [P1] def5678: No customer portal configured
+  - [P1] ghi9012: Subscription status not checked
   Skipped 2 (duplicates of existing open issues)
+  Synced to GitHub via bridge.
 ```
 
 ## Related

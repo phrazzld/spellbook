@@ -24,8 +24,13 @@ make proceed/fix/escalate decisions. Never delegate the ship/don't-ship call.
 ### 1. Pick work
 
 Read `backlog.d/` for highest-priority ready item, or accept explicit argument.
-**Immediately** update the item's status to `in-progress` and commit the change.
-This prevents other agents from picking the same item.
+Also check `git-bug bug status:open sort:edit-desc --format json` for git-bug issues
+(if `git-bug` is installed). `backlog.d/` = shaped work; git-bug = raw issues/bugs.
+
+**Immediately** acquire an atomic claim: `source scripts/lib/claims.sh && claim_acquire <item-id>`.
+If the claim fails (non-zero exit), another agent is working this item — skip to the next.
+Then update the item's status to `in-progress` and commit the change.
+Claim-then-commit ordering prevents two agents from both committing status changes.
 
 ### 2. Shape
 
@@ -117,6 +122,7 @@ Once review, QA, demo, and observability all pass:
 - Update the backlog item: status → `done`, check off oracle criteria, add a
   "What Was Built" section with implementation notes and any workarounds discovered.
   This context is essential for future agents working on related items.
+- Release the claim: `source scripts/lib/claims.sh && claim_release <item-id>`
 
 ### 10. Retro (optional)
 
@@ -167,7 +173,8 @@ When invoked with `--overnight` or for autonomous multi-hour sessions:
 ## Stopping Conditions
 
 Stop only if: build fails after multiple attempts, requires external action,
-or oracle criteria are unverifiable.
+or oracle criteria are unverifiable. **Always release the claim on stop:**
+`source scripts/lib/claims.sh && claim_release <item-id>`.
 
 NOT stopping conditions: item seems big, approach unclear, missing description.
 YOU make items ready — planner shapes, builder implements.

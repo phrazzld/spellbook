@@ -1,25 +1,32 @@
 # Backlog Doctrine
 
-## Two-Tier Backlog
+## Three-Tier Backlog
 
-GitHub issues are the **active plan** — the work you're committing to execute.
-`.groom/BACKLOG.md` is the **idea icebox** — everything else worth remembering.
+| Tier | Location | Purpose | Cap |
+|------|----------|---------|-----|
+| **Shaped work** | `backlog.d/` | Ready-to-build items with goal + oracle + sequence | 10-15 |
+| **Raw issues** | git-bug (`git-bug bug`) | Bugs, findings, requests — not yet shaped | 20-30 |
+| **Icebox** | `.groom/BACKLOG.md` | Everything else worth remembering | Unlimited |
 
-| Tier | Location | Cap | Grooming Standard |
-|------|----------|-----|-------------------|
-| Active | GitHub Issues | 20-30 | 100% score >= 70, all labeled, all execution-ready |
-| Icebox | `.groom/BACKLOG.md` | Unlimited | Categorized, dated, pruned each groom session |
+GitHub Issues is a **read-only bridge** for human visibility. git-bug syncs to
+GitHub via `git-bug push origin` / `git-bug bridge push`. Agents read/write
+issues via git-bug CLI; humans browse on GitHub.
+
+If `git-bug` is not installed, fall back to GitHub Issues as the active issue tier.
 
 Ideas flow between tiers during `/groom` sessions:
-- **Promote:** BACKLOG.md → GitHub issue (idea becomes priority)
-- **Demote:** GitHub issue → BACKLOG.md (issue loses priority, close with link)
+- **Shape:** git-bug issue → `backlog.d/` file (issue gets goal + oracle → ready to build)
+- **File:** finding → git-bug issue (raw bug or idea gets tracked)
+- **Promote:** BACKLOG.md → git-bug issue (idea becomes active)
+- **Demote:** git-bug issue → BACKLOG.md (issue loses priority, close with link)
 - **Archive:** BACKLOG.md → strikethrough (idea is done, obsolete, or absorbed)
-- **Discard:** either tier → gone (idea has no remaining value)
+- **Discard:** any tier → gone (no remaining value)
 
 ## What the active backlog is for
 
-The GitHub backlog is the current plan, not storage for every idea. A good backlog
-is ordered, transparent, and actively maintained. It should make the next decisions obvious.
+The active backlog (`backlog.d/` + git-bug) is the current plan, not storage for every idea.
+A good backlog is ordered, transparent, and actively maintained. It should make the next
+decisions obvious.
 
 ## Core rules
 

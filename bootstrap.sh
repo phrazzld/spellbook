@@ -496,6 +496,18 @@ if [ "$installed" -eq 0 ]; then
   installed=1
 fi
 
+# --- Git hooks: install into spellbook repo itself ---
+if [ -n "$SPELLBOOK" ] && [ -d "$SPELLBOOK/.git/hooks" ] && [ -d "$SPELLBOOK/git-hooks" ]; then
+  info "Installing git hooks..."
+  for hook in "$SPELLBOOK"/git-hooks/*; do
+    [ -f "$hook" ] || continue
+    name="$(basename "$hook")"
+    ln -sfn "$hook" "$SPELLBOOK/.git/hooks/$name"
+    ok "  $name"
+  done
+  echo
+fi
+
 ok "Done. Installed to $installed harness(es)."
 echo
 info "Skills (${#GLOBAL_SKILLS[@]}): ${GLOBAL_SKILLS[*]}"

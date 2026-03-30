@@ -162,6 +162,7 @@ When settlement needs screenshots, videos, logs, or walkthrough proof:
 - Simplifying without verifying behavior is preserved
 - Skipping simplify because "it works"
 - Posting "PR Unblocked" while async reviewers can still add findings
+- Merging the PR yourself — your job ends at merge-ready. Never call `gh pr merge`. The human decides when to merge.
 
 ## Output
 

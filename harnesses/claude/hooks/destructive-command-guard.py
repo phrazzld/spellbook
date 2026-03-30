@@ -28,11 +28,7 @@ RM_COMMAND_PATTERN = re.compile(
 # (they won't accidentally match normal text)
 DESTRUCTIVE_SUBSTRINGS = [
     # Git commands
-    # NOTE: git checkout -- <specific-file> is handled by SAFE_CHECKOUT_PATTERN below.
-    # Only git checkout -- . (whole-directory discard) is blocked here via check_checkout_discard().
-    # ("git checkout -- ", ...) — replaced by smarter check below
     ("git reset --hard", "Destroys all uncommitted work. Use 'git stash' first."),
-    ("git clean -f", "Deletes untracked files permanently. Use 'git clean -n' to preview first."),
     ("git push --force", "Overwrites remote history. Use '--force-with-lease' instead."),
     ("git push -f ", "Overwrites remote history. Use '--force-with-lease' instead."),
     # git branch -D is handled by check_branch_delete() — only protects main/master
@@ -47,9 +43,8 @@ DESTRUCTIVE_SUBSTRINGS = [
 
 # Patterns that need word boundary checking (could appear in strings)
 DESTRUCTIVE_PATTERNS = [
-    # (regex_pattern, reason)
-    (re.compile(r'(^|[;&|`]|\$\()\s*git\s+restore\s+(?!--staged|-S)'),
-     "git restore can discard uncommitted changes. Use 'git restore --staged' for safe unstaging."),
+    # Local workspace ops (checkout --, restore, clean) are allowed.
+    # Only remote-affecting or irreversible commands are blocked.
 ]
 
 # Flags that are dangerous anywhere in the command
@@ -62,10 +57,6 @@ DANGEROUS_FLAGS = [
 SAFE = [
     "git checkout -b",         # new branch
     "git checkout --orphan",   # orphan branch
-    "git restore --staged",    # unstaging is safe
-    "git restore -S",          # unstaging short form
-    "git clean -n",            # dry run
-    "git clean --dry-run",     # dry run long form
     "--force-with-lease",      # safe force push
     "--force-if-includes",     # safe force push variant
 ]
@@ -155,21 +146,6 @@ def check_push_protection(cmd: str) -> tuple[bool, str]:
     return False, ""
 
 
-def check_checkout_discard(cmd: str) -> tuple[bool, str]:
-    """
-    Block 'git checkout -- .' and 'git checkout -- /' (discard everything)
-    but allow 'git checkout -- <specific-file>' (restore one file).
-    """
-    match = re.search(r"git\s+checkout\s+--\s+(.+)", cmd)
-    if not match:
-        return False, ""
-    target = match.group(1).strip()
-    # Block broad discards: '.', '/', '*', or empty
-    if target in (".", "/", "*") or not target:
-        return True, "Discards all uncommitted changes. Use 'git stash' first, or restore specific files."
-    # Specific file restore is safe
-    return False, ""
-
 
 def check_branch_delete(cmd: str) -> tuple[bool, str]:
     """Block force-deletion of protected branches. Feature branches are fine."""
@@ -246,11 +222,6 @@ def check_command(cmd: str) -> tuple[bool, str]:
 
     # Check branch force-delete (only protect main/master)
     blocked, reason = check_branch_delete(cmd)
-    if blocked:
-        return True, reason
-
-    # Check git checkout -- (allow specific files, block broad discards)
-    blocked, reason = check_checkout_discard(cmd)
     if blocked:
         return True, reason
 

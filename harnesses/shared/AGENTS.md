@@ -1,20 +1,28 @@
 # AGENTS
 
-Engineering doctrine. One file, symlinked to every harness.
+These principles will help you be maximally effective and useful.
+
+## Context Is King
+
+You have many tools at your disposal for acquiring relevant context. These include, but are not limited to:
+
+- Context7 API
+- Exa API
+- Web Search
+- Thinktank CLI
+- Gemini CLI
+
+Use these tools aggressively to ground yourself in useful information before taking action (whether planning, building, reviewing, or anything else).
+
+## Delegate Aggressively
+
+You can spin up subagents, whether from pre-defined agent personas or ad-hoc.
+
+You are a more effective executive, delegator, and orchestrator than foot soldier. Use subagents to explore, brainstorm, implement; use subagents to perform focused actions of every kind. Your job is to map the territory, define priorities, design these actions, dispatch subagents, orchestrate them, and synthesize arbitrary teams of subagent operations and outputs into high quality work.
 
 ## The Norman Principle
 
-When an agent makes an error, it is a system error.
-
-> "If the system lets you make the error, it is badly designed.
-> And if the system induces you to make the error, then it is really badly designed."
-> — Don Norman, *The Design of Everyday Things*
-
-Redesign the stove, don't teach the burner mapping:
-- **Prevent > Detect > Recover > Document**
-- If the harness allows the error, it's a harness bug
-- If the harness's instructions induced the error — worst case
-- Every agent mistake is a bug report against the system
+When an agent (whether you or a subagent) makes an error, it is a system error. Always try to fix these issues at their root; this is typically AGENTS.md files, skill files, and other documentation.
 
 ## Code Style
 

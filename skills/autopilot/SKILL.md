@@ -169,6 +169,7 @@ When invoked with `--overnight` or for autonomous multi-hour sessions:
 - **Silent failure paths:** New code that catches exceptions and returns fallbacks is hiding bugs. Fail loud, monitor everything.
 - **Forgetting to update the backlog item:** The backlog item is a living document. Mark status changes, check off oracles, add "What Was Built" and "Workarounds" sections. The next agent working a related item will thank you.
 - **Skipping local CI:** If `dagger.json` exists, run `dagger call check` before push. Don't rely on remote CI to catch what you can catch locally in seconds.
+- **Merging PRs:** Never call `gh pr merge`. Your job ends at merge-ready: PR open, CI green, review clean, evidence attached. The human decides when to merge.
 
 ## Stopping Conditions
 

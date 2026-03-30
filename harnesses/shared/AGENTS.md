@@ -26,7 +26,7 @@ When an agent (whether you or a subagent) makes an error, it is a system error. 
 
 ## Code Style
 
-**idiomatic** · **canonical** · **terse** · **minimal** · **textbook** · **formalize**
+**idiomatic** · **elegant** · **canonical** · **terse** · **minimal** · **textbook** · **formalize**
 
 Ousterhout's strategic design: deep modules with simple interfaces,
 information hiding, explicit invariants. Kill shallow pass-throughs,
@@ -52,18 +52,11 @@ Test behavior, not implementation. One behavior per test.
 ## Red Lines
 
 - **NEVER lower quality gates.** Thresholds, lint rules, strictness are load-bearing walls.
-- **NEVER assert model facts from memory.** Research first, always.
 - **CLI-first.** Never say "configure in dashboard."
 - **Plausible ≠ correct.** Code that compiles and passes tests can be
   fundamentally wrong. Define acceptance criteria before generating code.
   Benchmark performance-sensitive paths. If you can't explain why approach
   X over Y, investigate before shipping.
-
-## Orchestration
-
-Non-trivial work: planner → builder → critic pipeline.
-Workers propose; the lead decides. Serial only for tiny edits.
-For delegated work: surface progress delta and stall detection.
 
 ## After Compaction
 

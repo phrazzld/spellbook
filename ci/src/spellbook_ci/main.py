@@ -171,6 +171,110 @@ class SpellbookCi:
         )
 
     @function
+    async def check_exclusions(
+        self,
+        source: Annotated[
+            dagger.Directory,
+            DefaultPath("/"),
+            Ignore([".git", "__pycache__", ".venv", "ci"]),
+        ],
+    ) -> str:
+        """Scan source files for exclusion patterns (@ts-ignore, .skip, eslint-disable, etc.)."""
+        script = r"""
+import re, sys, pathlib
+
+PATTERNS = [
+    (r'@ts-ignore',                 'TypeScript @ts-ignore'),
+    (r'@ts-expect-error',           'TypeScript @ts-expect-error'),
+    (r'\bas\s+any\b',              'TypeScript as any'),
+    (r':\s*any\b',                 'TypeScript : any'),
+    (r'eslint-disable(?!.*--)',    'ESLint disable'),
+    (r'\.skip\s*\(',              'Test .skip()'),
+    (r'\bxit\s*\(',               'xit()'),
+    (r'\bxdescribe\s*\(',         'xdescribe()'),
+]
+
+GLOBS = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.py']
+SKIP = {'hooks/', 'coverage/', 'dist/', '.next/', 'node_modules/'}
+
+findings = []
+for g in GLOBS:
+    for path in pathlib.Path('.').glob(g):
+        path_str = str(path)
+        if any(s in path_str for s in SKIP):
+            continue
+        try:
+            text = path.read_text()
+        except Exception:
+            continue
+        for lineno, line in enumerate(text.splitlines(), 1):
+            for regex, label in PATTERNS:
+                if re.search(regex, line):
+                    findings.append(f'  {path}:{lineno}: {label}')
+
+if findings:
+    print(f'Found {len(findings)} exclusion(s):', file=sys.stderr)
+    print('\n'.join(findings[:20]), file=sys.stderr)
+    sys.exit(1)
+
+print('No exclusion patterns found.')
+"""
+        return await (
+            _lint_container(source)
+            .with_exec(["python3", "-c", script])
+            .stdout()
+        )
+
+    @function
+    async def check_portable_paths(
+        self,
+        source: Annotated[
+            dagger.Directory,
+            DefaultPath("/"),
+            Ignore([".git", "__pycache__", ".venv", "ci"]),
+        ],
+    ) -> str:
+        """Scan shell scripts and configs for hardcoded user home paths."""
+        script = r"""
+import re, sys, pathlib
+
+HOME_RE = re.compile(r'/Users/[a-zA-Z0-9_-]+/')
+WIN_RE  = re.compile(r'C:\\Users\\[a-zA-Z0-9_-]+\\')
+
+# Files where hardcoded paths are expected
+ALLOW = {'.claude/hooks', 'coverage/', '.next/', 'dist/', 'harnesses/claude/'}
+
+GLOBS = ['**/*.sh', '**/*.bash', '**/*.zsh', '**/Makefile', '**/.env*']
+
+findings = []
+for g in GLOBS:
+    for path in pathlib.Path('.').glob(g):
+        path_str = str(path)
+        if any(a in path_str for a in ALLOW):
+            continue
+        try:
+            text = path.read_text()
+        except Exception:
+            continue
+        for lineno, line in enumerate(text.splitlines(), 1):
+            m = HOME_RE.search(line) or WIN_RE.search(line)
+            if m:
+                findings.append(f'  {path}:{lineno}: {m.group(0)}')
+
+if findings:
+    print(f'Found {len(findings)} hardcoded path(s):', file=sys.stderr)
+    print('\n'.join(findings[:20]), file=sys.stderr)
+    sys.exit(1)
+
+print('No hardcoded user paths found.')
+"""
+        return await (
+            _lint_container(source)
+            .with_exec(["python3", "-c", script])
+            .stdout()
+        )
+
+    @function
     async def check(
         self,
         source: Annotated[
@@ -200,6 +304,8 @@ class SpellbookCi:
             tg.start_soon(run_gate, "check-index-drift", self.check_index_drift(source))
             tg.start_soon(run_gate, "check-vendored-copies", self.check_vendored_copies(source))
             tg.start_soon(run_gate, "test-bun", self.test_bun(source))
+            tg.start_soon(run_gate, "check-exclusions", self.check_exclusions(source))
+            tg.start_soon(run_gate, "check-portable-paths", self.check_portable_paths(source))
 
         # Format results
         lines = ["Spellbook CI Results", "=" * 40]

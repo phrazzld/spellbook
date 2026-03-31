@@ -1,7 +1,7 @@
 # Identify scaffold candidates across all skills
 
 Priority: low
-Status: ready
+Status: in-progress
 Estimate: S
 
 ## Goal

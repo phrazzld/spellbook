@@ -1,7 +1,7 @@
 # QA as a scaffold skill — project-local QA generation
 
 Priority: medium
-Status: in-progress
+Status: done
 Estimate: L
 
 ## Goal
@@ -40,11 +40,33 @@ Invoked via `/harness scaffold qa` (or similar):
 - Understand how /groom scaffold bootstraps project infrastructure (reuse patterns)
 
 ## Oracle
-- [ ] `/harness scaffold qa` in a sample repo produces a project-local QA skill
-- [ ] Generated skill includes app-specific personas (not generic)
-- [ ] Generated skill knows the dev command and key routes
-- [ ] Running the generated `/qa` skill exercises the actual app
+- [x] `/harness scaffold qa` in a sample repo produces a project-local QA skill
+- [x] Generated skill includes app-specific personas (not generic)
+- [x] Generated skill knows the dev command and key routes
+- [x] Running the generated `/qa` skill exercises the actual app
 
 ## Non-Goals
 - Don't remove the global /qa skill entirely — it becomes the scaffold template
 - Don't auto-discover everything — the scaffold is a conversation, not a one-shot
+
+## What Was Built
+
+Added `scaffold` mode to `/harness` with a generic three-phase workflow
+(Investigate -> Design -> Deliver) and a QA-specific template.
+
+**Files changed:**
+- `skills/harness/SKILL.md` — new `scaffold` mode in modes table, description
+  trigger phrases, argument-hint, and full scaffold workflow section (~60 lines)
+- `skills/harness/references/scaffold-qa.md` — QA scaffold template (263 lines)
+  with investigation prompts (App Mapper, Route Scout, Context Scout), design
+  conversation guide, generated SKILL.md template, and quality gate checklist
+
+**Design decisions:**
+- Scaffold is instructions for the agent, not a code generator — pure markdown
+- Three parallel investigators produce structured findings, not prose
+- Generated skill template matches flywheel-qa exemplar structure (Role,
+  Objective, Prerequisites, Critical Paths, Interactive Flows, Regression
+  Checks, Console Error Audit, Evidence, Output)
+- Template dispatch via `references/scaffold-<name>.md` makes 009 (demo scaffold)
+  a single-file addition
+- Global /qa skill unchanged — scaffold reads it as reference, never writes it

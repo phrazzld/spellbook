@@ -5,9 +5,10 @@ description: |
   hooks, CLAUDE.md, AGENTS.md, and enforcement infrastructure.
   Use when: "create a skill", "update skill", "improve the harness",
   "sync skills", "eval skill", "lint skill", "tune the harness",
-  "add skill", "remove skill", "convert agent to skill".
+  "add skill", "remove skill", "convert agent to skill",
+  "scaffold skill", "scaffold qa", "generate project-local skill".
   Trigger: /harness, /focus, /skill, /primitive.
-argument-hint: "[create|eval|lint|convert|sync|engineer] [target]"
+argument-hint: "[create|eval|lint|convert|sync|scaffold|engineer] [target]"
 ---
 
 # /harness
@@ -23,6 +24,7 @@ Build and maintain the infrastructure that makes agents effective.
 | **lint** | Validate skill quality against gates |
 | **convert** | Convert a sub-agent definition to a skill (or vice versa) |
 | **sync** | Pull primitives from spellbook into project harness dirs |
+| **scaffold** | Generate a project-local skill by investigating the codebase and designing with the user |
 | **engineer** | Design harness improvements (hooks, enforcement, context) |
 
 ## Creating a Skill
@@ -211,6 +213,66 @@ uses symlinks instead (edits propagate instantly).
 Managed primitives have a `.spellbook` marker file.
 /harness sync only touches directories with this marker.
 
+## Scaffolding a Project-Local Skill (/harness scaffold)
+
+Generate a customized, project-local skill by investigating the target codebase,
+designing with the user, and writing the artifacts. The scaffold is a conversation,
+not a one-shot generator.
+
+**Invocation:** `/harness scaffold <skill-name>` (e.g., `/harness scaffold qa`)
+
+### Three-Phase Workflow
+
+#### 1. Investigate (parallel sub-agents)
+
+Launch 2-3 investigators simultaneously to map the codebase:
+
+- **App Mapper:** What kind of app? Dev command, port, entry points, package manager.
+  Read package.json / Cargo.toml / go.mod / pyproject.toml, README, CLAUDE.md.
+- **Route Scout:** User-facing routes, endpoints, or CLI commands. Build a structured
+  route table with descriptions.
+- **Context Scout:** Auth mechanism, test infrastructure, existing QA/demo artifacts,
+  configured browser tools (check `.mcp.json`, `mcp.json`, settings for MCPs).
+
+Each investigator returns structured findings. Merge into a single findings document.
+
+#### 2. Design (conversation with user)
+
+Present findings and iterate:
+
+- Confirm/correct discovered routes, dev command, app type
+- Design personas specific to this app's domain (not generic "new user")
+- Select tooling (browser tools, evidence format) based on app characteristics
+- Agree on scope: which routes are critical path, which are deferred
+
+Do not proceed to Deliver until the user approves the design.
+
+#### 3. Deliver (write project-local skill)
+
+Write to `.claude/skills/<name>/` in the target project:
+
+- `SKILL.md` — frontmatter with trigger phrases, routes table, dev command,
+  evidence strategy, gotchas. Under 500 lines.
+- `references/` — personas, test plans, deep reference material as needed.
+
+Generated artifacts are committed to git, never gitignored.
+
+### Dispatch
+
+The scaffold loads a skill-specific template from `references/scaffold-<name>.md`.
+If the template doesn't exist, error with available templates.
+
+Currently supported: `qa` (see `references/scaffold-qa.md`).
+
+### Quality Bar
+
+The generated skill must match the specificity of a hand-written project-local
+skill. No generic placeholders ("TODO: fill in routes"). Every section contains
+concrete, project-specific content from the investigation phase.
+
+Exemplar: `caesar-in-a-year/.claude/skills/flywheel-qa/SKILL.md` — 133 lines,
+zero placeholders, project-specific routes, concrete workflows.
+
 ## Gotchas
 
 - Skills that describe procedures the model already knows are waste
@@ -220,3 +282,5 @@ Managed primitives have a `.spellbook` marker file.
 - Stale AGENTS.md instructions cause more harm than missing ones
 - After any model upgrade, re-eval your skills — some become dead weight
 - Regexes over agent prose are usually proof the boundary is wrong
+- Scaffold that produces generic placeholders has failed — the investigation phase
+  must yield concrete, project-specific findings that flow into the generated skill

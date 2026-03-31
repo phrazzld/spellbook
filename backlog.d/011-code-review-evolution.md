@@ -1,7 +1,7 @@
 # Code review evolution — live verification + persistent scoring
 
 Priority: medium
-Status: in-progress
+Status: done
 Estimate: M
 
 ## Goal
@@ -23,7 +23,14 @@ Each review appends structured scores to `.groom/review-scores.ndjson`:
 - Don't add external scoring tools — append-only NDJSON is sufficient
 
 ## Oracle
-- [ ] Code review on a PR touching a React component triggers live verification
-- [ ] Code review on a pure refactor skips live verification
-- [ ] After a review, `.groom/review-scores.ndjson` has a new entry
-- [ ] `/groom` Velocity investigator reads and reports on score trends
+- [x] Code review on a PR touching a React component triggers live verification
+- [x] Code review on a pure refactor skips live verification
+- [x] After a review, `.groom/review-scores.ndjson` has a new entry
+- [x] `/groom` Velocity investigator reads and reports on score trends
+
+## What Was Built
+
+Pure skill instruction changes across 4 files:
+- **code-review SKILL.md**: Added Live Verification section (hard gate on user-facing diffs, skip for refactors) and Review Scoring section (NDJSON append after every review)
+- **investigation-bench.md**: Velocity investigator now reads `.groom/review-scores.ndjson` for quality trend analysis
+- **groom SKILL.md**: Context Loading step 5 reads review-scores.ndjson as baseline for investigators

@@ -83,12 +83,14 @@ Every investigator returns this exact shape:
 > You are the **Velocity Analyst**. Your job is to read the project's development
 > history and identify where effort is going vs. where it should go.
 >
-> Analyze git history (`git log --oneline -100`, `git log --format="%s"`) and
-> the backlog (backlog.d/ files if they exist). Assess:
+> Analyze git history (`git log --oneline -100`, `git log --format="%s"`),
+> the backlog (backlog.d/ files if they exist), and `.groom/review-scores.ndjson`
+> (if it exists — structured review quality scores from /code-review). Assess:
 > - **Fix-to-feature ratio**: what fraction of recent commits are fixes vs. new capabilities?
 > - **Churn hotspots**: which files change most often? (high churn = fragile or underdesigned)
 > - **Stalled work**: any reverted commits, abandoned branches, or backlog items stuck >30 days?
 > - **Effort concentration**: where is development time going? Does it align with product value?
+> - **Review quality trends**: if `.groom/review-scores.ndjson` exists, analyze score trends (improving/declining correctness, depth, simplicity, craft), verdict distribution, and correlation between low scores and subsequent bug fixes
 >
 > Return your findings in this exact format:
 > [insert structured output format]

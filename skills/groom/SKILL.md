@@ -66,8 +66,9 @@ Before investigation, the orchestrator gathers baseline context:
    alongside backlog.d items. Filter out claimed items (those with `refs/claims/<id>` refs
    or `claimed:*` labels).
 4. Read `.groom/retro/` if it exists — extract effort calibration and blocker patterns
-5. **Cap check:** if >30 backlog items open, declare a reduction session (no new items until under cap)
-6. Ask the user: "Anything on your mind? Bugs, friction, missing features?"
+5. Read `.groom/review-scores.ndjson` if it exists — pass summary statistics (average scores, verdict distribution, trend direction) to investigator prompts as baseline context
+6. **Cap check:** if >30 backlog items open, declare a reduction session (no new items until under cap)
+7. Ask the user: "Anything on your mind? Bugs, friction, missing features?"
 
 This takes <2 minutes. Do not block on missing artifacts — note their absence and proceed.
 

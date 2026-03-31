@@ -20,11 +20,23 @@ Launch 3-5 subagents to review changes from distinct perspectives. Ousterhout, G
 
 Collect all verdicts. Deduplicate overlapping concerns. Rank by severity.
 
-If the change has user-facing components, verify the implementation actually works — not just that it reads well.
-
-If live verification fails, it's a blocking issue — treat as Don't Ship.
-
 **Any Don't Ship** → spawn a builder sub-agent for each blocking concern, giving it the specific file:line and fix instruction. Builder fixes, runs tests. Then re-review (return to step 2). Max 3 iterations.
+
+## Live Verification
+
+**Trigger:** the diff touches files matching user-facing patterns — `.tsx`, `.jsx`,
+`pages/`, `app/`, `routes/`, `api/`, `endpoints/`, or component directories.
+Determine this by scanning the diff file list.
+
+**Rule:** when triggered, at least one reviewer must exercise the affected
+routes/components (run the app, hit the endpoint, render the component).
+"Ship" verdict is **blocked** until live verification passes.
+
+**Skip:** pure refactors, config-only changes, test-only changes, and
+backend-only changes with no user-facing surface skip live verification.
+
+**Failure:** if live verification fails or cannot be performed, verdict is
+"Don't Ship" with reason: "live verification not performed/failed."
 
 ### Plausible-but-Wrong Patterns
 
@@ -42,6 +54,20 @@ After review passes, if diff > 200 LOC net:
 - Collapse unnecessary abstractions
 - Simplify complex conditionals
 - Remove compatibility shims with no real users
+
+## Review Scoring
+
+After the final verdict, append one JSON line to `.groom/review-scores.ndjson`
+in the target project root (create `.groom/` if needed):
+
+```json
+{"date":"2026-03-30","pr":42,"correctness":8,"depth":7,"simplicity":9,"craft":8,"verdict":"ship"}
+```
+
+- Scores (1-10) reflect bench consensus, not any single reviewer.
+- `pr` is the PR number, or `null` when reviewing a branch without a PR.
+- `verdict`: `"ship"`, `"conditional"`, or `"dont-ship"`.
+- This file is committed to git (not gitignored). `/groom` reads it for quality trends.
 
 ## Gotchas
 

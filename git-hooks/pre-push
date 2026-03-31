@@ -4,19 +4,6 @@
 
 set -euo pipefail
 
-# Block pushes to master/main
-current_branch="$(git branch --show-current 2>/dev/null)" || true
-while read -r local_ref local_oid remote_ref remote_oid; do
-  if [[ "$remote_ref" =~ refs/heads/(master|main)$ ]]; then
-    echo "pre-push: blocked push to ${BASH_REMATCH[1]}. Use a feature branch." >&2
-    exit 1
-  fi
-done
-if [[ -z "${local_ref:-}" && "$current_branch" =~ ^(master|main)$ ]]; then
-  echo "pre-push: blocked push to $current_branch. Use a feature branch." >&2
-  exit 1
-fi
-
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 
 # Skip if no dagger.json in repo

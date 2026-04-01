@@ -89,7 +89,7 @@ Ask: "Who uses this app? What are they trying to accomplish?"
 
 ### 3. Select Browser Tool
 
-Browser tool decision tree (from the global `/qa` skill):
+Browser tool decision tree (see `references/browser-tools.md` for details):
 
 1. Need existing browser auth/cookies? -> Chrome MCP
 2. Need hosted/stealth/anti-bot? -> Stagehand/Browserbase

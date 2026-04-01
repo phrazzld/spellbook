@@ -147,7 +147,7 @@ CI and reviews. The loop terminates when a full pass produces no changes.
 When settlement needs screenshots, videos, logs, or walkthrough proof:
 
 - Upload screenshots/GIFs to draft GitHub release assets, embed download URLs
-  in PR comments. See `/demo` skill (`references/pr-evidence-upload.md`) for the recipe.
+  in PR comments. See `skills/harness/references/pr-evidence-upload.md` for the recipe.
 - Convert `.webm` → `.gif` before upload (GitHub renders GIFs inline, not video).
 - Prefer CI artifacts or step summaries for generated verification output.
 - Never commit binary PR evidence into the repo.

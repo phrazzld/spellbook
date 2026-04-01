@@ -1,13 +1,26 @@
 # QA and Demo Artifacts
 
-These capabilities are now standalone composable skills:
+These capabilities are scaffold-first: each project generates its own
+project-local `/qa` and `/demo` skills via `/harness scaffold qa` and
+`/harness scaffold demo`. The global skills are thin redirects.
 
 - **`/qa`** — browser-based QA, exploratory testing, evidence capture, bug reporting
 - **`/demo`** — demo artifact generation, video composition, narration, PR evidence upload
 
-Autopilot invokes them in steps 5-6. They can also be invoked independently
+Autopilot invokes them in steps 6-7. They can also be invoked independently
 outside the autopilot pipeline (e.g., after manually shipping, or to iterate
 on demo artifacts for an existing PR).
+
+**If the project has no scaffolded skill:** The global fallback provides minimal
+methodology and a redirect to `/harness scaffold`. For best results, scaffold
+before running autopilot on a new project.
+
+Reference material for scaffolding lives in `skills/harness/references/`:
+- `browser-tools.md` — browser tool selection and setup
+- `evidence-capture.md` — evidence capture patterns per tool
+- `pr-evidence-upload.md` — uploading evidence to PRs via draft releases
+- `remotion.md` — Remotion video composition
+- `tts-narration.md` — TTS narration and voiceover
 
 ## Observability Instrumentation
 

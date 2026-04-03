@@ -69,18 +69,58 @@ These are not fixes. They are debt with compound interest.
 
 ## Review Comment Triage
 
-Read every comment on the PR. Classify and act:
+### Reading Protocol
 
-### In scope, valid
+**Read every comment in full.** Not summaries, not previews, not truncated
+API responses. Fetch the complete body of every review comment before
+classifying any of them. Automated reviewers (Gemini, Codex, CodeRabbit,
+etc.) are treated with the same rigor as human reviewers — their comments
+often contain specific code suggestions that are invisible in truncated views.
 
-Fix it. Commit with a message referencing the feedback. Reply confirming
-the fix with the commit SHA.
+For each comment:
+1. Read the full text including any code suggestions, diffs, or expandable sections
+2. If the comment references a file/line, read the actual code at that location
+3. If the comment includes a `suggestion` block, evaluate the suggested code directly
+
+### Disposition Criteria
+
+Before classifying a comment, answer these questions:
+
+1. **Does the comment identify a real problem?** Not "could this be better" but
+   "does this violate a contract, duplicate information, introduce a bug, or
+   create a maintenance hazard?" If yes → fix it.
+
+2. **Does the comment include a concrete code suggestion?** Evaluate the suggestion
+   on its merits. If the suggested code is correct and improves the PR, accept it.
+   Don't reject working code suggestions because you'd "rather do it differently."
+
+3. **Steelman test:** Before rejecting, articulate the strongest version of the
+   reviewer's argument. If you can't explain *why* they think this matters,
+   you haven't understood the comment yet.
+
+4. **Pattern check:** Does the comment point out an inconsistency with existing
+   patterns in the codebase? If yes, the default is to fix the inconsistency,
+   not to justify it.
+
+**Rejection requires specificity.** "By design" and "established pattern" are
+not valid rejection reasons on their own. You must cite the specific design
+decision or pattern, explain why it applies here, and explain why the
+reviewer's concern doesn't override it.
+
+### Classification
+
+After applying the disposition criteria, classify and act:
+
+#### In scope, valid
+
+Fix it. Commit with a message referencing the feedback. Reply **inline on
+the comment thread** confirming the fix with the commit SHA.
 
 ```
 Fixed in abc1234 — switched to the connection pool pattern you suggested.
 ```
 
-### Valid but out of scope
+#### Valid but out of scope
 
 Create a git-bug issue or `backlog.d/` item. Reply linking the issue.
 Explain why it's deferred — scope boundary, not dismissal.
@@ -90,7 +130,7 @@ Good catch. Filed as backlog.d/042-connection-pool-config.md — out of scope
 for this PR but should land before the next release.
 ```
 
-### Invalid
+#### Invalid (after steelman test passes)
 
 Reply with clear, specific reasoning. Reference code, tests, or docs that
 support your position. Be respectful but firm.
@@ -101,10 +141,15 @@ change would break the invariant documented in ARCHITECTURE.md § Connection
 Lifecycle. Happy to discuss further if I'm missing context.
 ```
 
-### Questions (not requests)
+#### Questions (not requests)
 
 Answer clearly. If the answer reveals a documentation gap, fix the gap
 in the same PR.
+
+### Ordering
+
+Address comments **one at a time**, not in batches. Fix → commit → reply
+→ next comment. Batch replies encourage bulk dismissal and skip evaluation.
 
 ## Async Settlement
 

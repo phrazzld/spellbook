@@ -1,7 +1,7 @@
 # Self-healing CI — auto-repair Dagger gate failures
 
 Priority: low
-Status: ready
+Status: in-progress
 Estimate: L
 
 ## Goal

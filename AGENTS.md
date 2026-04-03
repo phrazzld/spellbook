@@ -30,6 +30,17 @@ has gotchas section, passes eval baseline comparison.
 TDD default. Fix what you touch. Never lower quality gates.
 Never assert model facts from memory — `/research` first.
 
+## Product Lens
+
+Spellbook is primarily a product for other repositories. Its own repo is the
+proving ground, not the primary customer.
+
+- Prefer reusable primitives, scaffolds, references, and config-driven patterns
+  over spellbook-repo-only convenience.
+- Treat local automation as validation for downstream adoption, not the end goal.
+- If a backlog item only helps this repo, justify the downstream payoff or reshape it.
+- Prioritize work by leverage across downstream repos, then by benefit inside spellbook itself.
+
 ## Codification
 
 When encoding a learning: type system > lint rule > hook > test > CI > skill > AGENTS.md > memory.

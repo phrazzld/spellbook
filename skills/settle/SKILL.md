@@ -167,6 +167,9 @@ When settlement needs screenshots, videos, logs, or walkthrough proof:
 
 - Declaring "done" while CI is still running
 - Ignoring review comments instead of addressing them
+- **Truncating review comments** — reading 300-char previews instead of full text. Run `scripts/fetch-pr-reviews.sh <PR>` to get complete bodies.
+- **Reflexive dismissal** — rejecting automated reviewer comments with "by design" or "established pattern" without steelmanning. See disposition criteria in `references/pr-fix.md`.
+- **Batch reply without fixing** — replying to all comments in one PR comment instead of addressing each inline, one at a time.
 - Polish without re-running CI afterward
 - Refactoring without verifying behavior is preserved
 - Skipping refactor because "it works"

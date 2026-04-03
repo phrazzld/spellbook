@@ -57,8 +57,10 @@ Estimate: S | M | L | XL
 ```
 
 When grooming Spellbook itself, shape items for downstream-repo usefulness first.
-Spellbook-local work should survive only if it validates a reusable pattern or removes
-debt that blocks downstream adoption.
+Spellbook-local work should survive only if it creates reusable primitives,
+scaffolds, references, or policies; validates a proving-ground pattern meant to
+transfer outward; or removes debt that materially blocks downstream adoption or
+trust. See `references/backlog-doctrine.md` under "Spellbook Product Lens."
 
 ## Context Loading (all modes except tidy)
 

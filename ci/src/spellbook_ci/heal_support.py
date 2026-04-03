@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+import hashlib
 from pathlib import Path
 import re
 
@@ -57,6 +58,12 @@ def parse_check_failures(summary: str) -> list[GateFailure]:
     return failures
 
 
+def first_failed_gate(summary: str) -> str | None:
+    """Return the first failing gate name from a check() summary, if any."""
+    failures = parse_check_failures(summary)
+    return failures[0].name if failures else None
+
+
 def select_healable_failure(failures: list[GateFailure]) -> GateFailure:
     """Allow exactly one healable lint-style failure at a time."""
     if not failures:
@@ -101,6 +108,13 @@ def snapshot_delta(
 ) -> tuple[list[str], list[str]]:
     """Return paths to stage and remove when comparing two working-tree snapshots."""
 
+    def file_digest(path: Path) -> bytes:
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            while chunk := handle.read(64 * 1024):
+                digest.update(chunk)
+        return digest.digest()
+
     def collect(root: Path) -> dict[str, bytes]:
         files: dict[str, bytes] = {}
         for path in root.rglob("*"):
@@ -108,7 +122,7 @@ def snapshot_delta(
             if any(part in excluded_names for part in rel.parts):
                 continue
             if path.is_file():
-                files[rel.as_posix()] = path.read_bytes()
+                files[rel.as_posix()] = file_digest(path)
         return files
 
     before_files = collect(before_root)

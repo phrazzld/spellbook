@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "spellbook_
 from heal_support import (  # noqa: E402
     HEALABLE_GATES,
     GateFailure,
+    first_failed_gate,
     parse_check_failures,
     repair_branch_name,
     repair_commit_message,
@@ -52,6 +53,30 @@ class ParseCheckFailuresTests(unittest.TestCase):
             failures,
             [GateFailure(name="lint-python", detail="No stderr captured.")],
         )
+
+    def test_first_failed_gate_returns_first_failure_name(self) -> None:
+        summary = """Spellbook CI Results
+========================================
+  PASS  lint-yaml
+  FAIL  lint-shell
+         first detail
+  FAIL  lint-python
+         second detail
+========================================
+1 passed, 2 failed
+"""
+
+        self.assertEqual(first_failed_gate(summary), "lint-shell")
+
+    def test_first_failed_gate_returns_none_when_summary_has_no_failures(self) -> None:
+        summary = """Spellbook CI Results
+========================================
+  PASS  lint-yaml
+========================================
+1 passed, 0 failed
+"""
+
+        self.assertIsNone(first_failed_gate(summary))
 
 
 class SelectHealableFailureTests(unittest.TestCase):

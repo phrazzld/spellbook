@@ -51,7 +51,8 @@ When `dagger call check` fails, auto-spawn a builder sub-agent to diagnose and f
   3. runs `dagger call --allow-llm all -o . heal`,
   4. re-runs `dagger call check`,
   5. creates `heal/<gate>-<timestamp>` branch,
-  6. stages only the post-heal delta (not unrelated pre-existing changes),
+  6. stages only a repair-only patch for the post-heal delta and refuses
+     ambiguous overlap with pre-existing staged or local edits,
   7. commits `ci: heal <gate>`.
 
 ## Workarounds

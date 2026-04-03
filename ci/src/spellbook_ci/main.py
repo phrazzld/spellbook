@@ -7,6 +7,49 @@ import anyio
 import dagger
 from dagger import DefaultPath, Doc, Ignore, dag, function, object_type
 
+from .heal_support import (
+    GateFailure,
+    parse_check_failures,
+    repair_branch_name,
+    repair_commit_message,
+    select_healable_failure,
+)
+
+
+def _repair_prompt(
+    failure: GateFailure,
+    attempt: int,
+    attempts: int,
+) -> str:
+    """Prompt the LLM with the exact repair contract."""
+    return f"""
+You are repairing a failing CI gate in the spellbook repository.
+
+Gate: {failure.name}
+Attempt: {attempt} of {attempts}
+Failure details:
+{failure.detail}
+
+Rules:
+- Work only in /src.
+- Fix the root cause for {failure.name}. Do not broaden scope.
+- Keep edits minimal and ASCII unless the file already requires otherwise.
+- Re-run the targeted gate after each meaningful edit.
+- Before finishing, ensure the targeted gate passes and leave the updated repo in $repaired.
+- Do not use git. Branching and committing happen after verification.
+
+Available tool:
+- $builder is a writable repo container rooted at /src with the linting tools installed.
+
+Targeted validation commands:
+- lint-yaml: find . -maxdepth 2 \\( -name '*.yaml' -o -name '*.yml' \\) | xargs python3 -c 'import sys,yaml; [yaml.safe_load(open(f)) for f in sys.argv[1:]]'
+- lint-shell: find . -name '*.sh' -not -path './ci/*' | xargs shellcheck --severity=error
+- lint-python: find . -name '*.py' -not -path './ci/*' | xargs -I{{}} python3 -m py_compile {{}}
+- check-frontmatter: python3 scripts/check-frontmatter.py
+
+When the target gate passes, bind the updated container to $repaired.
+""".strip()
+
 
 def _lint_container(source: dagger.Directory) -> dagger.Container:
     """Base container with shellcheck and yamllint installed."""
@@ -28,6 +71,104 @@ def _lint_container(source: dagger.Directory) -> dagger.Container:
         .with_directory("/src", source)
         .with_workdir("/src")
     )
+
+
+def _repair_container(source: dagger.Directory) -> dagger.Container:
+    """Writable repair container with the repo mounted at /src."""
+    return (
+        dag.container()
+        .from_("python:3.12-slim")
+        .with_exec(["apt-get", "update", "-qq"])
+        .with_exec(
+            [
+                "apt-get",
+                "install",
+                "-y",
+                "-qq",
+                "--no-install-recommends",
+                "git",
+                "shellcheck",
+            ]
+        )
+        .with_exec(["pip", "install", "-q", "yamllint"])
+        .with_directory("/src", source)
+        .with_workdir("/src")
+    )
+
+
+async def _ensure_standard_clone(source: dagger.Directory) -> None:
+    """Require `.git` to be a directory so commit metadata survives export."""
+    try:
+        dot_git = (await source.file(".git").contents()).strip()
+    except Exception:
+        return
+
+    if dot_git.startswith("gitdir: "):
+        raise ValueError(
+            "heal currently requires a standard clone with a `.git` directory; git worktrees are not supported"
+        )
+
+    raise ValueError("heal requires `.git` to be a directory")
+
+
+async def _stage_changed_paths(
+    container: dagger.Container,
+    *,
+    added: list[str],
+    modified: list[str],
+    removed: list[str],
+) -> dagger.Container:
+    """Stage only the files changed by the repair."""
+    changed = sorted(set(added + modified))
+    if removed:
+        container = await container.with_exec(["git", "rm", "--ignore-unmatch", "--", *removed]).sync()
+    if changed:
+        container = await container.with_exec(["git", "add", "--", *changed]).sync()
+    return container
+
+
+async def _commit_repair(
+    source: dagger.Directory,
+    repaired: dagger.Directory,
+    *,
+    branch_name: str,
+    commit_message: str,
+) -> dagger.Directory:
+    """Commit the repaired working tree on a new branch and return the full repo directory."""
+    base_source = source.without_directory(".git")
+    changes = repaired.changes(base_source)
+    added = [path for path in await changes.added_paths() if path != ".git"]
+    modified = [path for path in await changes.modified_paths() if path != ".git"]
+    removed = [path for path in await changes.removed_paths() if path != ".git"]
+
+    if not added and not modified and not removed:
+        raise ValueError("heal produced no file changes to commit.")
+
+    commit_container = (
+        dag.container()
+        .from_("alpine/git:2.49.1")
+        .with_directory("/repo", source)
+        .with_workdir("/repo")
+        .with_exec(["git", "config", "--global", "--add", "safe.directory", "/repo"])
+        .with_exec(["git", "config", "user.name", "dagger-heal"])
+        .with_exec(["git", "config", "user.email", "dagger-heal@example.com"])
+    )
+
+    for path in sorted(set(added + modified)):
+        commit_container = commit_container.with_file(
+            f"/repo/{path}",
+            repaired.file(path),
+        )
+
+    commit_container = await commit_container.with_exec(["git", "switch", "-c", branch_name]).sync()
+    commit_container = await _stage_changed_paths(
+        commit_container,
+        added=added,
+        modified=modified,
+        removed=removed,
+    )
+    commit_container = await commit_container.with_exec(["git", "commit", "-m", commit_message]).sync()
+    return commit_container.directory("/repo")
 
 
 @object_type
@@ -292,7 +433,8 @@ print('No hardcoded user paths found.')
                 output = await coro
                 results.append((name, True, output.strip() if output else "OK"))
             except dagger.ExecError as e:
-                results.append((name, False, e.stderr.strip() if e.stderr else str(e)))
+                detail = (e.stdout or e.stderr or str(e)).strip()
+                results.append((name, False, detail or str(e)))
             except Exception as e:
                 results.append((name, False, str(e)))
 
@@ -330,3 +472,83 @@ print('No hardcoded user paths found.')
             raise Exception(summary)
 
         return summary
+
+    @function
+    async def heal(
+        self,
+        source: Annotated[
+            dagger.Directory,
+            DefaultPath("/"),
+            Ignore(["__pycache__", ".venv", "ci"]),
+            Doc("Repo source directory from a standard clone, including `.git`"),
+        ],
+        model: Annotated[str, Doc("LLM model for the repair agent")] = "gpt-4.1",
+        attempts: Annotated[int, Doc("Maximum repair attempts before escalation")] = 2,
+    ) -> dagger.Directory:
+        """Repair one failing lint-style gate and return a repo directory with a repair commit."""
+        if attempts < 1:
+            raise ValueError("attempts must be at least 1.")
+
+        await _ensure_standard_clone(source)
+        working_tree = source.without_directory(".git")
+
+        try:
+            summary = await self.check(working_tree)
+        except Exception as error:
+            summary = str(error)
+        else:
+            return source
+
+        failure = select_healable_failure(parse_check_failures(summary))
+        last_error = summary
+        working_source = working_tree
+
+        for attempt in range(1, attempts + 1):
+            repaired_source = working_source
+            work = (
+                dag.llm()
+                .with_model(model)
+                .with_env(
+                    dag.env()
+                    .with_string_input("gate", failure.name, "the failing gate to repair")
+                    .with_string_input("failure_summary", last_error, "latest failure summary")
+                    .with_container_input(
+                        "builder",
+                        _repair_container(working_source),
+                        "a writable repo container rooted at /src with lint tools installed",
+                    )
+                    .with_container_output(
+                        "repaired",
+                        "the updated repo container after the gate passes",
+                    )
+                )
+                .with_system_prompt(
+                    "You are a minimal repair agent. Fix the failing CI gate with the smallest correct change."
+                )
+                .with_prompt(_repair_prompt(failure, attempt, attempts))
+            )
+
+            try:
+                repaired_container = await work.env().output("repaired").as_container().sync()
+                repaired_source = repaired_container.directory("/src")
+                gate_runner = getattr(self, failure.name.replace("-", "_"))
+                await gate_runner(repaired_source)
+                await self.check(repaired_source)
+                branch_name = repair_branch_name(failure.name)
+                return await _commit_repair(
+                    source,
+                    repaired_source,
+                    branch_name=branch_name,
+                    commit_message=repair_commit_message(failure.name),
+                )
+            except Exception as error:
+                last_error = str(error)
+                if attempt == attempts:
+                    break
+                working_source = repaired_source
+
+        raise Exception(
+            "heal exhausted its repair budget after "
+            f"{attempts} attempt(s).\n"
+            f"Last error:\n{last_error}"
+        )

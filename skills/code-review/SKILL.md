@@ -15,6 +15,13 @@ Multi-provider, multi-harness code review. You are the marshal — read the diff
 select reviewers, craft prompts, dispatch everything in parallel, synthesize
 results, fix blockers, loop until clean.
 
+## Execution Stance
+
+You are the executive orchestrator.
+- Keep severity ranking, ship/no-ship judgment, and review synthesis on the lead model.
+- Delegate independent reviews and bounded fixes to focused subagents.
+- Prefer parallel reviewer fanout; serialize only for fix-and-recheck loops.
+
 ## Marshal Protocol
 
 1. **Read the diff.** `git diff $BASE...HEAD` (default base: `main` or `master`).

@@ -15,6 +15,13 @@ argument-hint: "[url|route|feature|scaffold]"
 QA effectiveness depends on project-specific context. This skill either runs
 QA (if a project-local skill exists) or scaffolds one.
 
+## Execution Stance
+
+You are the executive orchestrator.
+- Keep test scope, severity classification, and final pass/fail call on the lead model.
+- Delegate route execution and evidence capture to focused subagents.
+- Use independent verification when the same agent captured the evidence.
+
 ## Routing
 
 | Intent | Action |

@@ -1,85 +1,85 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Deterministically fetches ALL review comments and review bodies for a PR.
-# Outputs every comment with full body, author, file path, and line number.
-# No truncation, no summarization.
-#
-# Usage:
-#   fetch-pr-reviews.sh [PR_NUMBER]
-#   fetch-pr-reviews.sh              # infers from current branch
-#
-# Requires: gh CLI authenticated with repo access.
-
-# ---------------------------------------------------------------------------
-# Resolve PR
-# ---------------------------------------------------------------------------
-
-if [[ $# -ge 1 ]]; then
-  PR="$1"
-else
-  PR=$(gh pr view --json number -q .number 2>/dev/null) || {
-    echo "ERROR: No PR number provided and no PR found for current branch." >&2
-    exit 1
-  }
+if ! command -v gh >/dev/null 2>&1; then
+  echo "gh CLI is required" >&2
+  exit 1
 fi
 
-REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null) || {
-  echo "ERROR: Could not determine repository." >&2
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq is required" >&2
   exit 1
+fi
+
+selector="${1:-}"
+
+if [[ -n "$selector" ]]; then
+  pr_json="$(gh pr view "$selector" --json number,title,url,baseRefName,headRefName)"
+else
+  pr_json="$(gh pr view --json number,title,url,baseRefName,headRefName)"
+fi
+
+pr_number="$(jq -r '.number' <<<"$pr_json")"
+pr_title="$(jq -r '.title' <<<"$pr_json")"
+pr_url="$(jq -r '.url' <<<"$pr_json")"
+base_ref="$(jq -r '.baseRefName' <<<"$pr_json")"
+head_ref="$(jq -r '.headRefName' <<<"$pr_json")"
+repo="$(jq -r '.url | capture("https?://[^/]*/(?<repo>[^/]+/[^/]+)/pull/") | .repo' <<<"$pr_json")"
+
+fetch_array() {
+  local endpoint="$1"
+  gh api --paginate "$endpoint" | jq -s 'add // []'
 }
 
-echo "=== PR #${PR} on ${REPO} ==="
-echo ""
+reviews_json="$(fetch_array "/repos/$repo/pulls/$pr_number/reviews?per_page=100")"
+inline_comments_json="$(fetch_array "/repos/$repo/pulls/$pr_number/comments?per_page=100")"
+issue_comments_json="$(fetch_array "/repos/$repo/issues/$pr_number/comments?per_page=100")"
 
-# ---------------------------------------------------------------------------
-# Fetch review-level comments (top-level review bodies)
-# ---------------------------------------------------------------------------
+printf '# PR %s: %s\n' "$pr_number" "$pr_title"
+printf 'URL: %s\n' "$pr_url"
+printf 'Base: %s\n' "$base_ref"
+printf 'Head: %s\n\n' "$head_ref"
 
-echo "--- REVIEWS ---"
-echo ""
+printf '## Review Summaries\n\n'
+jq -r '
+  if length == 0 then
+    "_none_\n"
+  else
+    sort_by(.submitted_at // .created_at)[] |
+    "### Review #\(.id) — \(.user.login) — \(.state) — \(.submitted_at // .submittedAt // .created_at)\n" +
+    "Commit: \(.commit_id // "n/a")\n" +
+    "URL: \(.html_url // "n/a")\n\n" +
+    ((.body // "") | if . == "" then "_no body_" else . end) +
+    "\n"
+  end
+' <<<"$reviews_json"
 
-gh api "repos/${REPO}/pulls/${PR}/reviews" --paginate -q '
-  .[] | select(.body != null and .body != "") |
-  "=== Review by \(.user.login) | state=\(.state) | submitted=\(.submitted_at) ===\n\(.body)\n---\n"
-' 2>/dev/null || echo "(no review-level comments)"
+printf '\n## Inline Review Comments\n\n'
+jq -r '
+  if length == 0 then
+    "_none_\n"
+  else
+    sort_by(.created_at)[] |
+    "### Comment #\(.id) — \(.user.login) — \(.path):\(.line // .original_line // "n/a")\n" +
+    "Created: \(.created_at)\n" +
+    "Review ID: \(.pull_request_review_id // "n/a")\n" +
+    "In reply to: \(.in_reply_to_id // "n/a")\n" +
+    "URL: \(.html_url // "n/a")\n\n" +
+    (if (.diff_hunk // "") == "" then "" else "```diff\n\(.diff_hunk)\n```\n\n" end) +
+    ((.body // "") | if . == "" then "_no body_" else . end) +
+    "\n"
+  end
+' <<<"$inline_comments_json"
 
-echo ""
-
-# ---------------------------------------------------------------------------
-# Fetch inline review comments (file-level comments with full body)
-# ---------------------------------------------------------------------------
-
-echo "--- INLINE COMMENTS ---"
-echo ""
-
-gh api "repos/${REPO}/pulls/${PR}/comments" --paginate -q '
-  .[] |
-  "=== \(.user.login) | \(.path):\(.line // .original_line // "N/A") | \(.created_at) ===",
-  "in_reply_to: \(.in_reply_to_id // "none")",
-  "",
-  .body,
-  "",
-  "---",
-  ""
-' 2>/dev/null || echo "(no inline comments)"
-
-# ---------------------------------------------------------------------------
-# Fetch issue-level comments (PR conversation thread)
-# ---------------------------------------------------------------------------
-
-echo "--- PR CONVERSATION ---"
-echo ""
-
-gh api "repos/${REPO}/issues/${PR}/comments" --paginate -q '
-  .[] |
-  "=== \(.user.login) | \(.created_at) ===",
-  "",
-  .body,
-  "",
-  "---",
-  ""
-' 2>/dev/null || echo "(no conversation comments)"
-
-echo ""
-echo "=== END OF REVIEWS FOR PR #${PR} ==="
+printf '\n## PR Conversation Comments\n\n'
+jq -r '
+  if length == 0 then
+    "_none_\n"
+  else
+    sort_by(.created_at)[] |
+    "### Comment #\(.id) — \(.user.login) — \(.created_at)\n" +
+    "URL: \(.html_url // "n/a")\n\n" +
+    ((.body // "") | if . == "" then "_no body_" else . end) +
+    "\n"
+  end
+' <<<"$issue_comments_json"

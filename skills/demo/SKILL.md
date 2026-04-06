@@ -17,6 +17,13 @@ argument-hint: "[evidence-dir|feature|scaffold] [--format gif|video|launch] [upl
 Demo effectiveness depends on project-specific context. This skill either
 generates demo artifacts or scaffolds a project-local demo skill.
 
+## Execution Stance
+
+You are the executive orchestrator.
+- Keep shot selection, evidence sufficiency, and final artifact approval on the lead model.
+- Delegate planning, capture, and critique to separate focused subagents.
+- Use a cold reviewer for final quality judgment.
+
 ## Routing
 
 | Intent | Action |

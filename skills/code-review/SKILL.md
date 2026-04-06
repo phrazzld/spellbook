@@ -99,6 +99,25 @@ in the target project root (create `.groom/` if needed):
 - `providers`: which review tiers contributed.
 - This file is committed to git (not gitignored). `/groom` reads it for quality trends.
 
+## Verdict Ref (git-native review proof)
+
+After scoring, record the verdict as a git ref so `/settle` and pre-merge hooks
+can enforce review requirements without GitHub PRs.
+
+```bash
+source scripts/lib/verdicts.sh
+verdict_write "<branch>" '{"branch":"<branch>","base":"<base>","verdict":"<ship|conditional|dont-ship>","reviewers":[...],"scores":{...},"sha":"<HEAD-sha>","date":"<ISO-8601>"}'
+```
+
+- Write on every review, not just "ship" — "dont-ship" verdicts block `/settle --land`.
+- The `sha` field MUST be `git rev-parse HEAD` at the time of review. If the branch
+  gets new commits after review, the verdict is stale and `/settle` will re-trigger review.
+- Verdict refs live under `refs/verdicts/<branch>` and sync via `git push/fetch`.
+- Also write a copy to `.evidence/<branch>/<date>/verdict.json` for browsability.
+
+Skip this step if `scripts/lib/verdicts.sh` does not exist in the target project
+(Spellbook-only feature, not expected in downstream repos).
+
 ## Gotchas
 
 - **Self-review leniency:** Models overrate their own work. Reviewers must be separate sub-agents, not the builder evaluating itself.

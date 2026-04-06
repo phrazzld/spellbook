@@ -1,7 +1,7 @@
 # Project-local skill resolution doesn't override global skills
 
 Priority: high
-Status: done
+Status: pending
 Estimate: M
 
 ## Goal

@@ -1,7 +1,7 @@
 # Evolve /settle for git-native workflow
 
 Priority: high
-Status: pending
+Status: in-progress
 Estimate: M
 
 ## Goal

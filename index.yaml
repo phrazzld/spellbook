@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-04-06T18:46:35Z
+# Generated: 2026-04-08T21:00:34Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -40,8 +40,8 @@ skills:
     description: "Branch-aware simplification and refactoring workflow. On feature branches, compare against base and simplify the diff before merge. On primary branch, scan the full codebase, research prior art, and i"
     tags: [against,art,base,before,branch,branch-aware,branches,codebase,compare,diff]
   - name: reflect
-    description: "Session retrospective, learning extraction, harness postmortem, codification. Distill learnings into hooks/rules/skills. Fix the system, not the instance. Use when: \"done\", \"wrap up\", \"what did we lea"
-    tags: [codification,did,distill,done,extraction,fix,harness,hooks,instance,lea]
+    description: "Session retrospective, operator coaching, harness postmortem, and codification. Distill learnings into hooks/rules/skills while upgrading the user's prompts, technical specificity, and reusable vocabu"
+    tags: [coaching,codification,distill,harness,hooks,learnings,operator,postmortem,prompts,retrospective]
   - name: research
     description: "Web research, multi-AI delegation, and multi-perspective validation. /research [query], /research delegate [task], /research thinktank [topic]. Triggers: \"search for\", \"look up\", \"research\", \"delegate"
     tags: [delegate,delegation,look,multi-ai,multi-perspective,query,research,search,task,thinktank]

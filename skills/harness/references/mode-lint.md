@@ -13,6 +13,7 @@ Validate a skill against quality gates.
 | **Oracle** | Can you verify the skill worked? | Add success criteria |
 | **Freshness** | Do instructions match current model capabilities? | Strip non-load-bearing scaffold |
 | **Mode bloat** | >4 modes with inline content, or any single mode >60 lines inline? | Extract mode content to references/mode-*.md; use router pattern (see /investigate, /settle) |
+| **Reference integrity** | Do all referenced local files in routing tables, gotchas, and examples exist? | Create the missing file, fix the path, or delete the stale reference |
 
 ## Batch lint
 

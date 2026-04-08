@@ -24,7 +24,7 @@ point your harnesses at a specific checkout, set `SPELLBOOK_DIR=/path/to/spellbo
 | `/investigate` | Investigate, triage, fix |
 | `/groom` | Backlog management, brainstorming, rethink, scaffold |
 | `/harness` | Skill engineering, primitive management, context lifecycle |
-| `/reflect` | Session retrospective, learning extraction, harness postmortem |
+| `/reflect` | Session retrospective, harness postmortem, operator coaching |
 | `/research` | Multi-source web research, delegation, think tank |
 | `/shape` | Spec/design → context packet output |
 

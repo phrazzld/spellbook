@@ -1,200 +1,189 @@
-# DISTILL
+# /reflect distill
 
-Distill this repo's knowledge into a single, sharp `AGENTS.md`.
+End-of-session retrospective that upgrades both:
+- the **system** that produced the work
+- the **operator** who collaborated with it
 
-## Purpose
+This is the default reflect mode.
 
-- Rewrite the current repository's `AGENTS.md` into the best possible onboarding + operating guide for this project.
-- Output must let a new contributor start useful work in minutes, without asking questions.
-- Scope is this repo only; global philosophy lives in global agent instructions.
+## Objective
 
-## The Kill Test
+Produce concrete artifacts and concrete lessons.
 
-Every line in AGENTS.md must survive three questions:
+If the retro ends with only repo CRUD, it underfit the session.
+If it ends with only vague advice, it also failed.
 
-1. **Discoverable?** Would the agent figure this out from `ls`, `cat package.json`, or reading code? → DELETE
-2. **Surprising?** Does this describe something counter-intuitive or unexpected? If not → DELETE
-3. **Earned by pain?** Did this instruction come from something going wrong? → KEEP
+## Deliverables
 
-**Start with nothing. Wait for the agent to do something wrong. Write THAT down.**
+Every `distill` run must inspect both lanes:
 
-### What to kill
+1. **System lane**
+   - harness findings ranked by leverage
+   - codification targets chosen by hierarchy
+   - repo or harness edits applied when warranted
 
-- File trees (agent can `ls`)
-- "This project uses React with TypeScript" (agent can see tsconfig.json)
-- Architecture descriptions that restate what code shows
-- Technology stack versions (in package.json)
-- Module lists (in imports)
-- Development philosophy restating linter/type config
-- Sprint plans, roadmaps, marketing copy, performance metrics
-- Build system descriptions (in build config)
-- Testing framework choice (in test config)
+2. **Operator lane**
+   - prompt-quality findings tied to real turns in the session
+   - rewritten prompts that would have reduced search space
+   - 3-7 reusable concepts or vocabulary items that became load-bearing
+   - 1-3 concrete practices for the next session
 
-### What survives
+System lane output is mandatory.
+Operator lane output is mandatory only when there is concrete coaching to give.
+Otherwise state `No high-leverage operator feedback this session.` and move on.
 
-- "Run `yarn test:unit` not `npm test`" — weird, not discoverable
-- "Don't touch src/legacy/ — three enterprise clients depend on it" — earned by pain
-- "The auth middleware is load-bearing, all of it, don't be a hero" — counter-intuitive
-- "DATABASE_URL not POSTGRES_URL — Prisma's Rust engine reads it before Node" — painful gotcha
-- "e2e tests can't run headless due to extension limitations" — surprising constraint
-- "Delete compatibility shims in greenfield paths — they compound fast and mislead agents" — earned by pain
+## Workflow
 
-## Inputs
+### 1. Gather evidence
 
-- Always read, if present:
-  - Repo `AGENTS.md`.
-  - Existing harness-specific instruction files (e.g. `CLAUDE.md`).
-  - Root `README` and any high-signal docs in `docs/`.
-  - Key config / entry files (e.g. `package.json`, `pyproject.toml`, `docker-compose.yml`, main entrypoints).
+Collect evidence from:
+- the full conversation
+- git diff, git log, and worktree state
+- skill invocation logs when available
+- AGENTS.md, CLAUDE.md, and touched skill docs
+- any moments where the user corrected, redirected, or clarified the agent
 
-## Target Shape for `AGENTS.md`
+Prefer specific turns, code changes, and corrections over impressions.
 
-```markdown
-# AGENTS
+### 2. Split findings by responsibility
 
-## Purpose
-- What this repo is and why it exists.
+Classify each friction point:
 
-## Architecture Map
-- Main domains / services and how they fit.
-- Where to start reading code (file:line).
+| Class | Meaning | Typical fix |
+|------|---------|-------------|
+| **Harness failure** | The system should have prevented this | Hook, lint, test, skill, AGENTS |
+| **Shared ambiguity** | Neither side made the decisive constraint explicit | Better prompts plus better skill guidance |
+| **Operator-spec gap** | The key constraint existed only in the user's head | Coaching, prompt rewrite, concept extraction |
 
-## Run & Test
-- Commands to run app, tests, lint, typecheck.
-- Required env, secrets, or services.
+Use this rule aggressively:
 
-## Quality & Pitfalls
-- Definition of done, PR expectations, review norms.
-- Non-obvious invariants, footguns, "never do X".
+**If the answer already existed in the repo, tools, or prompt context, do not
+call it a user prompt problem.**
 
-## References
-- Key docs / ADRs / diagrams (paths).
-- External systems / dashboards / runbooks.
-```
+### 3. Run the system lane
 
-## The Delegation Pattern
+Walk findings top-down through the Swiss Cheese layers:
 
-**Use a second agent to draft AGENTS.md. You review and refine.**
+| Layer | What to check | Finding type |
+|-------|--------------|--------------|
+| **Instructions** | Missing guidance, stale rules, conflicting directives | Highest priority |
+| **Skills** | Missing skill, wrong description, skill that did not fire | High |
+| **Hooks/guardrails** | Missing pre-commit check, no validation hook | High |
+| **Tools/environment** | Missing MCP, broken tool, undocumented setup | Medium |
+| **Agent reasoning** | Wrong decision with correct context available | Lowest |
 
-Review the draft. Refine for accuracy and compression.
+Rank system findings by this order:
+1. Harness induction errors
+2. Missing control layers
+3. Available-but-undiscovered information
+4. Stale context
+5. Tooling gaps
+6. Workflow dead ends
+7. Code-level findings
 
-## Algorithm
-
-1. **Gather**
-   - Read inputs; understand what the repo does, how it runs, and how it fits into the wider system.
-2. **Kill Test every line**
-   - For each line, ask three questions:
-     - **Discoverable?** Would the agent figure this out from `ls`, `cat package.json`, or reading code? → DELETE
-     - **Surprising?** Does this describe something counter-intuitive? If behavior is what you'd expect → DELETE
-     - **Earned by pain?** Did this come from something going wrong? → KEEP
-   - Also classify:
-     - General / global → belongs in global agent instructions, do not restate here.
-     - Marketing copy / roadmaps / sprint plans → DROP (not instructions)
-3. **Draft new `AGENTS.md`**
-   - Fill the target shape above with tight, repo-specific bullets.
-   - Prefer bullets over paragraphs; every line must earn its place.
-   - Link to existing docs instead of duplicating them.
-4. **Compress**
-   - Apply the 3-2-1 test:
-     - 3 key decisions or invariants newcomers must know.
-     - 2 critical insights about architecture or workflow.
-     - 1 clear starting point in the codebase.
-   - Rewrite soft prose into sharp, actionable lines.
-5. **Validate**
-   - Run the checklist below.
-   - Only propose the new `AGENTS.md` once all checks pass.
-
-## Checklist (must pass)
-
-- [ ] Readable in ≤3 minutes; roughly ≤80 lines.
-- [ ] Every line fails the Kill Test (not discoverable from code/config/ls).
-- [ ] Run commands included (only if non-obvious — skip if standard `pnpm dev/test/build`).
-- [ ] Captures footguns, gotchas, and "don't touch X" warnings.
-- [ ] No file trees (agent can `ls`).
-- [ ] No technology stack listings (agent can read package.json).
-- [ ] No architecture descriptions that restate what code shows.
-- [ ] No marketing copy, roadmaps, or sprint plans.
-- [ ] Links to deeper docs / ADRs instead of copying them.
-- [ ] Does not restate global behavior or philosophy from global agent instructions.
-
-## Compression Examples
-
-**Kill** (discoverable): "The project uses Turborepo with pnpm workspaces, Next.js 15, React 19, Tailwind CSS, and TypeScript strict mode."
-→ Agent can read `package.json` and `tsconfig.json`.
-
-**Kill** (not surprising): "Content scripts inject into web pages. Background scripts handle lifecycle. Core modules have specific responsibilities."
-→ This is what every browser extension does.
-
-**Kill** (file tree):
-```
-├── apps/web/       # Next.js app
-├── packages/common/ # Shared types
-└── turbo.json      # Turborepo config
-```
-→ Agent can `ls`.
-
-**Keep** (earned by pain): "DATABASE_URL not POSTGRES_URL — Prisma's Rust engine reads it before Node.js starts. Runtime env modifications are too late in serverless."
-
-**Keep** (surprising): "e2e tests can't run headless due to browser extension limitations."
-
-**Keep** (load-bearing): "Don't touch src/legacy/ — three enterprise clients depend on it, and there are no tests."
-
-## Philosophy
-
-- Maximum signal per word.
-- Document what is not obvious from code or README.
-- If you can't find 3 decisions, 2 insights, and 1 starting point, read more code before writing.
-
-## Graduation Rules
-
-AGENTS.md is a staging area for learnings. When sections grow, graduate them:
-
-- **Patterns section > 10 lines** → extract to a skill
-- **Rules section > 5 items** → extract to an agent
-- **Workflow section > 3 steps** → extract to a command
-
-Keep AGENTS.md lean. Knowledge graduates to executable artifacts.
-
-## Codify Learnings
-
-**Default codify, justify exceptions.** Every correction, feedback, or debugging insight represents a system gap. No cross-session memory exists — if you learned it, codify it now.
-
-### Identify Learnings
-
-Scan the session for:
-- Errors encountered and how they were fixed
-- PR feedback received
-- Debugging insights ("the real problem was...")
-- Workflow improvements discovered
-- Patterns that should be enforced
-- Repeated explanations that should become cold-memory docs
-- Retrieval misses that exposed undocumented subsystems
-
-### Codification Targets
-
-Apply codification hierarchy (see `/reflect calibrate`) — highest reliability level wins:
+Apply codification hierarchy:
 
 ```
 Type system > Lint rule > Hook > Test > CI > Skill/reference > AGENTS.md > Memory
 ```
 
-Lint rules are ideal for: import boundaries, naming conventions, deprecated API usage,
-auth enforcement, architectural layering violations.
+### 4. Run the operator lane
 
-### Anti-Patterns
+Do not give vibes-based advice. Build an evidence-backed coaching pass.
 
-- "No patterns detected" — One occurrence is enough
-- "First time seeing this" — No cross-session memory exists
-- "Seems too minor" — Minor issues compound into major friction
-- "Not sure where to put it" — Brainstorm, ask, don't skip
-- "Already obvious" — If it wasn't codified, the system didn't know it
+#### Prompt archaeology
 
-### Report Format
+Find the turns where:
+- the user goal was clear but constraints arrived late
+- success criteria were implicit rather than stated
+- the agent explored a wide search space that a better prompt could have bounded
+- the user had to restate priority, scope, or desired output shape
 
+For each, capture:
+- **what the prompt did well**
+- **what was missing**
+- **a stronger rewrite**
+- **why the rewrite changes the search space**
+
+#### Specificity ladder
+
+When rewriting prompts, look for missing details in this order:
+1. **Goal** — what outcome matters?
+2. **Scope** — what is in and out?
+3. **Constraints** — what must not change?
+4. **Acceptance criteria** — how will we know it is done?
+5. **Artifacts** — code change, plan, summary, patch, benchmark, PR, etc.
+6. **Context pointers** — files, commands, URLs, prior decisions
+7. **Depth** — brainstorm, design, implement, review, or teach
+
+If a prompt was already strong on some of these, say so explicitly.
+
+#### Concept extraction
+
+Extract 3-7 concepts that were load-bearing in the session:
+- a term or phrase
+- a one-line definition
+- why it mattered here
+- when the user should reach for it next time
+
+Good concept cards are concrete:
+- `router pattern`
+- `reference integrity`
+- `acceptance criteria`
+- `codification hierarchy`
+- `shared ambiguity`
+
+Bad concept cards are generic:
+- `AI`
+- `coding`
+- `improvement`
+
+#### Next-session leverage
+
+End with 1-3 habits the user can try immediately, for example:
+- give acceptance criteria up front
+- point to the decisive files instead of naming the area loosely
+- say whether the goal is brainstorming, design, implementation, or critique
+
+### 5. Pre-mortem the next session
+
+Ask two questions:
+- What failure mode will this same harness produce next?
+- What failure mode will this same prompting style produce next?
+
+Codify preventive fixes only if they clear the leverage bar.
+
+## Report Format
+
+```markdown
+## System Changes
+- [finding] -> [codification target] -> [fix applied or proposed]
+
+## Operator Feedback
+- [observed prompt gap] -> [stronger prompt] -> [why it helps]
+- or `No high-leverage operator feedback this session.`
+
+## Concepts To Keep
+- [term]: [definition]. Use when [situation].
+
+## Next Session Moves
+- [habit or prompt pattern]
+
+## Not Codified
+- [finding]: [specific justification]
+
+## Pre-Mortem
+- [predicted system failure] -> [preventive fix]
+- [predicted operator failure] -> [preventive move]
 ```
-CODIFIED:
-- [learning] → [file]: [summary of change]
 
-NOT CODIFIED:
-- [learning]: [justification - must be specific]
-```
+## Gotchas
+
+- **Agent blame masquerading as user coaching**: If the system could have
+  retrieved the answer, coaching the user is wrong.
+- **Generic advice**: Replace "be more specific" with named missing fields.
+- **Overloading the user**: Cap concepts and habits. Curate, do not dump.
+- **Only praising or only criticizing**: operator feedback should start with
+  what worked, then sharpen what did not.
+- **Artifact-only retros**: a retro that changes files but teaches nothing is
+  incomplete.

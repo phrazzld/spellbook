@@ -1,11 +1,14 @@
 # Spellbook Index
-# Generated: 2026-04-08T21:31:43Z
+# Generated: 2026-04-15T01:18:05Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
   - name: a11y
     description: "Accessibility audit, remediation, and verification. WCAG 2.2 AA compliance. Three-agent protocol: audit (find issues) → remediate (fix them) → critique (verify fixes). Use when: \"accessibility aud"
     tags: [2,aa,accessibility,aud,audit,compliance,critique,find,fix,fixes]
+  - name: agent-browser
+    description: "Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web a"
+    tags: [a,agents,ai,automation,browser,buttons,cli,clicking,data,extracting]
   - name: agent-readiness
     description: "Assess and improve codebase readiness for AI coding agents. Dispatches parallel subagents to evaluate style, testing, docs, architecture, CI, observability, security, and dev environment. Produces a s"
     tags: [a,agents,ai,architecture,assess,ci,codebase,coding,dev,dispatches]
@@ -30,6 +33,9 @@ skills:
   - name: investigate
     description: "Investigate, audit, triage, and fix. Systematic debugging, incident lifecycle, domain auditing, and issue logging. Four-phase protocol: root cause → pattern analysis → hypothesis test → fix. Use"
     tags: [analysis,audit,auditing,cause,debugging,domain,fix,four-phase,hypothesis,incident]
+  - name: iterate
+    description: "Outer-loop orchestrator. Composes /shape, /autopilot, /code-review, /qa, /deploy, /reflect into a closed delivery cycle. Picks a backlog item, ships it, reflects, updates the bucket, picks the next. W"
+    tags: [a,autopilot,backlog,bucket,closed,code-review,composes,cycle,delivery,deploy]
   - name: model-research
     description: "Research, compare, and select LLM models for AI-powered apps and workflows. Finds latest models per family, verifies availability on target platform, compares pricing/benchmarks/tool-calling, produces"
     tags: [ai-powered,apps,availability,benchmarks,compare,compares,family,finds,latest,llm]

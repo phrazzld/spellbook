@@ -3,7 +3,7 @@
 #
 # Real mode (not implemented in Phase 1) shells out to /shape, /autopilot,
 # /code-review, /qa, /deploy, /reflect. Dry-run walks all 9 phases and writes
-# one daybook event per phase — this exists so contract #5 (≥ cycle.opened
+# one event per phase — this exists so contract #5 (≥ cycle.opened
 # and cycle.closed in cycle.jsonl) is verifiable without burning model budget.
 #
 # Flags:
@@ -23,8 +23,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 # Callers who override ITERATE_LOCK_PATH should pass an absolute path.
 cd "$REPO_ROOT"
 
-# shellcheck source=../../../scripts/lib/daybook.sh
-source "$REPO_ROOT/scripts/lib/daybook.sh"
+# shellcheck source=../../../scripts/lib/events.sh
+source "$REPO_ROOT/scripts/lib/events.sh"
 # shellcheck source=../../../scripts/lib/iterate_lock.sh
 source "$REPO_ROOT/scripts/lib/iterate_lock.sh"
 
@@ -135,19 +135,19 @@ run_cycle() {
     sleep "$ITERATE_SIGINT_TEST_SLEEP"
   fi
 
-  daybook_event "$log" cycle.opened pick orchestrator \
+  emit_event "$log" cycle.opened pick orchestrator \
     "{\"note\":\"cycle started (dry_run=$DRY_RUN)\"}"
 
   if [ "$DRY_RUN" -eq 1 ]; then
     # Walk phases 1-9 from 028 control flow. Each phase is a no-op that
     # writes a placeholder event so the full event trail is exercised.
-    daybook_event "$log" shape.done         shape   planner       '{"note":"dry-run"}'
-    daybook_event "$log" build.done         build   builder       '{"note":"dry-run"}'
-    daybook_event "$log" review.iter        review  critic        '{"note":"dry-run","iter":1}'
-    daybook_event "$log" ci.done            ci      dagger        '{"note":"dry-run"}'
-    daybook_event "$log" qa.done            qa      qa            '{"note":"dry-run"}'
-    daybook_event "$log" deploy.done        deploy  deployer      '{"note":"dry-run"}'
-    daybook_event "$log" reflect.done       reflect reflector     '{"note":"dry-run"}'
+    emit_event "$log" shape.done         shape   planner       '{"note":"dry-run"}'
+    emit_event "$log" build.done         build   builder       '{"note":"dry-run"}'
+    emit_event "$log" review.iter        review  critic        '{"note":"dry-run","iter":1}'
+    emit_event "$log" ci.done            ci      dagger        '{"note":"dry-run"}'
+    emit_event "$log" qa.done            qa      qa            '{"note":"dry-run"}'
+    emit_event "$log" deploy.done        deploy  deployer      '{"note":"dry-run"}'
+    emit_event "$log" reflect.done       reflect reflector     '{"note":"dry-run"}'
     # harness.suggested is a Phase 2 event (writes to a branch, not dry-run).
     # Emitting it here would train the wrong mental model of the contract.
   else
@@ -156,15 +156,15 @@ run_cycle() {
     # any handler is missing we write phase.failed, release the lock via trap,
     # and exit non-zero.
     echo "iterate: real mode not yet wired in Phase 1 — use --dry-run" >&2
-    daybook_event "$log" phase.failed pick orchestrator \
+    emit_event "$log" phase.failed pick orchestrator \
       '{"note":"real mode unimplemented in Phase 1","reason":"phase-1-scope"}'
-    daybook_event "$log" cycle.closed close orchestrator '{"status":"aborted"}'
+    emit_event "$log" cycle.closed close orchestrator '{"status":"aborted"}'
     iterate_release "$cycle_id"
     trap - EXIT INT TERM
     return 1
   fi
 
-  daybook_event "$log" cycle.closed close orchestrator \
+  emit_event "$log" cycle.closed close orchestrator \
     "{\"status\":\"closed\",\"cycle_id\":\"$cycle_id\"}"
 
   iterate_release "$cycle_id"

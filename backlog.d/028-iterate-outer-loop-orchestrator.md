@@ -27,12 +27,12 @@ One cycle = one bucket item worked end-to-end. Each cycle gets a ULID:
 
 ```
 backlog.d/_cycles/<ulid>/
-├── cycle.jsonl        # append-only typed event log (the daybook)
+├── cycle.jsonl        # append-only typed event log
 ├── evidence/          # QA artifacts, review transcripts, diffs
 └── manifest.json      # {item_id, branch, claim, started, closed, status}
 ```
 
-### Daybook Event Schema (load-bearing contract)
+### Event Schema (load-bearing contract)
 
 Prose-only append logs rot — that's what ate `/focus`. Typed envelope,
 free-text note field for what we didn't anticipate:
@@ -49,7 +49,7 @@ free-text note field for what we didn't anticipate:
   "agent": "planner",
   "refs": ["path/to/artifact"],
   "findings": [{...}],        // kind-specific payload
-  "note": "free text"         // Pragmatic-daybook escape hatch
+  "note": "free text"         // escape hatch
 }
 ```
 
@@ -79,7 +79,7 @@ per repo. SIGINT releases cleanly.
 │     + CI        → dagger call check      │  ci.done
 │  5. qa          → /qa (auto-scaffold)    │  qa.done
 │  6. deploy      → /deploy (auto-scaffold)│  deploy.done
-│  7. reflect     → /reflect on daybook    │  reflect.done
+│  7. reflect     → /reflect on events    │  reflect.done
 │  8. update-bucket → WRAP emitter         │  writes backlog.d/NNN-*.md
 │  9. update-harness → harness.suggested   │  writes to PR branch only
 └── CYCLE CLOSED ─────────────────────────┘
@@ -104,7 +104,7 @@ Without `--budget`, `/iterate` refuses unattended mode.
 | Component | Type | Owns |
 |---|---|---|
 | `skills/iterate/SKILL.md` | skill | orchestration, event writing, lock, budget, stop predicates |
-| `scripts/daybook.sh` | script | `daybook_event <kind> <json>` — atomic JSONL append with fsync |
+| `scripts/lib/events.sh` | script | `emit_event <path> <kind> <phase> <agent> <payload>` — atomic JSONL append with fsync |
 | `scripts/scorer.sh` | script | bucket scoring (priority × recency-of-retro-signal) |
 | `agents/bucket-scorer.md` | agent | optional Explore agent when backlog > 20 items |
 | existing `/shape`, `/autopilot`, `/code-review`, `/qa`, `/deploy`, `/reflect` | skills | phase handlers, unchanged |
@@ -153,15 +153,15 @@ Single ownership file. Two disciplined consumers. No race.
 |---|---|
 | Phase handler fails | Write `phase.failed`, stop cycle, keep lock until `/iterate --resume <ulid>` or `--abandon <ulid>` |
 | Budget exceeded mid-cycle | Finish current phase, write `budget.exhausted`, stop |
-| Daybook write fails | Fatal — fsync every event; corrupted JSONL breaks reflect |
+| Event log write fails | Fatal — fsync every event; corrupted JSONL breaks reflect |
 | Two `/iterate` attempts | Second exits on lock |
 | `/autopilot` internal fail | Bubble up; cycle fails; no auto-retry (prevents cost spiral) |
 
 ## MVP Slice (~5 dev-days)
 
-1. **Daybook + `/iterate` skeleton** (1.5 days)
+1. **Events + `/iterate` skeleton** (1.5 days)
    - `skills/iterate/SKILL.md` with single-cycle mode (`--max-cycles 1` default)
-   - `scripts/daybook.sh` with typed event schema
+   - `scripts/lib/events.sh` with typed event schema
    - Event writing at each phase boundary
    - Lock file with clean SIGINT
 
@@ -202,7 +202,7 @@ Single ownership file. Two disciplined consumers. No race.
 
 - Depends on: 022 (swarm review default), 025 (dagger merge gate)
 - Sibling split-out: 030 (static bench-map — independently shippable)
-- Unlocks: 029 (`/tailor` — uses daybook for eval signal),
+- Unlocks: 029 (`/tailor` — uses cycle events for eval signal),
   031 (harness auto-tune — parked until ≥20 cycles produce signal)
 - Supersedes parts of: `/autopilot` continuous-mode speculation
 

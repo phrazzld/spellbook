@@ -244,7 +244,7 @@ Validate premise: if three real repos can't show tailored > vanilla on the A/B, 
 
 ## Related
 
-- Depends on: 028 (`/iterate` — daybook provides eval signal and refresh triggers in v2)
+- Depends on: 028 (`/iterate` — cycle events provide eval signal and refresh triggers in v2)
 - Structurally supersedes: 014 (archived 2026-04-14 — commit `6d3944d` fixed
   the name-matching root cause; `tailor-lint.sh` prevents the broader class
   of shadowing bugs)

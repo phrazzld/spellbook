@@ -4,7 +4,7 @@ description: |
   Outer-loop orchestrator. Composes /shape, /autopilot, /code-review, /qa,
   /deploy, /reflect into a closed delivery cycle. Picks a backlog item,
   ships it, reflects, updates the bucket, picks the next. Writes a typed
-  event log (daybook) per cycle.
+  event log per cycle.
   Use when: continuous delivery, "iterate", "run the loop", "next N items",
   "outer loop", "cycle", "overnight queue".
   Trigger: /iterate, /cycle.
@@ -22,7 +22,7 @@ This is the outer loop (async delivery). `/autopilot` is the inner loop
 ## Phase 1 Scope (current)
 
 - Dry-run end-to-end walk of all 9 phases
-- Typed daybook events (`scripts/lib/daybook.sh`)
+- Typed cycle events (`scripts/lib/events.sh`)
 - Single-instance lock (`scripts/lib/iterate_lock.sh`) with stale-pid steal
 - **Single-cycle only.** Multi-cycle (`--max-cycles > 1`) is Phase 2; the
   current guard would release the lock between cycles and let a second
@@ -38,7 +38,7 @@ proves the event/lock contract; Phase 2 wires the handlers.
 You are the executive orchestrator.
 - Keep work selection, stop judgment, and cycle close/abandon on the lead model.
 - Delegate each phase to its named skill; never inline phase logic here.
-- Treat the daybook as the source of truth — every phase boundary writes an event.
+- Treat the event log as the source of truth — every phase boundary writes an event.
 
 ## Flags
 
@@ -59,12 +59,12 @@ effect in Phase 1.
 
 ```
 backlog.d/_cycles/<ulid>/
-├── cycle.jsonl        # append-only typed events (the daybook)
+├── cycle.jsonl        # append-only typed events (the event log)
 ├── evidence/          # QA artifacts, review transcripts, diffs
 └── manifest.json      # {item_id, branch, claim, started, closed, status}
 ```
 
-## Daybook Event Schema
+## Event Schema
 
 Every event is one JSON line with this envelope:
 
@@ -106,7 +106,7 @@ Kinds: `cycle.opened`, `shape.done`, `build.done`, `review.iter`, `ci.done`,
 │     + CI        → dagger call check          │  ci.done
 │  5. qa          → /qa (auto-scaffold)        │  qa.done
 │  6. deploy      → /deploy (auto-scaffold)    │  deploy.done
-│  7. reflect     → /reflect on daybook        │  reflect.done
+│  7. reflect     → /reflect on events         │  reflect.done
 │  8. update-bucket → WRAP emitter             │  writes backlog.d/NNN-*.md
 │  9. update-harness → harness.suggested       │  writes to PR branch only
 └── CYCLE CLOSED ──────────────────────────────┘
@@ -169,5 +169,5 @@ Known limitations:
 - **`harness.suggested` writes to a branch only** (never main). Phase 2
   emits the event and wires the branch write; Phase 1 dry-run does not emit
   it (would train the wrong mental model of the contract).
-- **Closed-enum kinds.** Adding a new kind requires updating `DAYBOOK_KINDS`
-  in `daybook.sh` and every consumer — don't invent kinds inline.
+- **Closed-enum kinds.** Adding a new kind requires updating `EVENT_KINDS`
+  in `events.sh` and every consumer — don't invent kinds inline.

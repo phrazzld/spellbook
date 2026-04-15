@@ -1,11 +1,11 @@
-# GEPA-style harness auto-tune from daybook signal
+# GEPA-style harness auto-tune from cycle events
 
 Priority: low
 Status: parked
 Estimate: L
 
 Parked during 2026-04-14 grooming. Do not start until `/iterate` (028) has
-produced ≥20 cycles of daybook data. Without signal, there's nothing to tune
+produced ≥20 cycles of event data. Without signal, there's nothing to tune
 on, and prompt-evolution infrastructure ahead of signal is the same failure
 mode that ate `/focus`.
 
@@ -26,7 +26,7 @@ didn't include securitron"), and GEPA can evolve prompts using those
 reasons. MIPROv2 only optimizes on scalar metrics. For a harness where
 the feedback signal is prose, GEPA is the correct backend.
 
-## Signal Schema (to be defined against real daybook data)
+## Signal Schema (to be defined against real cycle event data)
 
 ```json
 {
@@ -62,7 +62,7 @@ next /iterate cycle picks up the PR as a backlog item
 - [ ] `backlog.d/_cycles/*.jsonl` files contain reflect.done events with
       actionable targets in ≥50% of cycles
 - [ ] At least one concrete harness improvement has been identified
-      manually from daybook review (proving signal exists before automating)
+      manually from cycle event review (proving signal exists before automating)
 
 ## Oracle (for eventual v2)
 
@@ -77,10 +77,10 @@ next /iterate cycle picks up the PR as a backlog item
 - Auto-merging tuner proposals (humans decide)
 - Tuning the tuner itself (meta-meta)
 - Touching global AGENTS.md without human approval
-- Starting this work before 028 produces daybook data
+- Starting this work before 028 produces event data
 
 ## Related
 
-- Depends on: 028 (`/iterate` produces the daybook signal this consumes)
+- Depends on: 028 (`/iterate` produces the event signal this consumes)
 - Related pattern: 023 (review score feedback loop — similar retro→improvement
   arc, different target surface)

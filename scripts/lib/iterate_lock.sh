@@ -3,7 +3,7 @@
 # Lock file: .spellbook/iterate.lock
 # Content:   {"pid": <int>, "cycle_id": "<ulid>", "started_at": "<iso8601 UTC>"}
 #
-# Two /iterate processes in the same repo would race on daybook + bucket
+# Two /iterate processes in the same repo would race on event log + bucket
 # updates. We keep a filesystem lock (not a git ref) because it's machine-
 # local state, and we steal stale locks when the owning pid is dead so a
 # SIGKILL'd cycle doesn't wedge the repo forever.

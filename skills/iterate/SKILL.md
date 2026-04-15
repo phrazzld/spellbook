@@ -130,7 +130,16 @@ bash skills/iterate/scripts/iterate.sh --max-cycles 5 --budget 20
 `.spellbook/iterate.lock` holds `{pid, cycle_id, started_at}`. SIGINT, EXIT, and
 TERM traps release the lock — scoped to the acquiring `cycle_id` so a late
 trap from a prior cycle cannot wipe a successor's lock. Stale locks (owner
-pid dead, or JSON corrupt) are stolen silently.
+pid dead, or JSON corrupt) are stolen atomically via `O_CREAT|O_EXCL`.
+
+Known limitations:
+- **Pid recycling.** If the recorded pid is reused by an unrelated process,
+  `kill -0` reports alive and acquire refuses. Manual recovery:
+  `rm .spellbook/iterate.lock`. A future revision may add `started_at`-based
+  disambiguation.
+- **`python-ulid` is optional.** When unavailable, the fallback emits real
+  26-character Crockford base32 ULIDs (10 chars timestamp + 16 chars random),
+  lexicographically sortable and interchangeable with the library output.
 
 ## Stop Conditions (Phase 1)
 

@@ -241,25 +241,66 @@ test_sigint_releases_lock_via_trap() {
 test_sigint_exits_with_130() {
   # SKILL.md contract: "SIGINT → trap releases lock, exit 130". A pure
   # `trap iterate_release EXIT INT TERM` without explicit `exit 130` causes
-  # bash to run the handler and continue the script. We need to exit 130.
+  # bash to run the handler and continue the script.
   #
-  # Strategy: run iterate.sh in dry-run with a synthetic pause injected via
-  # ITERATE_SIGINT_TEST_SLEEP (an env-only hook honored by iterate.sh to let
-  # tests catch the SIGINT window). Send SIGINT during the sleep and capture
-  # exit code.
-  ITERATE_SIGINT_TEST_SLEEP=2 bash "$ITERATE_SH" --dry-run >/dev/null 2>&1 &
-  local pid=$!
-  # Wait for iterate to acquire the lock before interrupting.
-  local waited=0
-  while [ ! -f "$ITERATE_LOCK_PATH" ] && [ "$waited" -lt 30 ]; do
-    sleep 0.05
-    waited=$((waited + 1))
-  done
-  kill -INT "$pid" 2>/dev/null || true
-  local rc=0
-  wait "$pid" || rc=$?
+  # Gotcha: bash backgrounded with `&` inherits SIG_IGN for SIGINT and a
+  # `trap "..." INT` inside the script can't override it ("signals ignored
+  # upon entry to the shell cannot be trapped"). So we drive the SIGINT via
+  # python3's subprocess, which restores default signal handlers in the
+  # child. This is how a real interactive ^C reaches iterate.sh.
+  #
+  # ITERATE_SIGINT_TEST_SLEEP is an env-only hook iterate.sh honors to pause
+  # after acquire, giving us a deterministic SIGINT window.
+  local rc
+  rc="$(ITERATE_LOCK_PATH="$ITERATE_LOCK_PATH" \
+        ITERATE_SH="$ITERATE_SH" \
+        python3 - <<'PYEOF'
+import os, signal, subprocess, time
+env = os.environ.copy()
+env["ITERATE_SIGINT_TEST_SLEEP"] = "3"
+p = subprocess.Popen(["bash", env["ITERATE_SH"], "--dry-run"],
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     env=env)
+# Wait for lock file so we know the trap is in place.
+lock = env["ITERATE_LOCK_PATH"]
+for _ in range(60):
+    if os.path.exists(lock):
+        break
+    time.sleep(0.05)
+p.send_signal(signal.SIGINT)
+p.wait()
+print(p.returncode)
+PYEOF
+)"
   assert_eq "SIGINT causes iterate.sh to exit 130" "130" "$rc"
   assert_eq "lock cleared after SIGINT" "no" \
+    "$([ -f "$ITERATE_LOCK_PATH" ] && echo yes || echo no)"
+}
+
+test_sigterm_exits_with_143() {
+  # Companion to SIGINT: SIGTERM must exit 143 (128 + 15).
+  local rc
+  rc="$(ITERATE_LOCK_PATH="$ITERATE_LOCK_PATH" \
+        ITERATE_SH="$ITERATE_SH" \
+        python3 - <<'PYEOF'
+import os, signal, subprocess, time
+env = os.environ.copy()
+env["ITERATE_SIGINT_TEST_SLEEP"] = "3"
+p = subprocess.Popen(["bash", env["ITERATE_SH"], "--dry-run"],
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     env=env)
+lock = env["ITERATE_LOCK_PATH"]
+for _ in range(60):
+    if os.path.exists(lock):
+        break
+    time.sleep(0.05)
+p.send_signal(signal.SIGTERM)
+p.wait()
+print(p.returncode)
+PYEOF
+)"
+  assert_eq "SIGTERM causes iterate.sh to exit 143" "143" "$rc"
+  assert_eq "lock cleared after SIGTERM" "no" \
     "$([ -f "$ITERATE_LOCK_PATH" ] && echo yes || echo no)"
 }
 

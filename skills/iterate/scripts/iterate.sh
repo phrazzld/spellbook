@@ -107,9 +107,22 @@ run_cycle() {
     return 1
   fi
   # Release on any exit path — SIGINT, normal return, or failure. Scoped to
-  # this cycle_id so traps don't clobber a successor.
+  # this cycle_id so traps don't clobber a successor. Bash's default after
+  # an INT/TERM handler is to resume the script, not exit — we must exit
+  # explicitly to honor the SKILL.md contract (SIGINT → 130, SIGTERM → 143).
   # shellcheck disable=SC2064  # we want $cycle_id expanded now
-  trap "iterate_release '$cycle_id'" EXIT INT TERM
+  trap "iterate_release '$cycle_id'" EXIT
+  # shellcheck disable=SC2064
+  trap "iterate_release '$cycle_id'; exit 130" INT
+  # shellcheck disable=SC2064
+  trap "iterate_release '$cycle_id'; exit 143" TERM
+
+  # Test hook: if ITERATE_SIGINT_TEST_SLEEP is set, pause after acquire so
+  # integration tests can reliably fire SIGINT against the cycle. No effect
+  # in normal operation (env var unset).
+  if [ -n "${ITERATE_SIGINT_TEST_SLEEP:-}" ]; then
+    sleep "$ITERATE_SIGINT_TEST_SLEEP"
+  fi
 
   daybook_event "$log" cycle.opened pick orchestrator \
     "{\"note\":\"cycle started (dry_run=$DRY_RUN)\"}"

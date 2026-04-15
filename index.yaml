@@ -1,14 +1,11 @@
 # Spellbook Index
-# Generated: 2026-04-15T16:03:28Z
+# Generated: 2026-04-15T20:49:34Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
   - name: a11y
     description: "Accessibility audit, remediation, and verification. WCAG 2.2 AA compliance. Three-agent protocol: audit (find issues) → remediate (fix them) → critique (verify fixes). Use when: \"accessibility aud"
     tags: [2,aa,accessibility,aud,audit,compliance,critique,find,fix,fixes]
-  - name: agent-browser
-    description: "Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web a"
-    tags: [a,agents,ai,automation,browser,buttons,cli,clicking,data,extracting]
   - name: agent-readiness
     description: "Assess and improve codebase readiness for AI coding agents. Dispatches parallel subagents to evaluate style, testing, docs, architecture, CI, observability, security, and dev environment. Produces a s"
     tags: [a,agents,ai,architecture,assess,ci,codebase,coding,dev,dispatches]

@@ -236,6 +236,118 @@ test_sigint_releases_lock_via_trap() {
     "$([ -f "$ITERATE_LOCK_PATH" ] && echo yes || echo no)"
 }
 
+# --- B7: SIGINT exit code contract ---
+
+test_sigint_exits_with_130() {
+  # SKILL.md contract: "SIGINT → trap releases lock, exit 130". A pure
+  # `trap iterate_release EXIT INT TERM` without explicit `exit 130` causes
+  # bash to run the handler and continue the script. We need to exit 130.
+  #
+  # Strategy: run iterate.sh in dry-run with a synthetic pause injected via
+  # ITERATE_SIGINT_TEST_SLEEP (an env-only hook honored by iterate.sh to let
+  # tests catch the SIGINT window). Send SIGINT during the sleep and capture
+  # exit code.
+  ITERATE_SIGINT_TEST_SLEEP=2 bash "$ITERATE_SH" --dry-run >/dev/null 2>&1 &
+  local pid=$!
+  # Wait for iterate to acquire the lock before interrupting.
+  local waited=0
+  while [ ! -f "$ITERATE_LOCK_PATH" ] && [ "$waited" -lt 30 ]; do
+    sleep 0.05
+    waited=$((waited + 1))
+  done
+  kill -INT "$pid" 2>/dev/null || true
+  local rc=0
+  wait "$pid" || rc=$?
+  assert_eq "SIGINT causes iterate.sh to exit 130" "130" "$rc"
+  assert_eq "lock cleared after SIGINT" "no" \
+    "$([ -f "$ITERATE_LOCK_PATH" ] && echo yes || echo no)"
+}
+
+# --- B8: orphan cycle dir on lock contention ---
+
+test_failed_acquire_leaves_no_orphan_cycle_dir() {
+  # Pre-create a live-pid lock so iterate_acquire will refuse.
+  python3 -c "
+import json, os
+os.makedirs('.spellbook', exist_ok=True)
+open(os.environ['ITERATE_LOCK_PATH'],'w').write(
+  json.dumps({'pid': $$, 'cycle_id': '01HHELD', 'started_at': '2026-01-01T00:00:00Z'}))
+"
+  # Second invocation must fail to acquire. We only care that no cycle dir
+  # was orphaned in backlog.d/_cycles.
+  local rc=0
+  bash "$ITERATE_SH" --dry-run >/dev/null 2>&1 || rc=$?
+  assert_eq "colliding invocation fails non-zero" "1" "$rc"
+  local cycles_count
+  if [ -d backlog.d/_cycles ]; then
+    cycles_count="$(find backlog.d/_cycles -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')"
+  else
+    cycles_count=0
+  fi
+  assert_eq "no orphan cycle dir after failed acquire" "0" "$cycles_count"
+}
+
+# --- B9: paths anchored to REPO_ROOT, not PWD ---
+
+test_off_repo_invocation_writes_to_repo_root() {
+  # Invoke iterate.sh from a directory OUTSIDE the spellbook repo. Artifacts
+  # must land under REPO_ROOT, not under PWD.
+  local pre_cycles_listing post_cycles_listing
+  # Snapshot repo cycles before invocation so we can identify the new dir.
+  if [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles" ]; then
+    pre_cycles_listing="$(ls -1 "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null | sort)"
+  else
+    pre_cycles_listing=""
+  fi
+  # Override the lock path to a tmp location so we don't collide with a real
+  # run in the repo. iterate.sh `cd`s to REPO_ROOT, so a relative lock path
+  # in this env var would land there — use an absolute path under TEST_DIR.
+  local off_repo_dir="$TEST_DIR/off_repo"
+  mkdir -p "$off_repo_dir"
+  (
+    cd "$off_repo_dir"
+    ITERATE_LOCK_PATH="$TEST_DIR/off_repo.lock" \
+      bash "$ITERATE_SH" --dry-run >/dev/null 2>&1
+  )
+  # No backlog.d tree should be created under PWD.
+  assert_eq "no backlog.d/_cycles under off-repo PWD" "no" \
+    "$([ -d "$off_repo_dir/backlog.d/_cycles" ] && echo yes || echo no)"
+  # A new cycle dir must exist under REPO_ROOT.
+  if [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles" ]; then
+    post_cycles_listing="$(ls -1 "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null | sort || true)"
+  else
+    post_cycles_listing=""
+  fi
+  local new_cycles new_cycles_raw
+  new_cycles_raw="$(comm -13 <(printf '%s\n' "$pre_cycles_listing") <(printf '%s\n' "$post_cycles_listing") 2>/dev/null | awk 'NF' || true)"
+  new_cycles="$(printf '%s' "$new_cycles_raw" | awk 'NF' | wc -l | tr -d ' ')"
+  assert_eq "exactly one new cycle dir under REPO_ROOT" "1" "$new_cycles"
+  # Clean up the cycle dir this test created in the real repo.
+  local new_cycle_name
+  new_cycle_name="$(printf '%s\n' "$new_cycles_raw" | awk 'NF' | head -n 1)"
+  if [ -n "$new_cycle_name" ] && [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles/$new_cycle_name" ]; then
+    /usr/bin/trash "$SPELLBOOK_ROOT/backlog.d/_cycles/$new_cycle_name" 2>/dev/null || \
+      rm -rf "$SPELLBOOK_ROOT/backlog.d/_cycles/$new_cycle_name"
+  fi
+  # Also remove the _cycles dir if it's now empty and wasn't there before.
+  if [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles" ] && [ -z "$(ls -A "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null)" ]; then
+    rmdir "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null || true
+  fi
+}
+
+# --- B10: --max-cycles > 1 rejected in Phase 1 ---
+
+test_max_cycles_2_exits_2_with_phase2_message() {
+  local out rc=0
+  out="$(bash "$ITERATE_SH" --dry-run --max-cycles 2 --budget 10 2>&1)" || rc=$?
+  assert_eq "--max-cycles 2 exits 2" "2" "$rc"
+  if echo "$out" | grep -q "Phase 2"; then
+    assert_eq "--max-cycles>1 error message mentions Phase 2" "ok" "ok"
+  else
+    assert_eq "--max-cycles>1 error message mentions Phase 2" "ok" "bad:$out"
+  fi
+}
+
 # --- Runner ---
 
 run_tests() {

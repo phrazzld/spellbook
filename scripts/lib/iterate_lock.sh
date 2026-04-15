@@ -17,6 +17,9 @@ ITERATE_LOCK_PATH="${ITERATE_LOCK_PATH:-.spellbook/iterate.lock}"
 
 # Acquire the iterate lock. Steals lock when owner pid is dead or content
 # is corrupt. Fails when owner pid is alive.
+# Atomicity: O_CREAT|O_EXCL creates the lock or fails; the kernel guarantees
+# exactly one creator across concurrent callers, eliminating the TOCTOU race
+# where two stealers both pass "kill -0" and both rename on top of each other.
 # Args: <cycle_id>
 iterate_acquire() {
   local cycle_id="$1"
@@ -27,32 +30,11 @@ iterate_acquire() {
 
   mkdir -p "$(dirname "$ITERATE_LOCK_PATH")"
 
-  if [ -e "$ITERATE_LOCK_PATH" ]; then
-    # Inspect existing lock. If pid is alive, refuse; otherwise treat as stale.
-    # Path is passed via env var: interpolating into a Python single-quoted
-    # string breaks on paths containing "'" or "\" (SyntaxError gets swallowed
-    # by 2>/dev/null, yielding empty existing_pid → stale → silent theft).
-    local existing_pid
-    existing_pid="$(ITERATE_LOCK_FILE="$ITERATE_LOCK_PATH" python3 -c '
-import json, os
-try:
-    data = json.load(open(os.environ["ITERATE_LOCK_FILE"]))
-    print(data.get("pid", ""))
-except Exception:
-    print("")
-' 2>/dev/null)"
-    if [ -n "$existing_pid" ] && [ "$existing_pid" != "0" ] && kill -0 "$existing_pid" 2>/dev/null; then
-      echo "iterate_acquire: lock held by live pid $existing_pid" >&2
-      return 1
-    fi
-    # Stale or corrupt — fall through and overwrite.
-  fi
-
   ITERATE_LOCK_CYCLE_ID="$cycle_id" \
   ITERATE_LOCK_PID="$$" \
   ITERATE_LOCK_FILE="$ITERATE_LOCK_PATH" \
   python3 <<'PYEOF'
-import json, os, tempfile, time
+import errno, json, os, sys, time
 
 path = os.environ["ITERATE_LOCK_FILE"]
 payload = {
@@ -60,20 +42,71 @@ payload = {
     "cycle_id": os.environ["ITERATE_LOCK_CYCLE_ID"],
     "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
 }
-# Atomic write via temp + rename so a SIGKILL mid-write can't leave a
-# truncated lock that we'd then treat as stale and steal from a live owner.
-d = os.path.dirname(path) or "."
-fd, tmp = tempfile.mkstemp(dir=d, prefix=".iterate.lock.")
+
+
+def write_fresh():
+    """Atomic create-or-fail. Returns True on success, False if file exists."""
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    except FileExistsError:
+        return False
+    try:
+        os.write(fd, json.dumps(payload).encode("utf-8"))
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    return True
+
+
+def owner_alive():
+    """Inspect current lock contents. Returns (alive, pid_or_none).
+    Corrupt/unreadable lock → (False, None) so caller steals it."""
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        pid = int(data.get("pid", 0))
+    except Exception:
+        return False, None
+    if pid <= 0:
+        return False, pid
+    try:
+        os.kill(pid, 0)
+        return True, pid
+    except (ProcessLookupError, PermissionError, OSError):
+        return False, pid
+
+
+# First attempt: O_EXCL create. Exactly one concurrent creator wins.
+if write_fresh():
+    sys.exit(0)
+
+# Lock exists. If owner is alive, refuse.
+alive, pid = owner_alive()
+if alive:
+    print(f"iterate_acquire: lock held by live pid {pid}", file=sys.stderr)
+    sys.exit(1)
+
+# Stale or corrupt. Attempt ONE steal: unlink then O_EXCL retry. If another
+# stealer unlinked-and-recreated between our unlink and our create, their
+# create wins and ours raises FileExistsError → we re-check liveness and
+# either refuse (they're our live rival) or fail; either is correct behavior.
 try:
-    with os.fdopen(fd, "w") as f:
-        json.dump(payload, f)
-        f.flush()
-        os.fsync(f.fileno())
-    os.rename(tmp, path)
-except Exception:
-    try: os.unlink(tmp)
-    except OSError: pass
-    raise
+    os.unlink(path)
+except FileNotFoundError:
+    pass  # another stealer already unlinked; that's fine
+
+if write_fresh():
+    sys.exit(0)
+
+# Someone else won the race to recreate. If they're alive, they hold it.
+alive, pid = owner_alive()
+if alive:
+    print(f"iterate_acquire: lost steal race to live pid {pid}", file=sys.stderr)
+    sys.exit(1)
+# They created it then died before we could check — conservative: refuse
+# rather than loop. Caller can retry.
+print("iterate_acquire: lost steal race", file=sys.stderr)
+sys.exit(1)
 PYEOF
 }
 

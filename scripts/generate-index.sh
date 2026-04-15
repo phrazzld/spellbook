@@ -12,11 +12,10 @@ echo "# Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$INDEX"
 echo "# Do not edit manually. Run: ./scripts/generate-index.sh" >> "$INDEX"
 echo "" >> "$INDEX"
 
-# Skills — first-party then external. First-party wins on name collision.
+# Skills — first-party only. Externals (skills/.external/) are gitignored
+# per-machine state installed by scripts/sync-external.sh and discovered by
+# bootstrap.sh at link time; they do not belong in the canonical index.
 echo "skills:" >> "$INDEX"
-
-# Track emitted names to enforce first-party precedence across both passes.
-emitted_names=" "
 
 emit_skill() {
   local skill_md="$1" name="$2" source="$3" desc tags
@@ -43,22 +42,7 @@ for skill_dir in "$REPO_ROOT"/skills/*/; do
   [ -f "$skill_md" ] || continue
   name=$(basename "$skill_dir")
   emit_skill "$skill_md" "$name" "first-party"
-  emitted_names+="$name "
 done
-
-# External skills — installed by scripts/sync-external.sh (gitignored tree).
-if [ -d "$REPO_ROOT/skills/.external" ]; then
-  for skill_dir in "$REPO_ROOT"/skills/.external/*/; do
-    skill_md="$skill_dir/SKILL.md"
-    [ -f "$skill_md" ] || continue
-    name=$(basename "$skill_dir")
-    case "$emitted_names" in
-      *" $name "*) continue ;;  # first-party wins
-    esac
-    emit_skill "$skill_md" "$name" "external"
-    emitted_names+="$name "
-  done
-fi
 
 echo "" >> "$INDEX"
 

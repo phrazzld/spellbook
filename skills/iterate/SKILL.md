@@ -24,7 +24,9 @@ This is the outer loop (async delivery). `/autopilot` is the inner loop
 - Dry-run end-to-end walk of all 9 phases
 - Typed daybook events (`scripts/lib/daybook.sh`)
 - Single-instance lock (`scripts/lib/iterate_lock.sh`) with stale-pid steal
-- Unattended-safety guard (`--budget` required for `--max-cycles > 1`)
+- **Single-cycle only.** Multi-cycle (`--max-cycles > 1`) is Phase 2; the
+  current guard would release the lock between cycles and let a second
+  iterate sneak in. Passing `N != 1` exits 2 with a clear message.
 
 **Not yet wired:** real handlers for `/shape`, `/autopilot`, `/code-review`,
 `/qa`, `/deploy`, `/reflect`. Invoking without `--dry-run` writes a
@@ -42,15 +44,16 @@ You are the executive orchestrator.
 
 | Flag | Purpose | Phase |
 |------|---------|-------|
-| `--max-cycles N` | Hard count of cycles (default 1) | 1 |
-| `--budget $N` | Cumulative model cost ceiling | 1 (required for N>1) |
+| `--max-cycles N` | Hard count of cycles. **Phase 1 requires N=1**; any other value exits 2 | 1 (N=1 only) |
+| `--budget $N` | Cumulative model cost ceiling | Phase 2 — inert in Phase 1 (single-cycle never exhausts) |
 | `--dry-run` | Walk phases, write events, invoke nothing | 1 |
 | `--until <pred>` | Stop predicate ("backlog empty", "P0 closed") | 2 |
 | `--resume <ulid>` | Resume a paused cycle from last completed phase | 2 |
 | `--abandon <ulid>` | Mark cycle abandoned and release its lock | 2 |
 
-Without `--budget`, `/iterate` refuses `--max-cycles > 1` — this is the exact
-failure mode unattended agents hit and it is cheap to prevent.
+`--max-cycles > 1` exits 2 with `iterate: --max-cycles > 1 is Phase 2; not
+yet implemented`. `--budget` is parsed for forward compatibility but has no
+effect in Phase 1.
 
 ## Artifacts Per Cycle
 
@@ -109,19 +112,19 @@ Kinds: `cycle.opened`, `shape.done`, `build.done`, `review.iter`, `ci.done`,
 └── CYCLE CLOSED ──────────────────────────────┘
     │
     ▼
-  stop? (predicate / max-cycles / budget / SIGINT) → next cycle or release lock
+  cycle done → release lock (Phase 1 runs exactly one cycle)
 ```
 
 ## Invocation
 
 ```bash
 # Dry-run a single cycle — writes all 9 phase events, invokes nothing.
-bash skills/iterate/scripts/iterate.sh --dry-run --max-cycles 1
+bash skills/iterate/scripts/iterate.sh --dry-run
 
 # Real mode (Phase 2+; currently writes phase.failed and exits 1)
-bash skills/iterate/scripts/iterate.sh --max-cycles 1
+bash skills/iterate/scripts/iterate.sh
 
-# Multi-cycle with cost ceiling
+# Multi-cycle is Phase 2 — this exits 2 in Phase 1.
 bash skills/iterate/scripts/iterate.sh --max-cycles 5 --budget 20
 ```
 
@@ -147,10 +150,12 @@ Known limitations:
 
 ## Stop Conditions (Phase 1)
 
-- `--max-cycles N` reached
+- Cycle finishes normally → emit `cycle.closed`, release lock, exit 0
 - Any phase returns non-zero → `phase.failed` event, release lock, exit 1
 - SIGINT → trap releases lock, exit 130
-- Budget exhausted mid-cycle → finish current phase, emit `budget.exhausted`, stop
+- SIGTERM → trap releases lock, exit 143
+- `--max-cycles > 1` → exit 2 before acquiring the lock (Phase 2 feature)
+- Budget-exhausted mid-cycle is a Phase 2 stop condition (no-op in Phase 1)
 
 ## Gotchas
 

@@ -115,6 +115,31 @@ test_daybook_event_appends_multiple_lines() {
   assert_eq "multiple events all appended" "4" "$count"
 }
 
+test_daybook_event_payload_cannot_override_core_envelope() {
+  # Adversarial payload tries to clobber every envelope field. Envelope must
+  # win — consumers key on these, silent override would let a malicious or
+  # buggy phase forge event identity.
+  daybook_event "$LOG" cycle.opened shape planner \
+    '{"kind":"attacker","cycle_id":"fake","ts":"1999-01-01T00:00:00Z","agent":"evil","schema_version":999,"phase":"hijacked"}'
+  local kind cid ts agent sv phase
+  kind="$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['kind'])" < "$LOG")"
+  cid="$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['cycle_id'])" < "$LOG")"
+  ts="$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['ts'])" < "$LOG")"
+  agent="$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['agent'])" < "$LOG")"
+  sv="$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['schema_version'])" < "$LOG")"
+  phase="$(python3 -c "import json,sys; print(json.loads(sys.stdin.read())['phase'])" < "$LOG")"
+  assert_eq "payload cannot override kind" "cycle.opened" "$kind"
+  assert_eq "payload cannot override cycle_id" "01HTESTCYCLE00000000000000" "$cid"
+  assert_eq "payload cannot override agent" "planner" "$agent"
+  assert_eq "payload cannot override schema_version" "1" "$sv"
+  assert_eq "payload cannot override phase" "shape" "$phase"
+  case "$ts" in
+    1999-*) assert_eq "payload cannot override ts" "ok" "bad:$ts" ;;
+    *T*Z)   assert_eq "payload cannot override ts" "ok" "ok" ;;
+    *)      assert_eq "payload cannot override ts" "ok" "bad:$ts" ;;
+  esac
+}
+
 test_daybook_event_merges_payload_fields() {
   daybook_event "$LOG" shape.done shape planner '{"refs":["a","b"],"note":"ok"}'
   local refs note

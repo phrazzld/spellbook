@@ -140,6 +140,10 @@ Known limitations:
 - **`python-ulid` is optional.** When unavailable, the fallback emits real
   26-character Crockford base32 ULIDs (10 chars timestamp + 16 chars random),
   lexicographically sortable and interchangeable with the library output.
+- **Paths anchor to REPO_ROOT.** `iterate.sh` `cd`s to the spellbook repo
+  root on startup so `backlog.d/_cycles/...` and the default lock path
+  always land in the right tree even when invoked from outside the repo.
+  If you override `ITERATE_LOCK_PATH`, pass an absolute path.
 
 ## Stop Conditions (Phase 1)
 

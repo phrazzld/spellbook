@@ -17,10 +17,34 @@ setup() {
   unset ITERATE_LOCK_PATH
   ITERATE_LOCK_PATH="$TEST_DIR/.spellbook/iterate.lock"
   export ITERATE_LOCK_PATH
+  # iterate.sh cd's to REPO_ROOT and writes cycles to REPO_ROOT/backlog.d/_cycles/.
+  # Snapshot the pre-existing entries so teardown can delete only what this test
+  # created — never anything that predated the run.
+  CYCLES_ROOT="$SPELLBOOK_ROOT/backlog.d/_cycles"
+  if [ -d "$CYCLES_ROOT" ]; then
+    CYCLES_PRE="$(ls -1 "$CYCLES_ROOT" 2>/dev/null | sort)"
+  else
+    CYCLES_PRE=""
+  fi
 }
 
 teardown() {
   cd "$ORIG_DIR"
+  # Clean up any cycle dirs this test created under REPO_ROOT.
+  if [ -d "$CYCLES_ROOT" ]; then
+    local post
+    post="$(ls -1 "$CYCLES_ROOT" 2>/dev/null | sort || true)"
+    local new
+    new="$(comm -13 <(printf '%s\n' "$CYCLES_PRE") <(printf '%s\n' "$post") 2>/dev/null | awk 'NF' || true)"
+    while IFS= read -r name; do
+      [ -z "$name" ] && continue
+      rm -rf "$CYCLES_ROOT/$name"
+    done <<< "$new"
+    # Remove _cycles dir if it became empty and didn't exist pre-test.
+    if [ -z "$CYCLES_PRE" ] && [ -d "$CYCLES_ROOT" ] && [ -z "$(ls -A "$CYCLES_ROOT" 2>/dev/null)" ]; then
+      rmdir "$CYCLES_ROOT" 2>/dev/null || true
+    fi
+  fi
   unset ITERATE_LOCK_PATH
   rm -rf "$TEST_DIR"
 }
@@ -38,11 +62,11 @@ assert_eq() {
 
 # --- Helpers ---
 
-# Latest cycle.jsonl written by iterate.sh in this TEST_DIR.
+# Latest cycle.jsonl written by iterate.sh in this test. iterate.sh now
+# anchors writes to REPO_ROOT, so we look there.
 find_cycle_log() {
-  # backlog.d/_cycles/<ulid>/cycle.jsonl ; pick the newest one.
   # shellcheck disable=SC2012
-  ls -1t backlog.d/_cycles/*/cycle.jsonl 2>/dev/null | head -n 1 || true
+  ls -1t "$SPELLBOOK_ROOT"/backlog.d/_cycles/*/cycle.jsonl 2>/dev/null | head -n 1 || true
 }
 
 # Extract JSONL "kind" field from every line.
@@ -206,10 +230,11 @@ test_two_sequential_dry_runs_both_succeed() {
   local rc2=$?
   assert_eq "first dry-run cycle exits 0" "0" "$rc1"
   assert_eq "second dry-run cycle exits 0" "0" "$rc2"
-  # Two cycle dirs should exist.
-  local cycles
-  cycles="$(ls -1 backlog.d/_cycles 2>/dev/null | wc -l | tr -d ' ')"
-  assert_eq "two cycle directories created" "2" "$cycles"
+  # Two cycle dirs should exist (above the pre-test baseline under REPO_ROOT).
+  local post new_cycles
+  post="$(ls -1 "$CYCLES_ROOT" 2>/dev/null | sort || true)"
+  new_cycles="$(comm -13 <(printf '%s\n' "$CYCLES_PRE") <(printf '%s\n' "$post") 2>/dev/null | awk 'NF' | wc -l | tr -d ' ')"
+  assert_eq "two cycle directories created" "2" "$new_cycles"
 }
 
 test_sigint_releases_lock_via_trap() {
@@ -316,37 +341,27 @@ os.makedirs('.spellbook', exist_ok=True)
 open(os.environ['ITERATE_LOCK_PATH'],'w').write(
   json.dumps({'pid': $$, 'cycle_id': '01HHELD', 'started_at': '2026-01-01T00:00:00Z'}))
 "
-  # Second invocation must fail to acquire. We only care that no cycle dir
-  # was orphaned in backlog.d/_cycles.
+  # Second invocation must fail to acquire. Assert no NEW cycle dir appeared
+  # under REPO_ROOT/backlog.d/_cycles after the failed acquire.
   local rc=0
   bash "$ITERATE_SH" --dry-run >/dev/null 2>&1 || rc=$?
   assert_eq "colliding invocation fails non-zero" "1" "$rc"
-  local cycles_count
-  if [ -d backlog.d/_cycles ]; then
-    cycles_count="$(find backlog.d/_cycles -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')"
-  else
-    cycles_count=0
-  fi
-  assert_eq "no orphan cycle dir after failed acquire" "0" "$cycles_count"
+  local post new_cycles
+  post="$(ls -1 "$CYCLES_ROOT" 2>/dev/null | sort || true)"
+  new_cycles="$(comm -13 <(printf '%s\n' "$CYCLES_PRE") <(printf '%s\n' "$post") 2>/dev/null | awk 'NF' | wc -l | tr -d ' ')"
+  assert_eq "no orphan cycle dir after failed acquire" "0" "$new_cycles"
 }
 
 # --- B9: paths anchored to REPO_ROOT, not PWD ---
 
 test_off_repo_invocation_writes_to_repo_root() {
   # Invoke iterate.sh from a directory OUTSIDE the spellbook repo. Artifacts
-  # must land under REPO_ROOT, not under PWD.
-  local pre_cycles_listing post_cycles_listing
-  # Snapshot repo cycles before invocation so we can identify the new dir.
-  if [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles" ]; then
-    pre_cycles_listing="$(ls -1 "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null | sort)"
-  else
-    pre_cycles_listing=""
-  fi
-  # Override the lock path to a tmp location so we don't collide with a real
-  # run in the repo. iterate.sh `cd`s to REPO_ROOT, so a relative lock path
-  # in this env var would land there — use an absolute path under TEST_DIR.
+  # must land under REPO_ROOT, not under PWD. (Teardown cleans up any new
+  # cycle dir this test spawns under REPO_ROOT.)
   local off_repo_dir="$TEST_DIR/off_repo"
   mkdir -p "$off_repo_dir"
+  # Use an absolute lock path anchored to TEST_DIR so the lock file lands
+  # there if the fix regresses — making REPO_ROOT anchoring observable.
   (
     cd "$off_repo_dir"
     ITERATE_LOCK_PATH="$TEST_DIR/off_repo.lock" \
@@ -356,26 +371,10 @@ test_off_repo_invocation_writes_to_repo_root() {
   assert_eq "no backlog.d/_cycles under off-repo PWD" "no" \
     "$([ -d "$off_repo_dir/backlog.d/_cycles" ] && echo yes || echo no)"
   # A new cycle dir must exist under REPO_ROOT.
-  if [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles" ]; then
-    post_cycles_listing="$(ls -1 "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null | sort || true)"
-  else
-    post_cycles_listing=""
-  fi
-  local new_cycles new_cycles_raw
-  new_cycles_raw="$(comm -13 <(printf '%s\n' "$pre_cycles_listing") <(printf '%s\n' "$post_cycles_listing") 2>/dev/null | awk 'NF' || true)"
-  new_cycles="$(printf '%s' "$new_cycles_raw" | awk 'NF' | wc -l | tr -d ' ')"
+  local post new_cycles
+  post="$(ls -1 "$CYCLES_ROOT" 2>/dev/null | sort || true)"
+  new_cycles="$(comm -13 <(printf '%s\n' "$CYCLES_PRE") <(printf '%s\n' "$post") 2>/dev/null | awk 'NF' | wc -l | tr -d ' ')"
   assert_eq "exactly one new cycle dir under REPO_ROOT" "1" "$new_cycles"
-  # Clean up the cycle dir this test created in the real repo.
-  local new_cycle_name
-  new_cycle_name="$(printf '%s\n' "$new_cycles_raw" | awk 'NF' | head -n 1)"
-  if [ -n "$new_cycle_name" ] && [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles/$new_cycle_name" ]; then
-    /usr/bin/trash "$SPELLBOOK_ROOT/backlog.d/_cycles/$new_cycle_name" 2>/dev/null || \
-      rm -rf "$SPELLBOOK_ROOT/backlog.d/_cycles/$new_cycle_name"
-  fi
-  # Also remove the _cycles dir if it's now empty and wasn't there before.
-  if [ -d "$SPELLBOOK_ROOT/backlog.d/_cycles" ] && [ -z "$(ls -A "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null)" ]; then
-    rmdir "$SPELLBOOK_ROOT/backlog.d/_cycles" 2>/dev/null || true
-  fi
 }
 
 # --- B10: --max-cycles > 1 rejected in Phase 1 ---

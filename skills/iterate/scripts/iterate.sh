@@ -18,6 +18,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
+# Anchor all relative paths (cycle dir, default lock path) to REPO_ROOT so
+# invocations from outside the repo can't corrupt a $PWD-shaped state tree.
+# Callers who override ITERATE_LOCK_PATH should pass an absolute path.
+cd "$REPO_ROOT"
+
 # shellcheck source=../../../scripts/lib/daybook.sh
 source "$REPO_ROOT/scripts/lib/daybook.sh"
 # shellcheck source=../../../scripts/lib/iterate_lock.sh

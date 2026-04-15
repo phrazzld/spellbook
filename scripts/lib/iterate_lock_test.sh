@@ -104,6 +104,29 @@ test_iterate_acquire_after_release_succeeds() {
   assert_exit "re-acquire after release succeeds" 0 iterate_acquire 01HDEF
 }
 
+test_iterate_acquire_path_with_single_quotes_is_safe() {
+  # Regression: path containing a single quote must not break the heredoc
+  # that reads the existing lock. Previous impl interpolated the path into a
+  # Python single-quoted string — a quote or backslash in the path caused a
+  # SyntaxError, swallowed by 2>/dev/null, producing empty existing_pid,
+  # treated as stale, silently stealing a live lock.
+  local quoted_dir="$TEST_DIR/has'quote"
+  mkdir -p "$quoted_dir"
+  ITERATE_LOCK_PATH="$quoted_dir/iterate.lock"
+  # First acquire should succeed.
+  assert_exit "acquire with quoted path succeeds" 0 iterate_acquire 01HABC
+  # Lock file should actually exist at that path.
+  assert_eq "lock exists at quoted path" "yes" \
+    "$([ -f "$ITERATE_LOCK_PATH" ] && echo yes || echo no)"
+  # Second acquire (same live shell pid) must refuse, proving the reader
+  # successfully parsed the pid out of the quoted-path lock.
+  assert_exit "second acquire refused with quoted path" 1 iterate_acquire 01HDEF
+  # Release must succeed and actually remove the file.
+  assert_exit "release with quoted path succeeds" 0 iterate_release 01HABC
+  assert_eq "lock removed at quoted path" "no" \
+    "$([ -f "$ITERATE_LOCK_PATH" ] && echo yes || echo no)"
+}
+
 test_iterate_acquire_corrupt_lock_is_treated_as_stale() {
   # Prior process crashed mid-write or disk ate the JSON. Don't hang forever.
   echo "not json" > "$LOCK"

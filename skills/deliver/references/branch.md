@@ -41,8 +41,9 @@ A phase skill that runs `git push` is a bug in that phase skill.
 
 ## No-Claim Invariant
 
-No `scripts/lib/claims.sh`. No `claim_acquire`. No `claim_release`. No
-`refs/claims/*`. Single local workspace assumption.
+Claim-based coordination is dropped entirely. The old `scripts/lib/`
+acquire/release helper and its `refs/claims/*` storage are gone. Single
+local workspace assumption.
 
 Concurrent `/deliver` invocations on different items in **different
 worktrees** are supported — see `worktree.md`. Concurrent `/deliver`

@@ -124,7 +124,8 @@ run_cycle() {
     daybook_event "$log" qa.done            qa      qa            '{"note":"dry-run"}'
     daybook_event "$log" deploy.done        deploy  deployer      '{"note":"dry-run"}'
     daybook_event "$log" reflect.done       reflect reflector     '{"note":"dry-run"}'
-    daybook_event "$log" harness.suggested  reflect reflector     '{"note":"dry-run","suggestions":[]}'
+    # harness.suggested is a Phase 2 event (writes to a branch, not dry-run).
+    # Emitting it here would train the wrong mental model of the contract.
   else
     # Real mode: each phase shells out to the corresponding slash command.
     # Phase 1 does not auto-scaffold missing skills (that's Phase 3), so if

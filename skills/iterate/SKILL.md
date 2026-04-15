@@ -148,7 +148,8 @@ pid dead, or JSON corrupt) are stolen silently.
   exits 1 by design. Wiring is Phase 2.
 - **Auto-scaffold is Phase 3.** If `/qa` or `/deploy` is missing when real
   mode lands, the cycle fails loudly — no silent scaffolding.
-- **`harness.suggested` writes to a branch only** (never main). Phase 1
-  emits the event in dry-run; Phase 2 wires the branch write.
+- **`harness.suggested` writes to a branch only** (never main). Phase 2
+  emits the event and wires the branch write; Phase 1 dry-run does not emit
+  it (would train the wrong mental model of the contract).
 - **Closed-enum kinds.** Adding a new kind requires updating `DAYBOOK_KINDS`
   in `daybook.sh` and every consumer — don't invent kinds inline.

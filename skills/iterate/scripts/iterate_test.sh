@@ -156,7 +156,7 @@ test_dry_run_writes_expected_event_kinds_in_order() {
   local log
   log="$(find_cycle_log)"
   local expected actual
-  expected=$'cycle.opened\nshape.done\nbuild.done\nreview.iter\nci.done\nqa.done\ndeploy.done\nreflect.done\nharness.suggested\ncycle.closed'
+  expected=$'cycle.opened\nshape.done\nbuild.done\nreview.iter\nci.done\nqa.done\ndeploy.done\nreflect.done\ncycle.closed'
   actual="$(kinds_in "$log")"
   assert_eq "dry-run event kinds match expected sequence" "$expected" "$actual"
 }

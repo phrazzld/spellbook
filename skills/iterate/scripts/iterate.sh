@@ -71,10 +71,14 @@ if [ -n "$RESUME" ] || [ -n "$ABANDON" ]; then
   echo "iterate: --resume/--abandon are Phase 2; not implemented" >&2; exit 2
 fi
 
-# Unattended safety: >1 cycle without a cost ceiling is the exact failure mode
-# autopilot already demonstrated. Refuse.
-if [ "$MAX_CYCLES" -gt 1 ] && [ -z "$BUDGET" ]; then
-  echo "iterate: --max-cycles > 1 requires --budget to run unattended" >&2
+# Phase 1 is strictly single-cycle. A multi-cycle outer loop would need to
+# either hold the lock across cycles (currently released between cycles, so
+# a second iterate could sneak in) or re-acquire it, neither of which is
+# implemented. Carmack cut: reject >1 loudly until Phase 2 wires the logic.
+# We keep --max-cycles and --budget in the parser so Phase 2 can flip this
+# guard without breaking any callers.
+if [ "$MAX_CYCLES" -ne 1 ]; then
+  echo "iterate: --max-cycles > 1 is Phase 2; not yet implemented" >&2
   exit 2
 fi
 
@@ -168,8 +172,5 @@ run_cycle() {
   echo "$cycle_id"
 }
 
-i=0
-while [ "$i" -lt "$MAX_CYCLES" ]; do
-  run_cycle
-  i=$((i + 1))
-done
+# Phase 1: exactly one cycle. The guard above rejects MAX_CYCLES != 1.
+run_cycle

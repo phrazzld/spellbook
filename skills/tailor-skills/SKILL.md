@@ -26,11 +26,13 @@ catalog.
    one-paragraph mental model of what this repo is and what work
    happens here.
 
-2. **Read the catalog.** Resolve `$SPELLBOOK` by following the symlink
-   of this very file: `readlink -f` on the SKILL.md path, then walk up
-   two directories. Read `$SPELLBOOK/index.yaml` — the generated
-   catalog has name + description + source per skill. That's your
-   input, not a glob of SKILL.md files.
+2. **Read the catalog.** Resolve `$SPELLBOOK`: prefer the `$SPELLBOOK`
+   env var if set; otherwise `readlink -f` this SKILL.md and walk up
+   two directories (works for symlink installs). Fail loud if neither
+   resolves to a dir containing `index.yaml`. Read
+   `$SPELLBOOK/index.yaml` — the generated catalog has name +
+   description + source per skill. That's your input, not a glob of
+   SKILL.md files.
 
 3. **Pick 10-20 skills.** For each, write one line of justification
    tied to the repo's actual characteristics. Prefer first-party over

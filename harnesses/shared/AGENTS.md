@@ -73,7 +73,9 @@ temporal decomposition, hidden coupling.
 - Launch, bound, and record agents; do not pre-solve their work in harness code
 - Reference architecture first: search before building any system >200 LOC
 - Favor convention over configuration
-- Full project reads over incremental searches
+- Full project reads over incremental searches when mapping.
+  Bounded reads (≤5 files) when executing a known change — exploration after
+  the problem is defined is a drift tell, not diligence.
 - Fix what you touch — including pre-existing issues in the same area.
   Never excuse broken things in PR comments ("pre-existing", "not introduced
   by this PR", "not a blocker"). If it's broken and you touched it, fix it
@@ -82,6 +84,52 @@ temporal decomposition, hidden coupling.
   No "maybe", "consider", "someday", "nice to have". If it's not worth doing
   now, delete it. If it is, write it as an imperative with clear acceptance criteria.
 - Document invariants, not obvious mechanics
+
+## Boil the Ocean
+
+With AI, the marginal cost of completeness is near zero. Ship finished products,
+not plans. Do the whole thing. Do it right. With tests. With documentation.
+
+- **The standard is "holy shit, that's done."** Not "good enough." Not "politely
+  satisfied." If the user wouldn't be genuinely impressed, it isn't done.
+- **Never table for later when the permanent solve is within reach.** If the
+  real fix is five minutes further than the workaround, do the real fix.
+- **Never leave a dangling thread when tying it off is cheap.** Edge cases,
+  missing tests, stale comments, broken adjacent functionality — if you can
+  see it, you can close it.
+- **Never present a workaround when the real fix exists.** Workarounds are for
+  cases where the real fix is genuinely out of scope. They are not for cases
+  where the real fix is merely harder.
+- **When the user asks for X, the answer is the finished X** — not a plan
+  to build X, not a prototype of X, not a first pass at X. Search before
+  building. Test before shipping. Ship the complete thing.
+- **Time, fatigue, and complexity are not excuses.** If the job is real, the
+  job gets done. If the job is not real, don't start it.
+
+This doctrine extends `Fix what you touch` from scoped-fix to full-solve.
+"Boil the ocean" and "Code is a liability" are complementary — ship *less*
+surface area, but ship it *complete*.
+
+## Resiliency
+
+State lives on disk, not in conversation memory. Sessions die. Machines crash.
+Context windows compact. The harness must be resilient to all of it.
+
+- **Externalize state the moment it surfaces.** Tasks, decisions, in-flight
+  work, intermediate conclusions — write to the vault, backlog, journal, or
+  task file immediately. Not at a "good stopping point." Now.
+- **If this session ended right now, what would be lost?** That's the capture
+  gap. Close it before doing anything else.
+- **Conversation traces are load-bearing.** Every session leaves a
+  breadcrumb trail so the next session can resume cold. No session inherits
+  implicit state from the prior one — only what's on disk.
+- **Checkpoint on any meaningful branch point.** Decisions made, hypotheses
+  tested, plans changed — all get written before the next action.
+- **Don't batch synthesis.** Synthesis that happens only at session end is
+  synthesis lost on crash. Capture in flight.
+- **Recovery over prevention.** Crashes, interrupts, compactions will happen.
+  The design goal is that they cost zero. Build for the assumption that any
+  given session is the last one.
 
 ## Testing
 
@@ -96,6 +144,25 @@ Test behavior, not implementation. One behavior per test.
   fundamentally wrong. Define acceptance criteria before generating code.
   Benchmark performance-sensitive paths. If you can't explain why approach
   X over Y, investigate before shipping.
+
+## Session Anti-Patterns
+
+Codified from claude-doctor analysis of 271 sessions. If you notice any
+of these, stop — these are the recurring failure modes, not edge cases.
+
+- **3-edit rule.** If you've edited the same file 3 times in a session,
+  stop. Re-read the user's last message and the current file in full.
+  Plan all remaining changes, then make ONE edit. Evidence: time-tracker
+  `styles.css` 60×, bitterblossom `orchestrator.ex` 23× — thrashing, not
+  convergence.
+- **2-failure rule.** After 2 consecutive tool failures (Bash, Edit,
+  tests), stop. The command or approach is wrong, not the context.
+  Read the error output; do not open more files.
+- **Correction protocol.** When the user corrects you, quote back in one
+  line what they want and confirm before acting. Do not paraphrase. Do
+  not re-explain what you already did.
+- **Drift check.** Every ~5 turns, re-read the original request. If the
+  current work doesn't trace back to it, stop and ask.
 
 ## After Compaction
 

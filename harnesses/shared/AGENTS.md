@@ -102,6 +102,11 @@ Test behavior, not implementation. One behavior per test.
 Re-read: (1) current task/plan, (2) files being actively modified,
 (3) the spec/contract being implemented against. Look, don't guess.
 
+Re-verify asserted failures. Summary claims like "X didn't fire" / "Y is
+broken" are frozen hypotheses from before compaction. Before debugging a
+claimed failure, reproduce it against live state (logs, HTTP, DB) —
+30 seconds of verification beats an hour chasing a dead hypothesis.
+
 ## Continuous Learning
 
 Default codify, justify not codifying.

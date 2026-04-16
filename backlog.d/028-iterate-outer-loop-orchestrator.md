@@ -1,8 +1,19 @@
 # `/autopilot` — outer delivery loop (formerly `/iterate`)
 
 Priority: high
-Status: in-progress (Phase 1 shipped under old name `/iterate`)
-Estimate: L (MVP ~5 dev-days; Phase 1 done, Phase 2+ ahead)
+Status: in-progress (Phase 1 + rename shipped; Phase 2+ ahead)
+Estimate: L (MVP ~5 dev-days; Phase 1 + rename done; Phase 2+ remaining)
+
+## Progress
+
+- 2026-04-15: Phase 1 MVP shipped as `/iterate` (commit e2db08e).
+- 2026-04-15: Rename `/iterate` → `/autopilot` shipped (commit 5d5358a).
+  Directory, scripts, lock file, helper libs, triggers, and all cross-refs
+  renamed. 48/48 tests green.
+- Remaining: Phase 2+ (deploy/monitor/triage/reflect wiring, budgets,
+  predicate stop conditions, GEPA feedback hooks). TODOs flagged in
+  `skills/autopilot/SKILL.md` and `skills/autopilot/scripts/autopilot.sh`.
+
 
 ## Rename
 

@@ -3,7 +3,8 @@ name: ci
 description: |
   Audit a repo's CI gates, strengthen what is weak, then drive the pipeline
   green. Owns confidence in correctness — lint, types, tests, coverage,
-  secrets. Dagger-first. Never returns red without a structured diagnosis.
+  secrets. Dagger is the canonical pipeline owner; absence is a blocking
+  audit finding. Never returns red without a structured diagnosis.
   Bounded self-heal: auto-fix lint/format, regenerate lockfiles, retry
   flakes. Escalates algorithm/logic failures to the human.
   Use when: "run ci", "check ci", "fix ci", "audit ci", "is ci passing",
@@ -43,10 +44,13 @@ You are the executive orchestrator.
 
 1. **Audit before run.** A weak pipeline passing is worse than a strong
    one failing. Inventory coverage before trusting green.
-2. **Dagger-first.** Run gates via `dagger call check` (or the repo's
-   pipeline entrypoint). Hermetic, reproducible, matches CI runners.
-   Never substitute raw local shells for hermetic containers when a
-   Dagger pipeline exists.
+2. **Dagger-mandatory.** Missing `dagger.json` is a critical audit gap —
+   block green until scaffolded. Gates run via `dagger call <function>`
+   only. Raw `npm run lint` / `pytest` / `go test` etc. are what GHA
+   replaced, not what replaces GHA — they bypass the hermetic-container
+   contract. CI providers (GHA, CircleCI, etc.) must be thin wrappers
+   that shell out to `dagger call check`, never the authoritative gate
+   owner. Agent-first, local-first, provider-independent.
 3. **Fix-until-green on self-healable failures.** Don't report red and
    exit. Either fix or produce a precise diagnosis the human can act on.
 4. **No quality lowering, ever.** Thresholds, lint rules, type strictness,
@@ -59,12 +63,19 @@ You are the executive orchestrator.
 
 ### Phase 1 — Audit (skip if `--run-only`)
 
-Read `references/audit.md` for the full audit rubric. Inventory in parallel:
+Read `references/audit.md` for the full audit rubric. Inventory in parallel.
+**Pipeline presence is the first gate and it is blocking** — if Dagger is
+absent, stop, propose scaffolding, wait for approval; no later check can
+compensate.
 
-- **Pipeline presence:** `dagger.json` / `.dagger/` exists? Entrypoint
-  reachable? (`dagger functions` lists `check`?)
+- **Pipeline presence (blocking):** `dagger.json` / `.dagger/` exists?
+  Entrypoint reachable? (`dagger functions` lists `check`?) Missing = HIGH,
+  blocks green until scaffolded.
+- **CI provider thinness:** GHA / CircleCI / etc. steps invoke
+  `dagger call <func>` only. Inline `npm run X` / `pytest` / raw bash in
+  workflow YAML = finding (pipeline lives in two places, drifts).
 - **Gate coverage:** lint, format, type-check, tests, coverage floor,
-  secrets scan — each one covered by a gate, or a gap?
+  secrets scan — each one covered by a Dagger function, or a gap?
 - **Thresholds:** coverage floor ≥70% (calibrate to repo maturity),
   type-check in strict mode, lint rules not silently disabled.
 - **Hermeticity:** tests don't hit network/external DBs? Fixtures pinned?
@@ -92,7 +103,8 @@ If audit finds no gaps worth fixing, say so and proceed.
 
 ### Phase 2 — Run (skip if `--audit-only`)
 
-1. Run the pipeline end-to-end: `dagger call check` (or repo equivalent).
+1. Run the pipeline end-to-end: `dagger call check`. No fallback. If
+   Dagger is absent, Phase 1 failed to block — abort and re-audit.
 2. Capture structured per-gate output (which gate, pass/fail, excerpt).
 3. If green → emit report, exit 0.
 4. If red → classify each failure per `references/self-heal.md`:
@@ -131,8 +143,15 @@ new thresholds before the skill returns clean.
   to make the gate pass. Any suggestion to do this is a red flag.
 - **Skipping audit on a repo you haven't run against before.** If the
   pipeline is weak, green is a lie.
-- **Running raw local shells** (`pytest`, `eslint`, etc.) when a Dagger
-  pipeline is available. Reproduce what CI actually runs.
+- **Declaring green on a repo with no Dagger pipeline.** Missing Dagger
+  = weak CI; "the GHA workflow passes" is not equivalent — it runs on
+  someone else's infrastructure and can't be reproduced locally.
+- **Running raw local shells** (`pytest`, `eslint`, `npm run X`) even
+  when "faster" or "the pipeline isn't set up yet." Gates run via
+  `dagger call` exclusively; raw shell bypasses the hermetic-container
+  contract that makes green meaningful.
+- **Treating GHA/CircleCI YAML as the source of truth.** If the workflow
+  has inline bash beyond `dagger call ...`, Dagger is being undermined.
 - **Unbounded self-heal loops.** 3 retries per gate. If it's not
   converging, stop and diagnose.
 - **Auto-fixing a failing test by deleting it** or `@skip`-ing it. A

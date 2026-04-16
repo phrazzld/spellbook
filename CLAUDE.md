@@ -54,6 +54,10 @@ backlog/harness mutation.
 
 See `harnesses/shared/AGENTS.md` — one file, symlinked to every harness.
 
+- **Cross-harness first** — every new mechanism works on Claude, Codex,
+  AND Pi. Harness-native runtime features are optimizations on top of a
+  filesystem-level base, not the base itself. Red Line. Primary layer is
+  SKILL.md + what bootstrap symlinks into each harness's skills dir
 - **Focused set of skills and agents** — resist bloat, justify additions
 - **Thin harness, strong models** — don't compensate for weak models with scaffold
 - **Gotchas > instructions** — enumerate what goes wrong

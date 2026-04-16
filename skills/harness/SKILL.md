@@ -59,6 +59,12 @@ this harness creates, evaluates, and lints.
    `$REPO_ROOT/…`. State roots (cycles, locks, backlog) resolve from the
    invoking project (`git rev-parse --show-toplevel`), not the skill's
    install location. Lint catches violations.
+9. **Cross-harness first.** Skills and mechanisms target Claude Code,
+   Codex, and Pi. If a design only works inside one harness's runtime
+   (e.g. Claude `enabledPlugins`, Codex `/plugins`), find the
+   filesystem-level equivalent that works across all three. Prior art:
+   `harnesses/pi/settings.json:skills[]` glob. See
+   `harnesses/shared/AGENTS.md` Cross-Harness First.
 
 ## Gotchas
 
@@ -72,3 +78,7 @@ this harness creates, evaluates, and lints.
 - Scripts that source `$REPO_ROOT/…` or `../../…` outside the skill tree
   break the moment the skill is symlink-distributed. Test the distribution
   path, not just the in-repo path.
+- Anchoring a new mechanism on one harness's runtime (Claude plugins,
+  Codex plugins) is a design bug. All three harnesses scan SKILL.md
+  from a skills directory — that's the common denominator. Runtime
+  features are optimizations, not primary mechanisms.

@@ -106,6 +106,29 @@ temporal decomposition, hidden coupling.
   the invoking project's `git rev-parse --show-toplevel`, not the skill's
   install dir.
 
+## Cross-Harness First
+
+Spellbook (and any harness library built on its pattern) serves Claude
+Code, Codex, and Pi from one checkout. Every new mechanism — skills,
+bundles, hooks, settings, lint rules — targets all three. Harness-native
+runtime features (Claude's `enabledPlugins`, Codex's `/plugins`, Pi's
+`skills[]` glob) are optimizations on top of the filesystem-level
+primary layer, not the primary layer itself.
+
+- **Primary layer is filesystem + SKILL.md.** Every modern harness
+  scans a skills directory and parses frontmatter at startup.
+  Filesystem-level selectivity (what gets symlinked into each
+  harness's skills dir) works everywhere by construction.
+- **If a mechanism needs runtime toggling, emit per-harness artifacts
+  from one source.** Single manifest in-repo → Claude plugin.json +
+  Codex plugin.json + Pi glob rendered deterministically.
+- **Anchoring a design on one harness's unique feature is a bug.**
+  If you can't answer "what does this do on Codex?" the design is
+  incomplete. Cross-harness parity is a Red Line.
+- **Prior art in this repo: `harnesses/pi/settings.json:skills[]`.**
+  Filesystem-level allow/deny globs — the cross-harness-compatible
+  pattern, working today.
+
 ## Diverge Before You Converge
 
 Twice — on the problem, then on the solution. Norman's double diamond.

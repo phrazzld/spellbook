@@ -62,3 +62,23 @@ Default to a thin harness:
 Do not default to semantic workflow engines, regex recovery of agent structure,
 or heavy handoff machinery. If the harness is reasoning about the repo or
 recovering meaning from free-form agent prose, that is a strong smell.
+
+## Workflow layering
+
+When multiple skills touch the same delivery lane, enforce strict layering:
+
+- **Leaf skills own one domain and are runnable standalone.** Examples:
+  `/ci`, `/refactor`, `/qa`, `/code-review`.
+- **Composer skills orchestrate leaves around one bounded objective.**
+  Examples: `/deliver`, `/settle`.
+- **Outer-loop skills orchestrate composers plus lifecycle work.**
+  Example: `/flywheel`.
+- **Aliases are vocabulary, not new domains.** `/land` is a landing
+  mode/alias of `/settle`, not a separate skill with an independent contract.
+
+Redundancy test:
+- If a composer explains a leaf skill's internal methodology in detail, that is
+  drift. The composer should invoke or reference the leaf, then add only the
+  boundary judgment it owns.
+- If two skills can both plausibly claim to be the authoritative owner of the
+  same concern, the boundary is wrong. Pick one owner and make the other compose it.

@@ -16,8 +16,9 @@ argument-hint: "[PR-number|branch-name]"
 
 # /settle
 
-Take a branch from blocked to merge-ready. Fix everything, polish everything, refactor everything.
-Dual-mode: works with GitHub PRs or git-native verdict refs.
+Take a branch from blocked to clean. Plain `/settle` stops at merge-ready.
+`/land` is the landing mode of this same skill and continues through the
+repo-policy merge. Dual-mode: works with GitHub PRs or git-native verdict refs.
 
 ## Role
 
@@ -30,6 +31,7 @@ You are the executive orchestrator.
 - Keep review-comment disposition, risk tradeoffs, and merge-readiness judgment on the lead model.
 - Delegate bounded evidence gathering and implementation to focused subagents.
 - Use parallel fanout for independent fixes; serialize when fixes share files or checks.
+- Compose `/ci`, `/code-review`, and `/refactor`; do not replace their domain contracts.
 
 ## Mode Detection
 
@@ -46,7 +48,8 @@ Detection sequence:
 2. If `gh pr view` for current branch succeeds → GitHub mode
 3. Otherwise → git-native mode
 
-When invoked as `/land <branch>`, always use git-native mode regardless of
+There is no separate `/land` skill. When invoked as `/land <branch>`, always
+use git-native mode regardless of
 whether a PR exists. `/land` validates the verdict ref (must exist and point
 at HEAD), rejects `dont-ship` verdicts, runs Dagger CI when available, and
 lands the branch directly. Default landing policy is squash merge for
@@ -88,7 +91,7 @@ Read `references/pr-fix.md` and follow it completely.
 **Goal:** Get from blocked to green.
 
 1. **Conflicts** — rebase or merge, resolve all conflicts
-2. **CI** — run `dagger call check` (always). In GitHub mode, also check remote CI.
+2. **CI** — invoke `/ci` for gate ownership. In GitHub mode, also check remote CI.
 3. **Self-review** — read the entire diff as a reviewer would
 4. **Review findings** —
    - **GitHub mode:** read every PR comment via `skills/settle/scripts/fetch-pr-reviews.sh`
@@ -97,7 +100,7 @@ Read `references/pr-fix.md` and follow it completely.
    - For each finding: fix (in scope), defer (out of scope → git-bug/backlog), or reject (with reasoning)
 5. **Async settlement** —
    - **GitHub mode:** wait for CI checks and bot reviewers; re-check via `gh pr view --json statusCheckRollup,reviews`
-   - **Git-native mode:** re-run `dagger call check` after fixes. No async bots to wait for.
+   - **Git-native mode:** re-run `/ci` after fixes. No async bots to wait for.
 
 Dispatch fixes to smaller worker subagents when scope is clear and bounded.
 
@@ -105,7 +108,7 @@ Dispatch fixes to smaller worker subagents when scope is clear and bounded.
    - **GitHub mode:** `gh pr view --json reviews,statusCheckRollup` — at least one
      approving review, all checks passing
    - **Git-native mode:** `source scripts/lib/verdicts.sh && verdict_validate <branch>`
-     — verdict ref exists and SHA matches HEAD. Plus `dagger call check` passes.
+     — verdict ref exists and SHA matches HEAD. Plus `/ci` is green.
 
 **Exit gate:** CI green, all review findings addressed, merge-readiness verified.
 

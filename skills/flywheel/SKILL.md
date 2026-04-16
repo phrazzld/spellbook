@@ -26,11 +26,14 @@ the reflect outputs. It runs N of those cycles.
 - Delegate each phase to its named skill; never inline phase logic here.
 - Treat `/deliver` as an opaque merge-readiness step. `/flywheel` does not
   stop there; it owns the final mile after `/deliver` succeeds.
-- Land the change on the default branch before deploy. Use `/settle`, `/land`,
-  or explicit repo-native landing; never deploy from an unlanded feature branch.
+- Land the change on the default branch before deploy. Use `/land`
+  (preferred), `/settle`, or explicit repo-native landing; never deploy from
+  an unlanded feature branch.
 - Treat the event log as the source of truth — every phase boundary writes an event via `flywheel.sh emit`.
 - Apply the reflect outputs before closing the cycle. Backlog mutation and
   harness suggestions are part of the success path, not optional cleanup.
+- Do not restate leaf-skill internals here. `/flywheel` orchestrates;
+  `/deliver`, `/land`, `/deploy`, `/monitor`, and `/reflect` own their own loops.
 
 ## Real Mode — Cycle Orchestration
 
@@ -49,12 +52,10 @@ provides state primitives; the model provides judgment.
    - On exit 0: read receipt.json and capture the merge-ready branch + head sha.
    - On non-zero: emit phase.failed, close aborted, STOP this cycle.
 
-4. Invoke the landing phase (`/settle`, `/land`, or explicit repo-native landing):
-   - Run the final-mile clean loop until the branch is actually clean:
-     Dagger/local CI, review settlement, refactor, QA, and any resulting fix loops.
-   - Land the change on the default branch using repo policy.
-   - Default policy for single-ticket backlog branches is squash merge unless the
-     repo has a stronger rule.
+4. Invoke the landing phase (`/land` preferred; `/settle` or explicit
+   repo-native landing if needed):
+   - Treat landing as a black-box final-mile step that returns a landed sha.
+   - Landing owns final-mile CI/review/refactor/QA loops and repo-policy merge strategy.
    - On success: emit deliver.done with cost_usd, branch, head_sha, landed_sha,
      and merge_strategy.
    - On non-zero: emit phase.failed, close aborted, STOP this cycle.
@@ -188,6 +189,8 @@ For multi-cycle runs: one brief per cycle, then one aggregate summary.
 - **harness.suggested writes to a branch only** (never main). Branch mechanics not yet implemented; currently emits a placeholder event.
 - **`/flywheel` is not `/deliver`.** Merge-ready is an intermediate state. A
   successful cycle lands the change before deploy.
+- **`/land` is not a separate lane.** It is the preferred landing mode of
+  `/settle`; use the shorter name when the task is specifically to land.
 - **Landing is explicit, not implicit.** Use repo policy. Default to squash for
   one-ticket feature branches unless repo guidance overrides it.
 - **Library repos still land.** If no deploy target exists, deploy/monitor may

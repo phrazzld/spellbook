@@ -323,6 +323,69 @@ else
   discover_remote
 fi
 
+# Per-project skill allowlist. Resolves symmetric to /tailor-skills: the file
+# lives at the git toplevel, so running bootstrap from a subdirectory still
+# picks it up. If there is no enclosing git repo, falls back to $PWD.
+# Three parser states (sentinel on first stdout token):
+#   PRESENT <names…> → file present, `skills:` is a list (possibly empty).
+#                      Allowlist is active; empty list → empty result (fail-loud
+#                      via the "No skills found" guard below, which is correct
+#                      for "user said install nothing").
+#   PARSE_FAIL       → file present but malformed or wrong shape. Warn and fall
+#                      through to global behavior.
+#   (file absent)    → skip filter entirely, global behavior preserved.
+ALLOWLIST_ACTIVE=0
+project_root=$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || echo "$PWD")
+if [ -f "$project_root/.spellbook.yaml" ]; then
+  allowlist_raw=$(python3 - "$project_root/.spellbook.yaml" <<'PY' || true
+import sys, yaml
+try:
+    d = yaml.safe_load(open(sys.argv[1]))
+except Exception as e:
+    sys.stderr.write('warn: could not parse .spellbook.yaml: {}\n'.format(e))
+    print('PARSE_FAIL')
+    sys.exit(0)
+if not isinstance(d, dict) or 'skills' not in d:
+    print('PARSE_FAIL')
+    sys.exit(0)
+skills = d.get('skills')
+if skills is None:
+    # `skills:` key present but null. Treat as malformed (user likely meant []).
+    sys.stderr.write('warn: .spellbook.yaml: skills: is null (use [] for empty)\n')
+    print('PARSE_FAIL')
+    sys.exit(0)
+if not isinstance(skills, list):
+    sys.stderr.write('warn: .spellbook.yaml: skills: must be a list\n')
+    print('PARSE_FAIL')
+    sys.exit(0)
+print('PRESENT ' + ' '.join(str(s) for s in skills))
+PY
+)
+  # Read first token as status sentinel; remaining tokens are allowlist names.
+  read -r status rest <<< "$allowlist_raw"
+  if [ "$status" = "PRESENT" ]; then
+    ALLOWLIST_ACTIVE=1
+    filtered_global=(); filtered_external=()
+    for s in $rest; do
+      if contains "$s" "${GLOBAL_SKILLS[@]}"; then filtered_global+=("$s")
+      elif contains "$s" "${EXTERNAL_SKILLS[@]}"; then filtered_external+=("$s")
+      else warn "  .spellbook.yaml: unknown skill '$s' (skipped)"
+      fi
+    done
+    GLOBAL_SKILLS=("${filtered_global[@]}")
+    EXTERNAL_SKILLS=("${filtered_external[@]}")
+    info "Allowlist active: ${#GLOBAL_SKILLS[@]} first-party + ${#EXTERNAL_SKILLS[@]} external"
+  fi
+  # Any other status (PARSE_FAIL, empty, unexpected) → leave ALLOWLIST_ACTIVE=0.
+fi
+
+if [ "${SPELLBOOK_TEST_MODE:-0}" = "1" ]; then
+  printf 'GLOBAL_SKILLS=%s\n' "${GLOBAL_SKILLS[*]:-}"
+  printf 'EXTERNAL_SKILLS=%s\n' "${EXTERNAL_SKILLS[*]:-}"
+  printf 'ALLOWLIST_ACTIVE=%s\n' "$ALLOWLIST_ACTIVE"
+  exit 0
+fi
+
 if [ ${#GLOBAL_SKILLS[@]} -eq 0 ]; then
   err "No skills found"
   exit 1
@@ -386,7 +449,7 @@ link_local() {
   # symlink hides them from harnesses that only glob `*`. Force per-entry mode
   # whenever externals are present.
   local force_per_entry=0
-  if [ "${#EXTERNAL_SKILLS[@]}" -gt 0 ]; then
+  if [ "${#EXTERNAL_SKILLS[@]}" -gt 0 ] || [ "${ALLOWLIST_ACTIVE:-0}" -eq 1 ]; then
     force_per_entry=1
     # Remove any prior whole-dir symlink so we can populate per-entry.
     if [ -L "$skills_dir" ]; then

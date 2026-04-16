@@ -24,17 +24,6 @@ floor), green means nothing. So this skill **audits first, then runs**.
 Stops at green CI. Does not review code semantics (→ `/code-review`), does
 not address review comments (→ `/settle`), does not ship.
 
-## Execution Stance
-
-You are the executive orchestrator.
-- Keep judgment calls on the lead: what counts as strong CI in this repo,
-  which failures are self-healable vs need escalation, whether a proposed
-  strengthening is load-bearing or gold-plating.
-- Delegate evidence gathering (inventory of configs, pipeline walks) and
-  mechanical fixes (auto-format, lockfile regen, narrow test patches) to
-  focused subagents.
-- Run audit inventory checks in parallel; serialize fix-and-rerun loops.
-
 ## Modes
 
 - Default: audit → run. Full pass.

@@ -18,22 +18,11 @@ Outer-loop delivery orchestrator. `/deliver` takes one item to merge-ready
 and exits (inner loop). `/flywheel` composes cycles of `/deliver` +
 `/deploy` + `/monitor` + `/diagnose` + `/reflect` and runs N of them.
 
-Two skills, two stop conditions, one composition contract:
-- `/deliver` (inner) — single-shot, interactive, ends at merge-ready.
-- `/flywheel` (outer) — continuous, unattended, ends on predicate/budget.
+## Invariants
 
-OpenHands inner-loop vs outer-loop distinction is load-bearing. Do not
-grow one into the other.
-
-## Execution Stance
-
-You are the executive orchestrator.
-- Keep work selection, stop judgment, and cycle close/abandon on the lead model.
 - Delegate each phase to its named skill; never inline phase logic here.
-- Treat `/deliver` as an opaque merge-readiness step. Consume exit code +
-  receipt; escalate disagreement.
-- Treat the event log as the source of truth — every phase boundary writes
-  an event via `flywheel.sh emit`.
+- Treat `/deliver` as an opaque merge-readiness step. Consume exit code + receipt; escalate disagreement.
+- Treat the event log as the source of truth — every phase boundary writes an event via `flywheel.sh emit`.
 
 ## Real Mode — Cycle Orchestration
 

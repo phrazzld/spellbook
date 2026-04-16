@@ -14,12 +14,9 @@ argument-hint: "[context-packet-path|ticket-id]"
 
 Spec in, green tests out. One packet, one feature branch, one concern.
 
-## Execution Stance
+## Invariants
 
-You are the orchestrator of a single builder.
 - Trust the context packet. Do not reshape. Do not re-plan.
-- Dispatch the **builder** sub-agent (general-purpose) as the primary executor.
-- Keep proceed/escalate/stop judgment on the lead model.
 - If the packet is incomplete, **fail loudly** — do not invent the spec.
 
 ## Contract

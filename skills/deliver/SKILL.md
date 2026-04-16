@@ -19,11 +19,9 @@ Inner-loop composer. One backlog item → merge-ready code. **Delivered ≠
 shipped.** The outer loop (`/flywheel`, see 028) consumes the receipt and
 decides whether to deploy. Humans merge.
 
-## Execution Stance
+## Invariants
 
-You are the executive orchestrator.
 - Compose atomic phase skills. Never inline phase logic.
-- Dispatch → synthesize receipts → make proceed/fix/escalate calls.
 - Fail loud. Never swallow a phase failure into a "best effort" pass.
 
 ## Closeout Contract

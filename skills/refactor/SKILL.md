@@ -18,13 +18,6 @@ Reduce complexity without reducing correctness. Favor fewer states, clearer
 names, stronger invariants, better tests, and current docs. Deletion first,
 then consolidation, then abstraction, then mechanical cleanup.
 
-## Execution Stance
-
-You are the executive orchestrator.
-- Keep branch strategy, acceptance criteria, and final simplification choices on the lead model.
-- Delegate evidence gathering, option generation, and code edits to focused subagents.
-- Run independent exploration in parallel; serialize only when one output gates another.
-
 ## Branch-Aware Routing
 
 Detect the current branch and primary branch first:

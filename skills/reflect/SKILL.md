@@ -22,14 +22,6 @@ Every finding becomes one of three things:
 - a concrete coaching note
 - an explicit justification for not codifying
 
-## Execution Stance
-
-You are the executive orchestrator.
-- Keep severity ranking, responsibility split, codification target selection,
-  and final teaching points on the lead model.
-- Delegate evidence gathering and drift scanning to focused subagents.
-- Run evidence-gathering subagents in parallel by default.
-
 ## Routing
 
 | Mode | Intent | Reference |

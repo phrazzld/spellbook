@@ -2,12 +2,12 @@
 
 The learning engine of the outer loop. Read one cycle's artifacts, produce
 a typed findings file, mutate the backlog with evidence, and push harness
-suggestions to a branch. Consumed by `/autopilot` (outer loop, 028) and by
+suggestions to a branch. Consumed by `/flywheel` (outer loop, 028) and by
 future harness auto-tune work (GEPA / backlog item 031).
 
 ## When to Use This Mode
 
-- `/autopilot` (outer loop) finishes a cycle and dispatches
+- `/flywheel` (outer loop) finishes a cycle and dispatches
   `/reflect cycle <cycle-ulid>` automatically.
 - A human re-runs reflect on a past cycle to extract deferred learnings:
   `/reflect cycle 01HQABC...`.
@@ -125,7 +125,7 @@ item. Authority and its boundaries:
 
 **Commit discipline.** One git commit per mutation class, message format:
 `reflect(<cycle-id>): <op> <target> — <finding-id>`. Commits land on the
-branch `/autopilot` is already on — reflect does not create a branch for
+branch `/flywheel` is already on — reflect does not create a branch for
 bucket work.
 
 ## Harness Suggestion Protocol

@@ -10,8 +10,8 @@ to ~/.claude, ~/.codex, ~/.pi via bootstrap.sh.
 
 ```
 spellbook/
-├── skills/        # Leaf skills (qa, demo, investigate, research, ...) and
-│                  #   orchestrators (deliver, autopilot, code-review, settle, ...)
+├── skills/        # Leaf skills (qa, demo, diagnose, research, ...) and
+│                  #   orchestrators (deliver, flywheel, code-review, settle, ...)
 ├── agents/        # Specialized agents: planner, builder, critic,
 │                  #   ousterhout, carmack, grug, beck
 ├── harnesses/     # Per-harness configs, hooks, shared principles
@@ -37,7 +37,7 @@ git-bug push origin                  # sync to GitHub bridge
 
 ```
 backlog.d/ → /groom → /shape → /deliver → ship
-                              └─ /autopilot (outer loop: cycles of
+                              └─ /flywheel (outer loop: cycles of
                                   /deliver → /deploy → /monitor → /reflect)
 ```
 
@@ -45,9 +45,9 @@ backlog.d/ → /groom → /shape → /deliver → ship
 `/shape` → `/implement` → clean loop over `/code-review` + `/ci` +
 `/refactor` + `/qa`. It stops at merge-ready; humans merge.
 
-`/autopilot` is the outer-loop orchestrator (028): continuous, unattended,
+`/flywheel` is the outer-loop orchestrator (028): continuous, unattended,
 budgeted cycles that compose `/deliver` as a black-box merge-readiness step
-then `/deploy`, `/monitor`, `/investigate` (on alert), `/reflect`, and
+then `/deploy`, `/monitor`, `/diagnose` (on alert), `/reflect`, and
 backlog/harness mutation.
 
 ## Principles

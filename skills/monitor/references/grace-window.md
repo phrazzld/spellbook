@@ -104,7 +104,7 @@ treat `/monitor` as indefinite production monitoring, which it is not.
 
 ## Interaction with the Outer Loop
 
-`/monitor` is invoked by `/autopilot` after `/deploy` reports success. The
+`/monitor` is invoked by `/flywheel` after `/deploy` reports success. The
 outer loop's contract:
 
 | Monitor exit | Outer loop action |

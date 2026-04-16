@@ -9,7 +9,7 @@ Estimate: M
 Enable `refs/verdicts/*` to sync across machines via `git push`/`git fetch`.
 Verdicts (from 020) are local refs.
 
-**Note (032):** Claim-based coordination was dropped when `/autopilot` was
+**Note (032):** Claim-based coordination was dropped when `/flywheel` was
 renamed to `/deliver`. This ticket was originally scoped to sync claims +
 verdicts; it now covers verdicts only. Kept alive as a design note for the
 verdict-sync half. Retained claim-sync sections below are historical.

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Integration tests for skills/autopilot/scripts/autopilot.sh.
+# Integration tests for skills/flywheel/scripts/flywheel.sh.
 # Runs each test in a temp directory so real repo state is untouched.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SPELLBOOK_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-AUTOPILOT_SH="$SCRIPT_DIR/autopilot.sh"
+FLYWHEEL_SH="$SCRIPT_DIR/flywheel.sh"
 PASS=0
 FAIL=0
 
@@ -14,10 +14,10 @@ setup() {
   TEST_DIR="$(mktemp -d)"
   cd "$TEST_DIR"
   mkdir -p .spellbook
-  unset AUTOPILOT_LOCK_PATH
-  AUTOPILOT_LOCK_PATH="$TEST_DIR/.spellbook/autopilot.lock"
-  export AUTOPILOT_LOCK_PATH
-  # autopilot.sh cd's to REPO_ROOT and writes cycles to REPO_ROOT/backlog.d/_cycles/.
+  unset FLYWHEEL_LOCK_PATH
+  FLYWHEEL_LOCK_PATH="$TEST_DIR/.spellbook/flywheel.lock"
+  export FLYWHEEL_LOCK_PATH
+  # flywheel.sh cd's to REPO_ROOT and writes cycles to REPO_ROOT/backlog.d/_cycles/.
   # Snapshot the pre-existing entries so teardown can delete only what this test
   # created — never anything that predated the run.
   CYCLES_ROOT="$SPELLBOOK_ROOT/backlog.d/_cycles"
@@ -45,7 +45,7 @@ teardown() {
       rmdir "$CYCLES_ROOT" 2>/dev/null || true
     fi
   fi
-  unset AUTOPILOT_LOCK_PATH
+  unset FLYWHEEL_LOCK_PATH
   rm -rf "$TEST_DIR"
 }
 
@@ -62,7 +62,7 @@ assert_eq() {
 
 # --- Helpers ---
 
-# Latest cycle.jsonl written by autopilot.sh in this test. autopilot.sh now
+# Latest cycle.jsonl written by flywheel.sh in this test. flywheel.sh now
 # anchors writes to REPO_ROOT, so we look there.
 find_cycle_log() {
   # shellcheck disable=SC2012
@@ -119,7 +119,7 @@ PYEOF
 }
 
 test_new_ulid_helper_produces_26_crockford_chars() {
-  # Exercise autopilot.sh's new_ulid() directly in fallback mode by forcing
+  # Exercise flywheel.sh's new_ulid() directly in fallback mode by forcing
   # ulid import to fail.
   local fake_dir="$TEST_DIR/fake_pythonpath"
   mkdir -p "$fake_dir"
@@ -127,7 +127,7 @@ test_new_ulid_helper_produces_26_crockford_chars() {
 raise ImportError("forced for test")
 PY
   local out
-  # Source autopilot.sh is not directly possible (it runs on source); instead
+  # Source flywheel.sh is not directly possible (it runs on source); instead
   # invoke a tiny python equivalent of its block.
   out="$(PYTHONPATH="$fake_dir" python3 - <<'PYEOF'
 try:
@@ -150,14 +150,14 @@ PYEOF
 }
 
 test_autopilot_emits_26char_crockford_cycle_id() {
-  # End-to-end: run autopilot.sh --dry-run and inspect cycle_id in the jsonl.
+  # End-to-end: run flywheel.sh --dry-run and inspect cycle_id in the jsonl.
   # Force the ImportError fallback so we test the path that was broken.
   local fake_dir="$TEST_DIR/fake_pythonpath"
   mkdir -p "$fake_dir"
   cat > "$fake_dir/ulid.py" <<'PY'
 raise ImportError("forced for test")
 PY
-  PYTHONPATH="$fake_dir" bash "$AUTOPILOT_SH" --dry-run >/dev/null 2>&1
+  PYTHONPATH="$fake_dir" bash "$FLYWHEEL_SH" --dry-run >/dev/null 2>&1
   local log cid
   log="$(find_cycle_log)"
   cid="$(python3 -c "
@@ -176,7 +176,7 @@ print(json.loads(line)['cycle_id'])
 # --- Integration tests (B5, B6) ---
 
 test_dry_run_writes_expected_event_kinds_in_order() {
-  bash "$AUTOPILOT_SH" --dry-run >/dev/null 2>&1
+  bash "$FLYWHEEL_SH" --dry-run >/dev/null 2>&1
   local log
   log="$(find_cycle_log)"
   local expected actual
@@ -187,25 +187,25 @@ test_dry_run_writes_expected_event_kinds_in_order() {
 
 test_max_cycles_gt_1_without_budget_exits_2() {
   local rc=0
-  bash "$AUTOPILOT_SH" --dry-run --max-cycles 2 >/dev/null 2>&1 || rc=$?
+  bash "$FLYWHEEL_SH" --dry-run --max-cycles 2 >/dev/null 2>&1 || rc=$?
   assert_eq "max-cycles>1 without budget exits 2" "2" "$rc"
 }
 
 test_until_flag_is_phase2_exits_2() {
   local rc=0
-  bash "$AUTOPILOT_SH" --until "backlog empty" >/dev/null 2>&1 || rc=$?
+  bash "$FLYWHEEL_SH" --until "backlog empty" >/dev/null 2>&1 || rc=$?
   assert_eq "--until exits 2 (Phase 2)" "2" "$rc"
 }
 
 test_resume_flag_is_phase2_exits_2() {
   local rc=0
-  bash "$AUTOPILOT_SH" --resume 01HFAKE >/dev/null 2>&1 || rc=$?
+  bash "$FLYWHEEL_SH" --resume 01HFAKE >/dev/null 2>&1 || rc=$?
   assert_eq "--resume exits 2 (Phase 2)" "2" "$rc"
 }
 
 test_real_mode_emits_phase_failed_and_cycle_closed_and_exits_1() {
   local rc=0
-  bash "$AUTOPILOT_SH" >/dev/null 2>&1 || rc=$?
+  bash "$FLYWHEEL_SH" >/dev/null 2>&1 || rc=$?
   assert_eq "real mode exits 1" "1" "$rc"
   local log kinds
   log="$(find_cycle_log)"
@@ -219,14 +219,14 @@ test_real_mode_emits_phase_failed_and_cycle_closed_and_exits_1() {
   assert_eq "real mode emits cycle.closed" "1" "$has_closed"
   # Lock must have been released.
   assert_eq "real mode releases lock" "no" \
-    "$([ -f "$AUTOPILOT_LOCK_PATH" ] && echo yes || echo no)"
+    "$([ -f "$FLYWHEEL_LOCK_PATH" ] && echo yes || echo no)"
 }
 
 test_two_sequential_dry_runs_both_succeed() {
   # Second invocation must acquire the lock the first one released.
-  bash "$AUTOPILOT_SH" --dry-run >/dev/null 2>&1
+  bash "$FLYWHEEL_SH" --dry-run >/dev/null 2>&1
   local rc1=$?
-  bash "$AUTOPILOT_SH" --dry-run >/dev/null 2>&1
+  bash "$FLYWHEEL_SH" --dry-run >/dev/null 2>&1
   local rc2=$?
   assert_eq "first dry-run cycle exits 0" "0" "$rc1"
   assert_eq "second dry-run cycle exits 0" "0" "$rc2"
@@ -238,8 +238,8 @@ test_two_sequential_dry_runs_both_succeed() {
 }
 
 test_sigint_releases_lock_via_trap() {
-  # Block autopilot.sh inside the cycle so we can SIGINT mid-flight. We wrap
-  # a python sleep into the spellbook PATH — but autopilot.sh does not call
+  # Block flywheel.sh inside the cycle so we can SIGINT mid-flight. We wrap
+  # a python sleep into the spellbook PATH — but flywheel.sh does not call
   # python by name mid-cycle. Simpler: drive a shell-level INT after the
   # cycle acquires its lock. The dry-run path is short, so we need a
   # synthetic pause. Instead, assert the invariant indirectly: after a
@@ -247,10 +247,10 @@ test_sigint_releases_lock_via_trap() {
   # we SIGINT a long-running real-mode process before cycle.closed, the
   # trap still removes the lockfile.
   #
-  # Mechanism: start autopilot.sh in background without --dry-run; it will
+  # Mechanism: start flywheel.sh in background without --dry-run; it will
   # acquire, emit phase.failed, release, exit 1 quickly. We time SIGINT to
   # land after the acquire and assert no residual lock.
-  ( bash "$AUTOPILOT_SH" --dry-run >/dev/null 2>&1 ) &
+  ( bash "$FLYWHEEL_SH" --dry-run >/dev/null 2>&1 ) &
   local pid=$!
   # Give it a brief moment to set the trap + acquire.
   sleep 0.05
@@ -258,7 +258,7 @@ test_sigint_releases_lock_via_trap() {
   wait "$pid" 2>/dev/null || true
   # After SIGINT (or natural completion), the lockfile must be gone.
   assert_eq "lock cleared after SIGINT / completion" "no" \
-    "$([ -f "$AUTOPILOT_LOCK_PATH" ] && echo yes || echo no)"
+    "$([ -f "$FLYWHEEL_LOCK_PATH" ] && echo yes || echo no)"
 }
 
 # --- B7: SIGINT exit code contract ---
@@ -272,22 +272,22 @@ test_sigint_exits_with_130() {
   # `trap "..." INT` inside the script can't override it ("signals ignored
   # upon entry to the shell cannot be trapped"). So we drive the SIGINT via
   # python3's subprocess, which restores default signal handlers in the
-  # child. This is how a real interactive ^C reaches autopilot.sh.
+  # child. This is how a real interactive ^C reaches flywheel.sh.
   #
-  # AUTOPILOT_SIGINT_TEST_SLEEP is an env-only hook autopilot.sh honors to
+  # FLYWHEEL_SIGINT_TEST_SLEEP is an env-only hook flywheel.sh honors to
   # pause after acquire, giving us a deterministic SIGINT window.
   local rc
-  rc="$(AUTOPILOT_LOCK_PATH="$AUTOPILOT_LOCK_PATH" \
-        AUTOPILOT_SH="$AUTOPILOT_SH" \
+  rc="$(FLYWHEEL_LOCK_PATH="$FLYWHEEL_LOCK_PATH" \
+        FLYWHEEL_SH="$FLYWHEEL_SH" \
         python3 - <<'PYEOF'
 import os, signal, subprocess, time
 env = os.environ.copy()
-env["AUTOPILOT_SIGINT_TEST_SLEEP"] = "10"
-p = subprocess.Popen(["bash", env["AUTOPILOT_SH"], "--dry-run"],
+env["FLYWHEEL_SIGINT_TEST_SLEEP"] = "10"
+p = subprocess.Popen(["bash", env["FLYWHEEL_SH"], "--dry-run"],
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                      env=env)
 # Wait for lock file so we know the trap is in place.
-lock = env["AUTOPILOT_LOCK_PATH"]
+lock = env["FLYWHEEL_LOCK_PATH"]
 for _ in range(200):  # up to 10s, plenty for CI
     if os.path.exists(lock):
         time.sleep(0.05)  # let the trap install
@@ -298,24 +298,24 @@ p.wait()
 print(p.returncode)
 PYEOF
 )"
-  assert_eq "SIGINT causes autopilot.sh to exit 130" "130" "$rc"
+  assert_eq "SIGINT causes flywheel.sh to exit 130" "130" "$rc"
   assert_eq "lock cleared after SIGINT" "no" \
-    "$([ -f "$AUTOPILOT_LOCK_PATH" ] && echo yes || echo no)"
+    "$([ -f "$FLYWHEEL_LOCK_PATH" ] && echo yes || echo no)"
 }
 
 test_sigterm_exits_with_143() {
   # Companion to SIGINT: SIGTERM must exit 143 (128 + 15).
   local rc
-  rc="$(AUTOPILOT_LOCK_PATH="$AUTOPILOT_LOCK_PATH" \
-        AUTOPILOT_SH="$AUTOPILOT_SH" \
+  rc="$(FLYWHEEL_LOCK_PATH="$FLYWHEEL_LOCK_PATH" \
+        FLYWHEEL_SH="$FLYWHEEL_SH" \
         python3 - <<'PYEOF'
 import os, signal, subprocess, time
 env = os.environ.copy()
-env["AUTOPILOT_SIGINT_TEST_SLEEP"] = "10"
-p = subprocess.Popen(["bash", env["AUTOPILOT_SH"], "--dry-run"],
+env["FLYWHEEL_SIGINT_TEST_SLEEP"] = "10"
+p = subprocess.Popen(["bash", env["FLYWHEEL_SH"], "--dry-run"],
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                      env=env)
-lock = env["AUTOPILOT_LOCK_PATH"]
+lock = env["FLYWHEEL_LOCK_PATH"]
 for _ in range(200):  # up to 10s, plenty for CI
     if os.path.exists(lock):
         time.sleep(0.05)  # let the trap install
@@ -326,9 +326,9 @@ p.wait()
 print(p.returncode)
 PYEOF
 )"
-  assert_eq "SIGTERM causes autopilot.sh to exit 143" "143" "$rc"
+  assert_eq "SIGTERM causes flywheel.sh to exit 143" "143" "$rc"
   assert_eq "lock cleared after SIGTERM" "no" \
-    "$([ -f "$AUTOPILOT_LOCK_PATH" ] && echo yes || echo no)"
+    "$([ -f "$FLYWHEEL_LOCK_PATH" ] && echo yes || echo no)"
 }
 
 # --- B8: orphan cycle dir on lock contention ---
@@ -338,13 +338,13 @@ test_failed_acquire_leaves_no_orphan_cycle_dir() {
   python3 -c "
 import json, os
 os.makedirs('.spellbook', exist_ok=True)
-open(os.environ['AUTOPILOT_LOCK_PATH'],'w').write(
+open(os.environ['FLYWHEEL_LOCK_PATH'],'w').write(
   json.dumps({'pid': $$, 'cycle_id': '01HHELD', 'started_at': '2026-01-01T00:00:00Z'}))
 "
   # Second invocation must fail to acquire. Assert no NEW cycle dir appeared
   # under REPO_ROOT/backlog.d/_cycles after the failed acquire.
   local rc=0
-  bash "$AUTOPILOT_SH" --dry-run >/dev/null 2>&1 || rc=$?
+  bash "$FLYWHEEL_SH" --dry-run >/dev/null 2>&1 || rc=$?
   assert_eq "colliding invocation fails non-zero" "1" "$rc"
   local post new_cycles
   post="$(ls -1 "$CYCLES_ROOT" 2>/dev/null | sort || true)"
@@ -355,7 +355,7 @@ open(os.environ['AUTOPILOT_LOCK_PATH'],'w').write(
 # --- B9: paths anchored to REPO_ROOT, not PWD ---
 
 test_off_repo_invocation_writes_to_repo_root() {
-  # Invoke autopilot.sh from a directory OUTSIDE the spellbook repo. Artifacts
+  # Invoke flywheel.sh from a directory OUTSIDE the spellbook repo. Artifacts
   # must land under REPO_ROOT, not under PWD. (Teardown cleans up any new
   # cycle dir this test spawns under REPO_ROOT.)
   local off_repo_dir="$TEST_DIR/off_repo"
@@ -364,8 +364,8 @@ test_off_repo_invocation_writes_to_repo_root() {
   # there if the fix regresses — making REPO_ROOT anchoring observable.
   (
     cd "$off_repo_dir"
-    AUTOPILOT_LOCK_PATH="$TEST_DIR/off_repo.lock" \
-      bash "$AUTOPILOT_SH" --dry-run >/dev/null 2>&1
+    FLYWHEEL_LOCK_PATH="$TEST_DIR/off_repo.lock" \
+      bash "$FLYWHEEL_SH" --dry-run >/dev/null 2>&1
   )
   # No backlog.d tree should be created under PWD.
   assert_eq "no backlog.d/_cycles under off-repo PWD" "no" \
@@ -381,7 +381,7 @@ test_off_repo_invocation_writes_to_repo_root() {
 
 test_max_cycles_2_exits_2_with_phase2_message() {
   local out rc=0
-  out="$(bash "$AUTOPILOT_SH" --dry-run --max-cycles 2 --budget 10 2>&1)" || rc=$?
+  out="$(bash "$FLYWHEEL_SH" --dry-run --max-cycles 2 --budget 10 2>&1)" || rc=$?
   assert_eq "--max-cycles 2 exits 2" "2" "$rc"
   if echo "$out" | grep -q "Phase 2"; then
     assert_eq "--max-cycles>1 error message mentions Phase 2" "ok" "ok"

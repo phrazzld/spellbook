@@ -16,7 +16,7 @@ argument-hint: "[backlog-item|issue-id] [--resume <ulid>] [--abandon <ulid>] [--
 # /deliver
 
 Inner-loop composer. One backlog item → merge-ready code. **Delivered ≠
-shipped.** The outer loop (`/autopilot`, see 028) consumes the receipt and
+shipped.** The outer loop (`/flywheel`, see 028) consumes the receipt and
 decides whether to deploy. Humans merge.
 
 ## Execution Stance
@@ -56,7 +56,7 @@ The delivery brief must answer:
 brief. The brief explains the delivered result; `/reflect` captures the
 learnings, harness changes, and follow-on mutations.
 
-When `/deliver` is invoked under `/autopilot`, keep the same content shape but
+When `/deliver` is invoked under `/flywheel`, keep the same content shape but
 let the outer loop own the final session-level shipping brief.
 
 ## Composition
@@ -120,7 +120,7 @@ receipts; it never re-implements the phase.
 ## Contract (exit code + receipt)
 
 `/deliver` communicates exclusively via its exit code and
-`<state-dir>/receipt.json`. Callers — human or `/autopilot` outer loop —
+`<state-dir>/receipt.json`. Callers — human or `/flywheel` outer loop —
 do not parse stdout.
 
 | Exit | Meaning | Receipt `status` |
@@ -186,7 +186,7 @@ Full protocol: `references/durability.md`.
 
 ## Non-Goals
 
-- Deploying — `/autopilot` outer loop's concern
+- Deploying — `/flywheel` outer loop's concern
 - Merging — humans merge
 - Multi-ticket operation — one ticket per invocation
 - Claim-based coordination — explicitly dropped
@@ -194,7 +194,7 @@ Full protocol: `references/durability.md`.
 
 ## Related
 
-- Consumer: `/autopilot` (028) — outer loop passes `--state-dir` under its
+- Consumer: `/flywheel` (028) — outer loop passes `--state-dir` under its
   cycle tree and reads `receipt.json`
 - Phases: `/shape`, `/implement` (033), `/code-review`, `/ci` (034),
   `/refactor`, `/qa`

@@ -83,7 +83,7 @@ in markdown mark permanent protected sections.
 ### Enforcement (structural, not prose)
 
 `scripts/tailor-lint.sh` runs as pre-commit hook on `.claude/skills/`:
-- Reject if `.claude/skills/<name>/SKILL.md` shadows a global workflow skill name (`groom`, `shape`, `deliver`, `autopilot`, `code-review`, `settle`, `reflect`, `tailor`, `harness`)
+- Reject if `.claude/skills/<name>/SKILL.md` shadows a global workflow skill name (`groom`, `shape`, `deliver`, `flywheel`, `code-review`, `settle`, `reflect`, `tailor`, `harness`)
 - Reject if the 2-skill MVP cap is exceeded
 
 ## Control Flow
@@ -164,7 +164,7 @@ No round 2. That's where `/focus` rotted.
 
 | Layer | Owner | Examples |
 |---|---|---|
-| Workflow primitives | **Global (spellbook)** | groom, shape, deliver, autopilot, code-review, reflect, settle, harness, tailor |
+| Workflow primitives | **Global (spellbook)** | groom, shape, deliver, flywheel, code-review, reflect, settle, harness, tailor |
 | Philosophy bench | Global | beck, carmack, grug, ousterhout, planner, critic |
 | Domain skills | **Per-repo (generated)** | `<repo>-migrations`, `<repo>-fixtures`, `<repo>-deploy` — v2+ |
 | AGENTS.md content | Per-repo | build/test commands, hot paths, gotchas |
@@ -190,18 +190,18 @@ Sharp line enforced by `tailor-lint.sh`.
 | Generation attempts shadowing skill | `tailor-lint.sh` rejects pre-commit |
 | `ls .claude/skills/` exceeds cap | Lint rejects |
 
-## Interaction Contract with `/autopilot`
+## Interaction Contract with `/flywheel`
 
 Two touchpoints:
 
-1. **Auto-scaffold arbitration.** `/autopilot` reads
+1. **Auto-scaffold arbitration.** `/flywheel` reads
    `.claude/.tailor/manifest.json:domains_owned` before auto-scaffolding
-   `/qa` or `/deploy`. If tailor owns, autopilot uses tailored artifact.
+   `/qa` or `/deploy`. If tailor owns, flywheel uses tailored artifact.
    Single ownership file. No race.
 
 2. **Drift counter isolation** (v2). When `/tailor drift` counts commits,
    exclude refs matching `refs/heads/cycle/*` and
-   `refs/heads/harness/auto-tune`. `/autopilot` writes to those branches;
+   `refs/heads/harness/auto-tune`. `/flywheel` writes to those branches;
    they're not "repo evolution."
 
 ## MVP Slice (~week 1)
@@ -227,7 +227,7 @@ Validate premise: if three real repos can't show tailored > vanilla on the A/B, 
 - [ ] `tailor-lint.sh` rejects a test commit exceeding 2-skill cap
 - [ ] Human edit of `AGENTS.md` section outside `<!-- tailor:keep -->` fence is preserved on regen
 - [ ] `/tailor` refuses to run if manifest is <7 days old without `--force`
-- [ ] `/autopilot` reads `manifest.json:domains_owned` and defers to tailored artifact when present
+- [ ] `/flywheel` reads `manifest.json:domains_owned` and defers to tailored artifact when present
 - [ ] Validated on 3 real repos showing tailored > vanilla on the A/B
 
 ## Non-Goals (MVP)
@@ -244,7 +244,7 @@ Validate premise: if three real repos can't show tailored > vanilla on the A/B, 
 
 ## Related
 
-- Depends on: 028 (`/autopilot` — cycle events provide eval signal and refresh triggers in v2)
+- Depends on: 028 (`/flywheel` — cycle events provide eval signal and refresh triggers in v2)
 - Structurally supersedes: 014 (archived 2026-04-14 — commit `6d3944d` fixed
   the name-matching root cause; `tailor-lint.sh` prevents the broader class
   of shadowing bugs)

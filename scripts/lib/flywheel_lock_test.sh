@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tests for autopilot_lock.sh — single-instance lock with stale-pid detection.
+# Tests for flywheel_lock.sh — single-instance lock with stale-pid detection.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,11 +11,11 @@ setup() {
   TEST_DIR="$(mktemp -d)"
   cd "$TEST_DIR"
   mkdir -p .spellbook
-  LOCK=".spellbook/autopilot.lock"
-  # Reset before sourcing; source sets AUTOPILOT_LOCK_PATH=default only if unset.
-  unset AUTOPILOT_LOCK_PATH
-  # shellcheck source=scripts/lib/autopilot_lock.sh
-  source "$SCRIPT_DIR/autopilot_lock.sh"
+  LOCK=".spellbook/flywheel.lock"
+  # Reset before sourcing; source sets FLYWHEEL_LOCK_PATH=default only if unset.
+  unset FLYWHEEL_LOCK_PATH
+  # shellcheck source=scripts/lib/flywheel_lock.sh
+  source "$SCRIPT_DIR/flywheel_lock.sh"
 }
 
 teardown() {
@@ -44,13 +44,13 @@ assert_exit() {
 
 # --- Tests ---
 
-test_autopilot_acquire_creates_lock_file() {
-  autopilot_acquire 01HABC
+test_flywheel_acquire_creates_lock_file() {
+  flywheel_acquire 01HABC
   assert_eq "lock file exists" "yes" "$([ -f "$LOCK" ] && echo yes || echo no)"
 }
 
-test_autopilot_acquire_writes_pid_and_cycle_id() {
-  autopilot_acquire 01HABC
+test_flywheel_acquire_writes_pid_and_cycle_id() {
+  flywheel_acquire 01HABC
   local pid cycle_id started
   pid="$(python3 -c "import json,sys; print(json.load(sys.stdin)['pid'])" < "$LOCK")"
   cycle_id="$(python3 -c "import json,sys; print(json.load(sys.stdin)['cycle_id'])" < "$LOCK")"
@@ -63,56 +63,56 @@ test_autopilot_acquire_writes_pid_and_cycle_id() {
   esac
 }
 
-test_autopilot_acquire_second_call_fails_when_pid_alive() {
-  autopilot_acquire 01HABC
+test_flywheel_acquire_second_call_fails_when_pid_alive() {
+  flywheel_acquire 01HABC
   # Rewrite lock so pid is truly alive (this shell) but cycle differs.
-  assert_exit "second acquire fails" 1 autopilot_acquire 01HDEF
+  assert_exit "second acquire fails" 1 flywheel_acquire 01HDEF
 }
 
-test_autopilot_acquire_steals_stale_lock() {
+test_flywheel_acquire_steals_stale_lock() {
   # Write a stale lock pointing at a pid that cannot exist (pid 0 is never
   # a user process on unix).
   python3 -c "
 import json
-open('.spellbook/autopilot.lock','w').write(json.dumps({'pid':0,'cycle_id':'01HOLD','started_at':'2000-01-01T00:00:00Z'}))
+open('.spellbook/flywheel.lock','w').write(json.dumps({'pid':0,'cycle_id':'01HOLD','started_at':'2000-01-01T00:00:00Z'}))
 "
-  assert_exit "acquire steals stale lock" 0 autopilot_acquire 01HNEW
+  assert_exit "acquire steals stale lock" 0 flywheel_acquire 01HNEW
   local cycle_id
   cycle_id="$(python3 -c "import json,sys; print(json.load(sys.stdin)['cycle_id'])" < "$LOCK")"
   assert_eq "new cycle_id written after steal" "01HNEW" "$cycle_id"
 }
 
-test_autopilot_release_removes_lock() {
-  autopilot_acquire 01HABC
-  autopilot_release 01HABC
+test_flywheel_release_removes_lock() {
+  flywheel_acquire 01HABC
+  flywheel_release 01HABC
   assert_eq "lock file removed" "no" "$([ -f "$LOCK" ] && echo yes || echo no)"
 }
 
-test_autopilot_release_wrong_cycle_id_is_noop() {
+test_flywheel_release_wrong_cycle_id_is_noop() {
   # A late trap from a finished cycle must not wipe a successor's lock, so
   # cycle_id mismatch is a no-op (rc=0, lock unchanged). This keeps callers
   # from having to know the secret "|| true" incantation.
-  autopilot_acquire 01HABC
-  assert_exit "release with wrong cycle_id is a no-op (rc=0)" 0 autopilot_release 01HOTHER
+  flywheel_acquire 01HABC
+  assert_exit "release with wrong cycle_id is a no-op (rc=0)" 0 flywheel_release 01HOTHER
   assert_eq "lock still present" "yes" "$([ -f "$LOCK" ] && echo yes || echo no)"
   # The owning cycle can still release normally afterward.
-  assert_exit "correct cycle_id still releases" 0 autopilot_release 01HABC
+  assert_exit "correct cycle_id still releases" 0 flywheel_release 01HABC
   assert_eq "lock removed after correct release" "no" "$([ -f "$LOCK" ] && echo yes || echo no)"
 }
 
-test_autopilot_release_no_lock_is_ok() {
+test_flywheel_release_no_lock_is_ok() {
   # Idempotent: releasing a non-existent lock shouldn't explode (cleanup traps
   # may fire on paths that never acquired).
-  assert_exit "release of missing lock returns 0" 0 autopilot_release 01HABC
+  assert_exit "release of missing lock returns 0" 0 flywheel_release 01HABC
 }
 
-test_autopilot_acquire_after_release_succeeds() {
-  autopilot_acquire 01HABC
-  autopilot_release 01HABC
-  assert_exit "re-acquire after release succeeds" 0 autopilot_acquire 01HDEF
+test_flywheel_acquire_after_release_succeeds() {
+  flywheel_acquire 01HABC
+  flywheel_release 01HABC
+  assert_exit "re-acquire after release succeeds" 0 flywheel_acquire 01HDEF
 }
 
-test_autopilot_acquire_path_with_single_quotes_is_safe() {
+test_flywheel_acquire_path_with_single_quotes_is_safe() {
   # Regression: path containing a single quote must not break the heredoc
   # that reads the existing lock. Previous impl interpolated the path into a
   # Python single-quoted string — a quote or backslash in the path caused a
@@ -120,40 +120,40 @@ test_autopilot_acquire_path_with_single_quotes_is_safe() {
   # treated as stale, silently stealing a live lock.
   local quoted_dir="$TEST_DIR/has'quote"
   mkdir -p "$quoted_dir"
-  local prev_path="$AUTOPILOT_LOCK_PATH"
-  AUTOPILOT_LOCK_PATH="$quoted_dir/autopilot.lock"
+  local prev_path="$FLYWHEEL_LOCK_PATH"
+  FLYWHEEL_LOCK_PATH="$quoted_dir/flywheel.lock"
   # First acquire should succeed.
-  assert_exit "acquire with quoted path succeeds" 0 autopilot_acquire 01HABC
+  assert_exit "acquire with quoted path succeeds" 0 flywheel_acquire 01HABC
   # Lock file should actually exist at that path.
   assert_eq "lock exists at quoted path" "yes" \
-    "$([ -f "$AUTOPILOT_LOCK_PATH" ] && echo yes || echo no)"
+    "$([ -f "$FLYWHEEL_LOCK_PATH" ] && echo yes || echo no)"
   # Second acquire (same live shell pid) must refuse, proving the reader
   # successfully parsed the pid out of the quoted-path lock.
-  assert_exit "second acquire refused with quoted path" 1 autopilot_acquire 01HDEF
+  assert_exit "second acquire refused with quoted path" 1 flywheel_acquire 01HDEF
   # Release must succeed and actually remove the file.
-  assert_exit "release with quoted path succeeds" 0 autopilot_release 01HABC
+  assert_exit "release with quoted path succeeds" 0 flywheel_release 01HABC
   assert_eq "lock removed at quoted path" "no" \
-    "$([ -f "$AUTOPILOT_LOCK_PATH" ] && echo yes || echo no)"
-  AUTOPILOT_LOCK_PATH="$prev_path"
+    "$([ -f "$FLYWHEEL_LOCK_PATH" ] && echo yes || echo no)"
+  FLYWHEEL_LOCK_PATH="$prev_path"
 }
 
-test_autopilot_acquire_concurrent_stealers_only_one_wins() {
+test_flywheel_acquire_concurrent_stealers_only_one_wins() {
   # Two processes both see a stale lock and attempt to steal it. The old
   # "kill -0 → temp+rename" dance had no mutual exclusion: both could pass
   # the liveness check, both rename on top of each other, last writer wins,
   # and BOTH returned 0. Exactly one must win.
   python3 -c "
 import json
-open('.spellbook/autopilot.lock','w').write(json.dumps({'pid':0,'cycle_id':'01HOLD','started_at':'2000-01-01T00:00:00Z'}))
+open('.spellbook/flywheel.lock','w').write(json.dumps({'pid':0,'cycle_id':'01HOLD','started_at':'2000-01-01T00:00:00Z'}))
 "
   local rc_a_file="$TEST_DIR/rc_a" rc_b_file="$TEST_DIR/rc_b"
   # Fork two children that both try to steal. Each persists its rc.
   (
-    if autopilot_acquire 01HAAA 2>/dev/null; then echo 0 > "$rc_a_file"; else echo $? > "$rc_a_file"; fi
+    if flywheel_acquire 01HAAA 2>/dev/null; then echo 0 > "$rc_a_file"; else echo $? > "$rc_a_file"; fi
   ) &
   local pid_a=$!
   (
-    if autopilot_acquire 01HBBB 2>/dev/null; then echo 0 > "$rc_b_file"; else echo $? > "$rc_b_file"; fi
+    if flywheel_acquire 01HBBB 2>/dev/null; then echo 0 > "$rc_b_file"; else echo $? > "$rc_b_file"; fi
   ) &
   local pid_b=$!
   wait "$pid_a" "$pid_b"
@@ -167,17 +167,17 @@ open('.spellbook/autopilot.lock','w').write(json.dumps({'pid':0,'cycle_id':'01HO
   assert_eq "exactly one stealer wins the race" "1" "$winners"
 }
 
-test_autopilot_acquire_corrupt_lock_is_treated_as_stale() {
+test_flywheel_acquire_corrupt_lock_is_treated_as_stale() {
   # Prior process crashed mid-write or disk ate the JSON. Don't hang forever.
   echo "not json" > "$LOCK"
-  assert_exit "corrupt lock treated as stale, acquire succeeds" 0 autopilot_acquire 01HABC
+  assert_exit "corrupt lock treated as stale, acquire succeeds" 0 flywheel_acquire 01HABC
 }
 
 # --- Runner ---
 
 run_tests() {
   local funcs
-  funcs="$(declare -F | awk '/test_autopilot_/{print $3}')"
+  funcs="$(declare -F | awk '/test_flywheel_/{print $3}')"
   for t in $funcs; do
     setup
     "$t"

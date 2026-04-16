@@ -1,6 +1,6 @@
 # Receipt Contract
 
-`/deliver` communicates with its caller — human or `/autopilot` outer
+`/deliver` communicates with its caller — human or `/flywheel` outer
 loop — exclusively via exit code and `receipt.json`. No stdout parsing,
 no heuristic sniffing.
 
@@ -77,6 +77,6 @@ state is frozen. Re-invoking on the same item returns exit 41.
 
 - **Human:** `cat <state-dir>/receipt.json | jq` — read `status`,
   `remaining_work`, `recommended_next`.
-- **`/autopilot` outer (028):** reads `receipt.json`, emits one
+- **`/flywheel` outer (028):** reads `receipt.json`, emits one
   `deliver.done` event. Exit 0 → proceed to deploy phase. Non-zero →
   halt cycle with `phase.failed` event.

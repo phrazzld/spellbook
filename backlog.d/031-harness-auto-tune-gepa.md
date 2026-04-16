@@ -4,7 +4,7 @@ Priority: low
 Status: parked
 Estimate: L
 
-Parked during 2026-04-14 grooming. Do not start until `/autopilot` (028) has
+Parked during 2026-04-14 grooming. Do not start until `/flywheel` (028) has
 produced ≥20 cycles of event data. Without signal, there's nothing to tune
 on, and prompt-evolution infrastructure ahead of signal is the same failure
 mode that ate `/focus`.
@@ -53,12 +53,12 @@ proposes edit on branch harness/auto-tune
 opens PR for human review (NEVER auto-merge)
     │
     ▼
-next /autopilot cycle picks up the PR as a backlog item
+next /flywheel cycle picks up the PR as a backlog item
 ```
 
 ## Entry Criteria (when to unpark)
 
-- [ ] `/autopilot` has run ≥20 cycles on real work (not dogfooding alone)
+- [ ] `/flywheel` has run ≥20 cycles on real work (not dogfooding alone)
 - [ ] `backlog.d/_cycles/*.jsonl` files contain reflect.done events with
       actionable targets in ≥50% of cycles
 - [ ] At least one concrete harness improvement has been identified
@@ -67,7 +67,7 @@ next /autopilot cycle picks up the PR as a backlog item
 ## Oracle (for eventual v2)
 
 - [ ] `reflect.signals.json` schema is defined and validated
-- [ ] `harness-tuner` agent exists and is invoked by `/autopilot` step 9
+- [ ] `harness-tuner` agent exists and is invoked by `/flywheel` step 9
 - [ ] Proposed edits land on `harness/auto-tune` branch, never main
 - [ ] ≥3 tuner-generated PRs over 30 days show measurable improvement
       (A/B via `/tailor`-style eval or human verdict)
@@ -81,6 +81,6 @@ next /autopilot cycle picks up the PR as a backlog item
 
 ## Related
 
-- Depends on: 028 (`/autopilot` produces the event signal this consumes)
+- Depends on: 028 (`/flywheel` produces the event signal this consumes)
 - Related pattern: 023 (review score feedback loop — similar retro→improvement
   arc, different target surface)

@@ -34,7 +34,7 @@ phase skill — `/deliver` surfaces it as exit 10.
 `/deliver` **never** runs `git push`. Delivery ≠ shipping.
 
 - Human flow: `/deliver` → inspect receipt → human pushes & opens PR
-- Outer-loop flow: `/deliver` → `/autopilot` outer reads receipt → the
+- Outer-loop flow: `/deliver` → `/flywheel` outer reads receipt → the
   outer loop (not `/deliver`) decides when/whether to push
 
 A phase skill that runs `git push` is a bug in that phase skill.
@@ -55,6 +55,6 @@ invocations on the **same item** produce the double-invoke behavior
 `/deliver` does not clean up after itself. The feature branch persists.
 State-dir persists until `--abandon`.
 
-When invoked by `/autopilot` outer, the outer loop returns to a clean
+When invoked by `/flywheel` outer, the outer loop returns to a clean
 base (`git switch main && git pull`) before the next cycle. That cleanup
 is the outer loop's contract, not `/deliver`'s.

@@ -1,45 +1,45 @@
 #!/usr/bin/env bash
-# Single-instance lock for /autopilot.
-# Lock file: .spellbook/autopilot.lock
+# Single-instance lock for /flywheel.
+# Lock file: .spellbook/flywheel.lock
 # Content:   {"pid": <int>, "cycle_id": "<ulid>", "started_at": "<iso8601 UTC>"}
 #
-# Two /autopilot processes in the same worktree would race on event log +
+# Two /flywheel processes in the same worktree would race on event log +
 # bucket updates. We keep a filesystem lock (not a git ref) because it's
 # machine-local state, and we steal stale locks when the owning pid is dead
 # so a SIGKILL'd cycle doesn't wedge the worktree forever.
 #
 # Usage:
-#   source scripts/lib/autopilot_lock.sh
-#   autopilot_acquire <cycle_id>   # 0 on success, 1 if another live cycle holds it
-#   autopilot_release <cycle_id>   # 0 on success (idempotent); 1 if cycle_id mismatch
+#   source scripts/lib/flywheel_lock.sh
+#   flywheel_acquire <cycle_id>   # 0 on success, 1 if another live cycle holds it
+#   flywheel_release <cycle_id>   # 0 on success (idempotent); 1 if cycle_id mismatch
 
-AUTOPILOT_LOCK_PATH="${AUTOPILOT_LOCK_PATH:-.spellbook/autopilot.lock}"
+FLYWHEEL_LOCK_PATH="${FLYWHEEL_LOCK_PATH:-.spellbook/flywheel.lock}"
 
-# Acquire the autopilot lock. Steals lock when owner pid is dead or content
+# Acquire the flywheel lock. Steals lock when owner pid is dead or content
 # is corrupt. Fails when owner pid is alive.
 # Atomicity: O_CREAT|O_EXCL creates the lock or fails; the kernel guarantees
 # exactly one creator across concurrent callers, eliminating the TOCTOU race
 # where two stealers both pass "kill -0" and both rename on top of each other.
 # Args: <cycle_id>
-autopilot_acquire() {
+flywheel_acquire() {
   local cycle_id="$1"
   if [ -z "$cycle_id" ]; then
-    echo "autopilot_acquire: cycle_id required" >&2
+    echo "flywheel_acquire: cycle_id required" >&2
     return 1
   fi
 
-  mkdir -p "$(dirname "$AUTOPILOT_LOCK_PATH")"
+  mkdir -p "$(dirname "$FLYWHEEL_LOCK_PATH")"
 
-  AUTOPILOT_LOCK_CYCLE_ID="$cycle_id" \
-  AUTOPILOT_LOCK_PID="$$" \
-  AUTOPILOT_LOCK_FILE="$AUTOPILOT_LOCK_PATH" \
+  FLYWHEEL_LOCK_CYCLE_ID="$cycle_id" \
+  FLYWHEEL_LOCK_PID="$$" \
+  FLYWHEEL_LOCK_FILE="$FLYWHEEL_LOCK_PATH" \
   python3 <<'PYEOF'
 import errno, json, os, sys, time
 
-path = os.environ["AUTOPILOT_LOCK_FILE"]
+path = os.environ["FLYWHEEL_LOCK_FILE"]
 payload = {
-    "pid": int(os.environ["AUTOPILOT_LOCK_PID"]),
-    "cycle_id": os.environ["AUTOPILOT_LOCK_CYCLE_ID"],
+    "pid": int(os.environ["FLYWHEEL_LOCK_PID"]),
+    "cycle_id": os.environ["FLYWHEEL_LOCK_CYCLE_ID"],
     "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
 }
 
@@ -83,7 +83,7 @@ if write_fresh():
 # Lock exists. If owner is alive, refuse.
 alive, pid = owner_alive()
 if alive:
-    print(f"autopilot_acquire: lock held by live pid {pid}", file=sys.stderr)
+    print(f"flywheel_acquire: lock held by live pid {pid}", file=sys.stderr)
     sys.exit(1)
 
 # Stale or corrupt. Attempt ONE steal: unlink then O_EXCL retry. If another
@@ -101,42 +101,42 @@ if write_fresh():
 # Someone else won the race to recreate. If they're alive, they hold it.
 alive, pid = owner_alive()
 if alive:
-    print(f"autopilot_acquire: lost steal race to live pid {pid}", file=sys.stderr)
+    print(f"flywheel_acquire: lost steal race to live pid {pid}", file=sys.stderr)
     sys.exit(1)
 # They created it then died before we could check — conservative: refuse
 # rather than loop. Caller can retry.
-print("autopilot_acquire: lost steal race", file=sys.stderr)
+print("flywheel_acquire: lost steal race", file=sys.stderr)
 sys.exit(1)
 PYEOF
 }
 
-# Release the autopilot lock. Fully idempotent: any of (a) missing lock,
+# Release the flywheel lock. Fully idempotent: any of (a) missing lock,
 # (b) cycle_id mismatch, (c) successful removal returns 0. The mismatch case
 # is a no-op — a late trap from a finished cycle must not wipe a successor's
 # lock. Callers never need `|| true`.
 # Args: <cycle_id>
-autopilot_release() {
+flywheel_release() {
   local cycle_id="$1"
   if [ -z "$cycle_id" ]; then
-    echo "autopilot_release: cycle_id required" >&2
+    echo "flywheel_release: cycle_id required" >&2
     return 1
   fi
-  if [ ! -e "$AUTOPILOT_LOCK_PATH" ]; then
+  if [ ! -e "$FLYWHEEL_LOCK_PATH" ]; then
     return 0
   fi
   local recorded
-  recorded="$(AUTOPILOT_LOCK_FILE="$AUTOPILOT_LOCK_PATH" python3 -c '
+  recorded="$(FLYWHEEL_LOCK_FILE="$FLYWHEEL_LOCK_PATH" python3 -c '
 import json, os
 try:
-    print(json.load(open(os.environ["AUTOPILOT_LOCK_FILE"])).get("cycle_id", ""))
+    print(json.load(open(os.environ["FLYWHEEL_LOCK_FILE"])).get("cycle_id", ""))
 except Exception:
     print("")
 ' 2>/dev/null)"
   if [ "$recorded" != "$cycle_id" ]; then
     # Observability: log the skip but do not fail. Lock belongs to another
     # cycle (or is corrupt) — not ours to delete.
-    echo "autopilot_release: no-op (lock cycle=$recorded, asked=$cycle_id)" >&2
+    echo "flywheel_release: no-op (lock cycle=$recorded, asked=$cycle_id)" >&2
     return 0
   fi
-  rm -f "$AUTOPILOT_LOCK_PATH"
+  rm -f "$FLYWHEEL_LOCK_PATH"
 }

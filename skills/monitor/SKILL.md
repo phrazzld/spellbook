@@ -48,9 +48,9 @@ or `monitor.alert` — never both, never zero.
 
 ### Event schema
 
-Events extend the `/autopilot` envelope so the outer loop can consume them
+Events extend the `/flywheel` envelope so the outer loop can consume them
 directly. Append to the active cycle's `cycle.jsonl` when running under
-`/autopilot`; otherwise write to `.spellbook/monitor/<ulid>.jsonl`.
+`/flywheel`; otherwise write to `.spellbook/monitor/<ulid>.jsonl`.
 
 ```json
 {

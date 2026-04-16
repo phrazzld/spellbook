@@ -8,7 +8,7 @@ description: |
   Use when: "done", "wrap up", "what did we learn", "retro", "reflect",
   "calibrate", "how could I have asked better", "prompt better",
   "teach me from this session", "what should I learn from this",
-  "reflect on cycle", "cycle postmortem", post-/autopilot critique.
+  "reflect on cycle", "cycle postmortem", post-/flywheel critique.
   Trigger: /reflect, /retro, /calibrate, /reflect cycle <cycle-ulid>.
 argument-hint: "[distill|calibrate|coach|tune-repo|append|cycle] [context]"
 ---
@@ -51,7 +51,7 @@ Interpret natural-language requests as:
   -> `calibrate`
 - "tune this repo", "refresh AGENTS", "context drift"
   -> `tune-repo`
-- "reflect on cycle <ulid>", "postmortem this cycle", invocation from `/autopilot`
+- "reflect on cycle <ulid>", "postmortem this cycle", invocation from `/flywheel`
   -> `cycle`
 
 ## Responsibility Split

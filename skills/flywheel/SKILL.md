@@ -1,27 +1,27 @@
 ---
-name: autopilot
+name: flywheel
 description: |
   Outer-loop delivery orchestrator. Composes cycles of /deliver → /deploy →
-  /monitor → /investigate → /reflect, mutates the backlog, and emits harness
+  /monitor → /diagnose → /reflect, mutates the backlog, and emits harness
   suggestions to a branch. Inner loop is /deliver (one ticket → merge-ready,
   a black box here). Outer loop is this: continuous, unattended, budgeted.
   Every run ends with a tight shipping brief plus a full /reflect session.
-  Use when: continuous delivery, "autopilot", "run the outer loop",
+  Use when: continuous delivery, "flywheel", "run the outer loop",
   "next N items", "overnight queue", "outer loop", "cycle".
-  Trigger: /autopilot.
+  Trigger: /flywheel.
 argument-hint: "[--max-cycles N] [--budget $N] [--dry-run]"
 ---
 
-# /autopilot
+# /flywheel
 
 Outer-loop delivery orchestrator. `/deliver` takes one item to merge-ready
-and exits (inner loop). `/autopilot` composes cycles of `/deliver` +
-`/deploy` + `/monitor` + `/investigate` + `/reflect` and runs N of them
+and exits (inner loop). `/flywheel` composes cycles of `/deliver` +
+`/deploy` + `/monitor` + `/diagnose` + `/reflect` and runs N of them
 (outer loop).
 
 Two skills, two stop conditions, one composition contract:
 - `/deliver` (inner) — single-shot, interactive, ends at merge-ready.
-- `/autopilot` (outer) — continuous, unattended, ends on predicate/budget.
+- `/flywheel` (outer) — continuous, unattended, ends on predicate/budget.
 
 OpenHands inner-loop vs outer-loop distinction is load-bearing. Do not
 grow one into the other.
@@ -30,18 +30,18 @@ grow one into the other.
 
 - Dry-run end-to-end walk of all phases
 - Typed cycle events (`scripts/lib/events.sh`)
-- Single-instance lock (`scripts/lib/autopilot_lock.sh`) with stale-pid steal
+- Single-instance lock (`scripts/lib/flywheel_lock.sh`) with stale-pid steal
 - **Single-cycle only.** Multi-cycle (`--max-cycles > 1`) is Phase 2; the
   current guard would release the lock between cycles and let a second
-  autopilot sneak in. Passing `N != 1` exits 2 with a clear message.
+  flywheel sneak in. Passing `N != 1` exits 2 with a clear message.
 
 **Not yet wired:** real handlers for `/deliver`, `/deploy`, `/monitor`,
-`/investigate`, `/reflect`. Invoking without `--dry-run` writes a
+`/diagnose`, `/reflect`. Invoking without `--dry-run` writes a
 `phase.failed` event and exits non-zero. That is intentional — Phase 1
 proves the event/lock contract; Phase 2 wires the handlers.
 
 Phase 2+ design (multi-cycle, budget accounting, resume/abandon, harness
-auto-tune branch) is tracked in `backlog.d/028-iterate-outer-loop-orchestrator.md`.
+auto-tune branch) is tracked in `backlog.d/028-flywheel-outer-loop-orchestrator.md`.
 
 ## Execution Stance
 
@@ -54,7 +54,7 @@ You are the executive orchestrator.
 
 ## Closeout Contract
 
-Every `/autopilot` run ends with two operator-facing outputs, in this order:
+Every `/flywheel` run ends with two operator-facing outputs, in this order:
 1. A tight shipping brief.
 2. A full `/reflect` session.
 
@@ -91,7 +91,7 @@ aggregate summary across the whole session.
 | `--resume <ulid>` | Resume a paused cycle from last completed phase | 2 |
 | `--abandon <ulid>` | Mark cycle abandoned and release its lock | 2 |
 
-`--max-cycles > 1` exits 2 with `autopilot: --max-cycles > 1 is Phase 2; not
+`--max-cycles > 1` exits 2 with `flywheel: --max-cycles > 1 is Phase 2; not
 yet implemented`. `--budget` is parsed for forward compatibility but has no
 effect in Phase 1.
 
@@ -101,7 +101,7 @@ effect in Phase 1.
 backlog.d/_cycles/<ulid>/
 ├── cycle.jsonl        # append-only typed events (the event log)
 ├── evidence/          # QA artifacts, review transcripts, diffs, /deliver state
-│   └── deliver/       # /deliver state dir when invoked by /autopilot
+│   └── deliver/       # /deliver state dir when invoked by /flywheel
 └── manifest.json      # {item_id, branch, started, closed, status}
 ```
 
@@ -142,10 +142,10 @@ outer loop sees one `deliver.done` event per cycle. Add `deliver.done`,
 ## Control Flow
 
 ```
-/autopilot [flags]
+/flywheel [flags]
     │
     ▼
-  acquire .spellbook/autopilot.lock  (fails if a live /autopilot holds it)
+  acquire .spellbook/flywheel.lock  (fails if a live /flywheel holds it)
     │
     ▼
 ┌── CYCLE START ───────────────────────────────┐
@@ -153,7 +153,7 @@ outer loop sees one `deliver.done` event per cycle. Add `deliver.done`,
 │  2. deliver     → /deliver (inner loop)      │  deliver.done (Phase 2)
 │  3. deploy      → /deploy                    │  deploy.done
 │  4. monitor     → /monitor                   │  monitor.done | monitor.alert
-│  5. triage      → /investigate (on alert)    │  triage.done
+│  5. triage      → /diagnose (on alert)       │  triage.done
 │  6. reflect     → /reflect on events         │  reflect.done
 │  7. update-bucket → backlog mutation         │  bucket.updated
 │  8. update-harness → harness.suggested       │  writes to PR branch only
@@ -171,18 +171,18 @@ steps into a single `/deliver` invocation and a single `deliver.done` event.
 
 ```bash
 # Dry-run a single cycle — writes phase events, invokes nothing.
-bash skills/autopilot/scripts/autopilot.sh --dry-run
+bash skills/flywheel/scripts/flywheel.sh --dry-run
 
 # Real mode (Phase 2+; currently writes phase.failed and exits 1)
-bash skills/autopilot/scripts/autopilot.sh
+bash skills/flywheel/scripts/flywheel.sh
 
 # Multi-cycle is Phase 2 — this exits 2 in Phase 1.
-bash skills/autopilot/scripts/autopilot.sh --max-cycles 5 --budget 20
+bash skills/flywheel/scripts/flywheel.sh --max-cycles 5 --budget 20
 ```
 
 ## Lock Semantics
 
-`.spellbook/autopilot.lock` holds `{pid, cycle_id, started_at}`. SIGINT, EXIT,
+`.spellbook/flywheel.lock` holds `{pid, cycle_id, started_at}`. SIGINT, EXIT,
 and TERM traps release the lock — scoped to the acquiring `cycle_id` so a
 late trap from a prior cycle cannot wipe a successor's lock. Stale locks
 (owner pid dead, or JSON corrupt) are stolen atomically via `O_CREAT|O_EXCL`.
@@ -190,15 +190,15 @@ late trap from a prior cycle cannot wipe a successor's lock. Stale locks
 Known limitations:
 - **Pid recycling.** If the recorded pid is reused by an unrelated process,
   `kill -0` reports alive and acquire refuses. Manual recovery:
-  `rm .spellbook/autopilot.lock`. A future revision may add `started_at`-based
+  `rm .spellbook/flywheel.lock`. A future revision may add `started_at`-based
   disambiguation.
 - **`python-ulid` is optional.** When unavailable, the fallback emits real
   26-character Crockford base32 ULIDs (10 chars timestamp + 16 chars random),
   lexicographically sortable and interchangeable with the library output.
-- **Paths anchor to REPO_ROOT.** `autopilot.sh` `cd`s to the spellbook repo
+- **Paths anchor to REPO_ROOT.** `flywheel.sh` `cd`s to the spellbook repo
   root on startup so `backlog.d/_cycles/...` and the default lock path
   always land in the right tree even when invoked from outside the repo.
-  If you override `AUTOPILOT_LOCK_PATH`, pass an absolute path.
+  If you override `FLYWHEEL_LOCK_PATH`, pass an absolute path.
 
 ## Stop Conditions (Phase 1)
 
@@ -211,7 +211,7 @@ Known limitations:
 
 ## Gotchas
 
-- **Never run two /autopilot in the same worktree.** The lock enforces it;
+- **Never run two /flywheel in the same worktree.** The lock enforces it;
   tests verify. Two worktrees of the same repo can run concurrently —
   state anchors to REPO_ROOT of each worktree.
 - **Inner loop is a black box.** `/deliver` owns shape/implement/review/
@@ -226,7 +226,7 @@ Known limitations:
 - **`harness.suggested` writes to a branch only** (never main). Phase 2
   emits the event and wires the branch write; Phase 1 dry-run does not emit
   it (would train the wrong mental model of the contract).
-- **Never auto-merge.** `/autopilot` never opens, approves, or merges a PR.
+- **Never auto-merge.** `/flywheel` never opens, approves, or merges a PR.
   Humans merge. The harness auto-tune branch (Phase 3) requires CODEOWNERS
   review by design.
 - **Closed-enum kinds.** Adding a new kind requires updating `EVENT_KINDS`

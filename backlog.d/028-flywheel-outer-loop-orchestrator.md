@@ -1,4 +1,4 @@
-# `/autopilot` — outer delivery loop (formerly `/iterate`)
+# `/flywheel` — outer delivery loop (formerly `/iterate`)
 
 Priority: high
 Status: in-progress (Phase 1 + rename shipped; Phase 2+ ahead)
@@ -7,33 +7,33 @@ Estimate: L (MVP ~5 dev-days; Phase 1 + rename done; Phase 2+ remaining)
 ## Progress
 
 - 2026-04-15: Phase 1 MVP shipped as `/iterate` (commit e2db08e).
-- 2026-04-15: Rename `/iterate` → `/autopilot` shipped (commit 5d5358a).
+- 2026-04-15: Rename `/iterate` → `/flywheel` shipped (commit 5d5358a).
   Directory, scripts, lock file, helper libs, triggers, and all cross-refs
   renamed. 48/48 tests green.
 - Remaining: Phase 2+ (deploy/monitor/triage/reflect wiring, budgets,
   predicate stop conditions, GEPA feedback hooks). TODOs flagged in
-  `skills/autopilot/SKILL.md` and `skills/autopilot/scripts/autopilot.sh`.
+  `skills/flywheel/SKILL.md` and `skills/flywheel/scripts/flywheel.sh`.
 
 
 ## Rename
 
 Formerly `/iterate`. The outer loop is the *actually* autonomous skill —
 multi-cycle, unattended, budgeted, cross-cycle learning. The name
-`/autopilot` belongs to this, not to the inner single-ticket pipeline.
+`/flywheel` belongs to this, not to the inner single-ticket pipeline.
 
-- Old `/autopilot` (single-shot ticket delivery) → renamed to `/deliver` (see 032)
-- Old `/iterate` (this skill) → renamed to `/autopilot`
+- Old `/flywheel` (single-shot ticket delivery) → renamed to `/deliver` (see 032)
+- Old `/iterate` (this skill) → renamed to `/flywheel`
 - Naming swap tracked in 032. This ticket refers to the new meaning throughout.
 
 ## Goal
 
 Close the delivery loop. `/deliver` ships one item to merge-ready code and
-exits. `/autopilot` picks items, delivers them, deploys, monitors, triages,
+exits. `/flywheel` picks items, delivers them, deploys, monitors, triages,
 reflects, updates the backlog + harness, and picks the next. It composes
 existing skills as phase handlers — it does not reimplement phases.
 
 OpenHands inner-loop vs outer-loop distinction is load-bearing. `/deliver`
-is inner (single-shot, interactive). `/autopilot` is outer (continuous,
+is inner (single-shot, interactive). `/flywheel` is outer (continuous,
 unattended).
 
 ## Why Not Grow `/deliver`
@@ -46,10 +46,10 @@ contract.
 ## Composition Contract
 
 ```
-/autopilot [--max-cycles N] [--budget $X] [--until <pred>] [--unattended]
+/flywheel [--max-cycles N] [--budget $X] [--until <pred>] [--unattended]
     │
     ▼
-  acquire <worktree-root>/.spellbook/autopilot.lock
+  acquire <worktree-root>/.spellbook/flywheel.lock
     │
     ▼
 ┌── CYCLE START ───────────────────────────────┐
@@ -68,7 +68,7 @@ contract.
 ```
 
 `/deliver` itself loops shape → implement → code-review → ci → refactor
-→ qa → evidence internally (see 032). `/autopilot` treats `/deliver` as a
+→ qa → evidence internally (see 032). `/flywheel` treats `/deliver` as a
 black-box merge-readiness step and consumes its receipt (see `/deliver`
 Exit Contract below).
 
@@ -135,7 +135,7 @@ present. The `bucket.updated` event payload carries the list of touched paths.
 
 ### `update-harness` — suggestion-only harness delta
 
-`/reflect` may surface harness-level findings. `/autopilot` NEVER mutates
+`/reflect` may surface harness-level findings. `/flywheel` NEVER mutates
 the harness in-place. Every finding lands on the `harness/auto-tune`
 branch as a suggestion for human review.
 
@@ -162,10 +162,10 @@ Branch mechanics:
      emit `phase.failed` with `{"reason": "harness_branch_conflict"}`; do
      not force-push.
   3. Each suggestion is one commit: `harness: <kind> — <target> (cycle <ulid>)`.
-  4. Push to `origin` only if `AUTOPILOT_PUSH_HARNESS=1`; default off.
+  4. Push to `origin` only if `FLYWHEEL_PUSH_HARNESS=1`; default off.
 
 Never-auto-merge: `harness/auto-tune` is marked with a CODEOWNERS entry
-requiring human review. The spec forbids any `/autopilot` code path from
+requiring human review. The spec forbids any `/flywheel` code path from
 opening, approving, or merging a PR from this branch.
 
 ## State Model
@@ -176,7 +176,7 @@ One cycle = one bucket item worked end-to-end. Each cycle gets a ULID:
 backlog.d/_cycles/<ulid>/
 ├── cycle.jsonl        # typed event log (see events.sh)
 ├── evidence/          # QA artifacts, review transcripts, deliver receipt
-│   └── deliver/       # /deliver state dir when invoked by /autopilot
+│   └── deliver/       # /deliver state dir when invoked by /flywheel
 └── manifest.json      # {item_id, branch, started, closed, status, budget}
 ```
 
@@ -192,7 +192,7 @@ Kinds: `cycle.opened`, `deliver.done`, `deploy.done`, `monitor.done`,
 
 **Note:** the per-phase kinds from the old iterate spec (`shape.done`,
 `build.done`, `review.iter`, `ci.done`, `qa.done`) move inside `/deliver`
-and are no longer emitted at the `/autopilot` level — `/autopilot` sees
+and are no longer emitted at the `/flywheel` level — `/flywheel` sees
 one `deliver.done` event. Drops cross-cycle noise.
 
 ### Stopping Predicates
@@ -227,7 +227,7 @@ Interactive vs unattended:
 - Interactive (stdin is a TTY): `--budget` optional. Default cap $5 USD
   with prompt on breach ("continue? y/N"); operator can raise.
 - Unattended (no TTY, or `--unattended` flag): `--budget` **required**.
-  Exits 2 with "autopilot: unattended mode requires --budget <usd>".
+  Exits 2 with "flywheel: unattended mode requires --budget <usd>".
 
 ### Resume & Abandon Semantics
 
@@ -260,7 +260,7 @@ Phase resolution (resume):
 **Re-runnable-phase rule (non-negotiable):** every phase handler is
 re-runnable from its phase-start with no duplicate side-effects.
 - `deliver`: resumes via `/deliver --resume` (032 owns that contract).
-  `/autopilot` re-invokes with same branch; `/deliver` no-ops already-done
+  `/flywheel` re-invokes with same branch; `/deliver` no-ops already-done
   sub-phases.
 - `deploy`: idempotent deploy targets (035); duplicate-deploy detection
   lives in `/deploy`.
@@ -292,22 +292,22 @@ Invariants:
 - **D3.** `manifest.json` is rewritten atomically (temp + rename) at two
   moments: cycle open, and after every `*.done` event. Always reflects
   state at-or-before the last event.
-- **D4.** Lock file (`.spellbook/autopilot.lock`) records
+- **D4.** Lock file (`.spellbook/flywheel.lock`) records
   `{pid, cycle_id, started_at}`. Stale-pid steal via `O_CREAT|O_EXCL`
-  already implemented in Phase 1 (`scripts/lib/autopilot_lock.sh`).
+  already implemented in Phase 1 (`scripts/lib/flywheel_lock.sh`).
 - **D5.** Worst-case loss on SIGKILL: the phase in progress is re-run from
   its start on `--resume`. No in-flight events silently dropped.
 
 Non-guarantees:
-- Subagent-internal state is the subagent's problem. `/autopilot` only
+- Subagent-internal state is the subagent's problem. `/flywheel` only
   guarantees phase-boundary durability.
 - Remote state (pushed commits, opened PRs) is best-effort — underlying
   skills own their own rollback.
 
 ## Worktree Behavior
 
-`/autopilot` state is worktree-local, not machine-global. Two worktrees of
-the same repo can run `/autopilot` concurrently without interference.
+`/flywheel` state is worktree-local, not machine-global. Two worktrees of
+the same repo can run `/flywheel` concurrently without interference.
 
 Path resolution: all state paths anchor to `git rev-parse --show-toplevel`
 (the worktree root for linked worktrees, main checkout otherwise). NOT
@@ -315,13 +315,13 @@ Path resolution: all state paths anchor to `git rev-parse --show-toplevel`
 
 Worktree-local paths:
 ```
-<worktree-root>/.spellbook/autopilot.lock
+<worktree-root>/.spellbook/flywheel.lock
 <worktree-root>/backlog.d/_cycles/<ulid>/...
-<worktree-root>/.spellbook/autopilot-state.json
+<worktree-root>/.spellbook/flywheel-state.json
 ```
 
 Rationale: git worktrees share `.git/` but have independent working trees.
-Two `/autopilot` instances writing the same `backlog.d/_cycles/` would
+Two `/flywheel` instances writing the same `backlog.d/_cycles/` would
 corrupt each other's event logs. Anchoring to the worktree root gives each
 a private state space.
 
@@ -339,10 +339,10 @@ operator resolves with normal git tooling.
 
 | Component | Status | Owns |
 |---|---|---|
-| `skills/autopilot/SKILL.md` | rename from iterate | Orchestration, event writing, lock, budget, stop predicates |
+| `skills/flywheel/SKILL.md` | rename from iterate | Orchestration, event writing, lock, budget, stop predicates |
 | `scripts/lib/events.sh` | ✓ shipped (was daybook.sh) | `emit_event` — atomic JSONL append with fsync |
-| `scripts/lib/autopilot_lock.sh` | ✓ shipped (rename from iterate_lock.sh) | Single-instance per-worktree lock |
-| `/deliver` | 032 — rename autopilot + compose | Full inner pipeline to merge-ready |
+| `scripts/lib/flywheel_lock.sh` | ✓ shipped (rename from iterate_lock.sh) | Single-instance per-worktree lock |
+| `/deliver` | 032 — rename flywheel + compose | Full inner pipeline to merge-ready |
 | `/deploy` | 035 — new | Ship to environment |
 | `/monitor` | 036 — new | Post-deploy signal watch + escalate |
 | `/investigate` | ✓ exists | Triage on monitor.alert |
@@ -356,13 +356,13 @@ operator resolves with normal git tooling.
 | Monitor flags anomaly | `monitor.alert` → triage → remediation or `phase.failed` |
 | Budget exceeded mid-cycle | Finish current phase, `budget.exhausted`, stop |
 | Event log write fails | Fatal — fsync every event; corrupted JSONL breaks reflect |
-| Two `/autopilot` attempts in same worktree | Second exits on lock |
+| Two `/flywheel` attempts in same worktree | Second exits on lock |
 | `/deliver` internal fail | See Exit Contract below |
 
 ### `/deliver` Exit Contract
 
 `/deliver` returns via exit code AND a receipt file. Both are load-bearing;
-`/autopilot` consults both and treats disagreement as a bug.
+`/flywheel` consults both and treats disagreement as a bug.
 
 Exit codes:
 ```
@@ -374,14 +374,14 @@ Exit codes:
 130  — SIGKILL/SIGTERM; partial receipt may exist
 ```
 
-Receipt path (when called by `/autopilot`):
+Receipt path (when called by `/flywheel`):
 `backlog.d/_cycles/<ulid>/evidence/deliver/receipt.json`
 
-`/autopilot` invokes `/deliver --state-dir backlog.d/_cycles/<ulid>/evidence/deliver/`
+`/flywheel` invokes `/deliver --state-dir backlog.d/_cycles/<ulid>/evidence/deliver/`
 so `/deliver`'s state lands under the cycle's evidence tree directly. See
 032 for the receipt schema.
 
-`/autopilot` behavior on each status:
+`/flywheel` behavior on each status:
 - `merge_ready` → emit `deliver.done`, proceed to `deploy`
 - `clean_loop_exhausted` / `failed` / `partial` → emit `phase.failed`
   with inline receipt; stop cycle
@@ -405,7 +405,7 @@ Eight phases × detailed semantics will trip the harness `>4 modes with
 inline content` lint. Pre-empt by extracting:
 
 ```
-skills/autopilot/
+skills/flywheel/
 ├── SKILL.md                       # ≤300 lines: routing table + cross-phase invariants
 └── references/
     ├── phase-pick.md              # eligibility filter, scoring formula
@@ -442,11 +442,11 @@ Structural prevention beats prose. Add alongside the rename commit:
       (gitignored — cycles are committed, but `/deliver` state inside is not)
 - [ ] CODEOWNERS entry: `harness/auto-tune` requires human review before merge
 - [ ] Pre-push hook: reject pushes from a branch named `harness/auto-tune`
-      unless `AUTOPILOT_PUSH_HARNESS=1` is set in env
+      unless `FLYWHEEL_PUSH_HARNESS=1` is set in env
 - [ ] Pre-commit hook: reject manual edits to `backlog.d/_cycles/**/*.jsonl`
       and `manifest.json` (machine-written; human edits = corruption)
 - [ ] Lint rule (added to harness/lint or skills/harness eval): no skill
-      other than `/autopilot` may write to `harness/auto-tune` branch —
+      other than `/flywheel` may write to `harness/auto-tune` branch —
       grep-based check on `harness/auto-tune` string in skill files
 
 These are the burner-stove redesigns. Without them, the never-auto-merge
@@ -455,31 +455,31 @@ and worktree-local rules are just CLAUDE.md prose.
 ### Rename mechanics (grep-verified, exhaustive)
 
 Files to move:
-- `skills/iterate/` → `skills/autopilot/`
-- `skills/iterate/scripts/iterate.sh` → `skills/autopilot/scripts/autopilot.sh`
-- `skills/iterate/scripts/iterate_test.sh` → `skills/autopilot/scripts/autopilot_test.sh`
-- `scripts/lib/iterate_lock.sh` → `scripts/lib/autopilot_lock.sh`
-- `scripts/lib/iterate_lock_test.sh` → `scripts/lib/autopilot_lock_test.sh`
+- `skills/iterate/` → `skills/flywheel/`
+- `skills/iterate/scripts/iterate.sh` → `skills/flywheel/scripts/flywheel.sh`
+- `skills/iterate/scripts/iterate_test.sh` → `skills/flywheel/scripts/flywheel_test.sh`
+- `scripts/lib/iterate_lock.sh` → `scripts/lib/flywheel_lock.sh`
+- `scripts/lib/iterate_lock_test.sh` → `scripts/lib/flywheel_lock_test.sh`
 
 Symbols to rename:
-- `iterate_acquire()` → `autopilot_acquire()`
-- `iterate_release()` → `autopilot_release()`
-- `ITERATE_LOCK_PATH` → `AUTOPILOT_LOCK_PATH`
+- `iterate_acquire()` → `flywheel_acquire()`
+- `iterate_release()` → `flywheel_release()`
+- `ITERATE_LOCK_PATH` → `FLYWHEEL_LOCK_PATH`
 - `ITERATE_LOCK_FILE` → `AUTOPILOT_LOCK_FILE`
 - `ITERATE_LOCK_CYCLE_ID` → `AUTOPILOT_LOCK_CYCLE_ID`
 - `ITERATE_LOCK_PID` → `AUTOPILOT_LOCK_PID`
 
 Path strings:
-- `.spellbook/iterate.lock` → `.spellbook/autopilot.lock`
+- `.spellbook/iterate.lock` → `.spellbook/flywheel.lock`
 - `backlog.d/_cycles/` unchanged — keep historical cycles readable
 
 Env var: `AUTOPILOT_MODE=1` (currently no `ITERATE_MODE` in code —
 introduce during Phase 2 if/when needed).
 
 External references:
-- Rename `backlog.d/028-iterate-outer-loop-orchestrator.md` → `028-autopilot-outer-loop.md`
+- Rename `backlog.d/028-flywheel-outer-loop-orchestrator.md` → `028-flywheel-outer-loop-orchestrator.md`
 - Update `backlog.d/031-harness-auto-tune-gepa.md`, `037-reflect-upgrade.md`
-- `skills/autopilot/SKILL.md` header, trigger, argument-hint
+- `skills/flywheel/SKILL.md` header, trigger, argument-hint
 - `CLAUDE.md` and `AGENTS.md` if any trigger mention (grep first)
 
 Composition work:
@@ -505,13 +505,13 @@ Composition work:
 ## Oracle
 
 Functional:
-- [ ] `/autopilot --max-cycles 1` runs pick → deliver → deploy → monitor →
+- [ ] `/flywheel --max-cycles 1` runs pick → deliver → deploy → monitor →
       reflect → update-bucket → update-harness on a real backlog item
 - [ ] Cycle event log contains ≥6 typed events, all valid against
       closed-enum schema
-- [ ] `/autopilot` refuses unattended (no-TTY or `--unattended`) without
+- [ ] `/flywheel` refuses unattended (no-TTY or `--unattended`) without
       `--budget`; exit 2 with clear message
-- [ ] Second `/autopilot` invocation while first holds lock exits non-zero
+- [ ] Second `/flywheel` invocation while first holds lock exits non-zero
       within the same worktree
 - [ ] `/deliver` runs its internal loop and returns merge-ready via exit 0
       + receipt.json with `status == "merge_ready"`
@@ -531,9 +531,9 @@ Durability:
 - [ ] `--abandon <ulid>` closes cycle, releases lock, stamps source file
 
 Worktree:
-- [ ] `/autopilot` run from a linked worktree uses
-      `<worktree-root>/.spellbook/autopilot.lock`, not main checkout's
-- [ ] worktree-A and worktree-B can both run `/autopilot` concurrently on
+- [ ] `/flywheel` run from a linked worktree uses
+      `<worktree-root>/.spellbook/flywheel.lock`, not main checkout's
+- [ ] worktree-A and worktree-B can both run `/flywheel` concurrently on
       the same repo; each has its own lock, cycle dir, budget state
 
 Integration:
@@ -559,5 +559,5 @@ Integration:
   (`/reflect` upgrade)
 - Sibling: 030 (static bench-map), 024 (evidence storage — see 032 for fate)
 - Unlocks: 031 (harness auto-tune — parked until cycles produce signal)
-- Supersedes: old `/autopilot` continuous-mode speculation; claim-based
+- Supersedes: old `/flywheel` continuous-mode speculation; claim-based
   multi-agent coordination (explicitly dropped)

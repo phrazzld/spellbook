@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-04-16T16:24:15Z
+# Generated: 2026-04-16T16:31:29Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -11,10 +11,6 @@ skills:
     description: "Assess and improve codebase readiness for AI coding agents. Dispatches parallel subagents to evaluate style, testing, docs, architecture, CI, observability, security, and dev environment. Produces a s"
     source: first-party
     tags: [a,agents,ai,architecture,assess,ci,codebase,coding,dev,dispatches]
-  - name: autopilot
-    description: "Outer-loop delivery orchestrator. Composes cycles of /deliver → /deploy → /monitor → /investigate → /reflect, mutates the backlog, and emits harness suggestions to a branch. Inner loop is /del"
-    source: first-party
-    tags: [a,backlog,branch,composes,cycles,del,deliver,delivery,deploy,emits]
   - name: ci
     description: "Audit a repo's CI gates, strengthen what is weak, then drive the pipeline green. Owns confidence in correctness — lint, types, tests, coverage, secrets. Dagger is the canonical pipeline owner; absen"
     source: first-party
@@ -39,6 +35,10 @@ skills:
     description: "Analyze, test, and upgrade dependencies. One curated PR, not 47 version bumps. Reachability analysis, behavioral diffs, risk assessment. Package-manager agnostic. Use when: \"upgrade deps\", \"dependency"
     source: first-party
     tags: [47,agnostic,analysis,analyze,assessment,behavioral,bumps,curated,dependencies,dependency]
+  - name: flywheel
+    description: "Outer-loop delivery orchestrator. Composes cycles of /deliver → /deploy → /monitor → /diagnose → /reflect, mutates the backlog, and emits harness suggestions to a branch. Inner loop is /delive"
+    source: first-party
+    tags: [a,backlog,branch,composes,cycles,delive,deliver,delivery,deploy,diagnose]
   - name: groom
     description: "Backlog management, brainstorming, architectural exploration, project bootstrapping. File-driven backlog via backlog.d/. Parallel investigation bench, synthesis protocol, themed recommendations. Produ"
     source: first-party

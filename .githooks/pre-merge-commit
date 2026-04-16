@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Verdict gate for non-fast-forward merges.
+# Blocks merge commits unless a valid review verdict exists for the topic branch.
+# Escape hatch: SPELLBOOK_NO_REVIEW=1
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+if [ "${SPELLBOOK_NO_REVIEW:-}" = "1" ]; then
+  echo "pre-merge-commit: bypassing verdict gate (SPELLBOOK_NO_REVIEW=1)" >&2
+  exit 0
+fi
+
+# Recover topic branch name. MERGE_HEAD and MERGE_MSG are unavailable during
+# pre-merge-commit. Git exposes GIT_REFLOG_ACTION="merge <branch>" and
+# GITHEAD_<sha>=<branch> in the environment instead.
+branch=""
+if [ -n "${GIT_REFLOG_ACTION:-}" ]; then
+  branch="${GIT_REFLOG_ACTION#merge }"
+  # If stripping didn't change the value, it wasn't "merge <branch>"
+  [ "$branch" = "$GIT_REFLOG_ACTION" ] && branch=""
+fi
+
+# Fallback: GITHEAD_<sha>=<branch> env var
+if [ -z "$branch" ]; then
+  branch="$(env | sed -n 's/^GITHEAD_[0-9a-f]*=//p' | head -1)"
+fi
+
+# Fail-open: if we cannot determine the branch, warn loudly but allow.
+# Blocking on ambiguous state is worse than letting one merge through
+# unguarded (see def0cb9 for the prior hook that blocked unconditionally).
+if [ -z "$branch" ]; then
+  yellow=$'\033[33m'
+  reset=$'\033[0m'
+  echo "${yellow}pre-merge-commit: cannot determine topic branch — allowing merge${reset}" >&2
+  exit 0
+fi
+
+verdicts_lib="$repo_root/scripts/lib/verdicts.sh"
+[ -f "$verdicts_lib" ] || exit 0
+
+# shellcheck source=scripts/lib/verdicts.sh
+source "$verdicts_lib"
+
+if ! verdict_validate "$branch"; then
+  echo "pre-merge-commit: no valid verdict for '$branch'." >&2
+  echo "  Run /code-review first, or bypass with:" >&2
+  echo "  SPELLBOOK_NO_REVIEW=1 git merge --no-ff $branch" >&2
+  exit 1
+fi
+
+verdict_json="$(verdict_read "$branch")"
+verdict_value="$(echo "$verdict_json" | python3 -c "import sys,json; print(json.load(sys.stdin)['verdict'])")"
+
+if [ "$verdict_value" = "dont-ship" ]; then
+  echo "pre-merge-commit: verdict is 'dont-ship' for '$branch'." >&2
+  echo "  Address review findings and re-run /code-review." >&2
+  exit 1
+fi

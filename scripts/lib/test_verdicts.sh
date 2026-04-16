@@ -116,11 +116,44 @@ test_verdict_write_rejects_missing_fields() {
   assert_exit "verdict_write rejects missing sha" 1 verdict_write feat-foo '{"branch":"feat-foo","verdict":"ship"}'
 }
 
+test_check_landable_passes_ship() {
+  local sha
+  sha="$(git rev-parse HEAD)"
+  verdict_write feat-foo '{"branch":"feat-foo","base":"master","verdict":"ship","reviewers":["critic"],"scores":{},"sha":"'"$sha"'","date":"2026-04-06T15:00:00Z"}'
+  assert_exit "verdict_check_landable passes ship" 0 verdict_check_landable feat-foo
+}
+
+test_check_landable_passes_conditional() {
+  local sha
+  sha="$(git rev-parse HEAD)"
+  verdict_write feat-foo '{"branch":"feat-foo","base":"master","verdict":"conditional","reviewers":["critic"],"scores":{},"sha":"'"$sha"'","date":"2026-04-06T15:00:00Z"}'
+  assert_exit "verdict_check_landable passes conditional" 0 verdict_check_landable feat-foo
+}
+
+test_check_landable_rejects_dont_ship() {
+  local sha
+  sha="$(git rev-parse HEAD)"
+  verdict_write feat-foo '{"branch":"feat-foo","base":"master","verdict":"dont-ship","reviewers":["critic"],"scores":{},"sha":"'"$sha"'","date":"2026-04-06T15:00:00Z"}'
+  assert_exit "verdict_check_landable rejects dont-ship" 2 verdict_check_landable feat-foo
+}
+
+test_check_landable_rejects_missing() {
+  assert_exit "verdict_check_landable rejects missing verdict" 1 verdict_check_landable no-verdict-branch
+}
+
+test_check_landable_rejects_stale() {
+  local sha
+  sha="$(git rev-parse HEAD)"
+  verdict_write feat-foo '{"branch":"feat-foo","base":"master","verdict":"ship","reviewers":["critic"],"scores":{},"sha":"'"$sha"'","date":"2026-04-06T15:00:00Z"}'
+  git commit --allow-empty -m "post-review" -q
+  assert_exit "verdict_check_landable rejects stale" 1 verdict_check_landable feat-foo
+}
+
 # --- Runner ---
 
 run_tests() {
   local funcs
-  funcs="$(declare -F | awk '/test_verdict_/{print $3}')"
+  funcs="$(declare -F | awk '/test_(verdict_|check_landable_)/{print $3}')"
   for t in $funcs; do
     setup
     "$t"

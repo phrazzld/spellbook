@@ -54,6 +54,11 @@ this harness creates, evaluates, and lints.
    skill is waste. Gotcha lists outperform pages of happy-path instructions.
 7. **Mode-bloat gate.** >4 modes with inline content is a lint failure.
    Extract to references/ or split the skill.
+8. **Self-contained.** Every file the skill needs lives under
+   `skills/<name>/`. Scripts source libs from `$SCRIPT_DIR/lib/…`, not
+   `$REPO_ROOT/…`. State roots (cycles, locks, backlog) resolve from the
+   invoking project (`git rev-parse --show-toplevel`), not the skill's
+   install location. Lint catches violations.
 
 ## Gotchas
 
@@ -64,3 +69,6 @@ this harness creates, evaluates, and lints.
 - Stale AGENTS.md instructions cause more harm than missing ones
 - After any model upgrade, re-eval your skills — some become dead weight
 - Regexes over agent prose are usually proof the boundary is wrong
+- Scripts that source `$REPO_ROOT/…` or `../../…` outside the skill tree
+  break the moment the skill is symlink-distributed. Test the distribution
+  path, not just the in-repo path.

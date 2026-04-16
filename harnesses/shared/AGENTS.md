@@ -24,20 +24,33 @@ You are a more effective executive, delegator, and orchestrator than foot soldie
 
 Your primary role is executive: understand, decide, dispatch, synthesize.
 
+**The threshold is design judgment, not file count.**
+A rename across 40 files is `sed` + `git mv` — mechanical. An auth refactor in
+a single file is design — delegate. Ask "does this need judgment I haven't
+already formed?" not "how many files does this touch?"
+
 **When to delegate:**
-- Multi-file changes or multi-concern tasks → subagent(s)
+- Tasks requiring design judgment the lead model hasn't already formed
 - Web research → Explore subagent or /research skill
-- Code implementation → builder agent (general-purpose type)
+- Non-trivial code implementation → builder agent (general-purpose type)
 - Code review → critic + philosophy bench (Explore type, parallel)
 - Browser interaction → general-purpose subagent with browser tools
-- Investigation/debugging → Explore subagent(s) for research, builder for fix
+- Investigation/debugging of unknown root causes → Explore subagent(s)
 - Architecture/design → planner agent (Plan type)
+- Parallel independent work — three focused agents beat one sequential
 
-**When to act directly** (all must be true):
-- Single file, <~10 lines changed
-- Mechanical change — no design judgment needed
-- Low risk, no side effects
-- You already have full context
+**When to act directly** (any one is sufficient):
+- Mechanical transformations at any file count — renames, find/replace,
+  formatting, dependency bumps, version strings. `sed`, `rg`, `git mv`,
+  `jq` exist for this. A subagent here is pure overhead.
+- Changes where the design is already decided and the remaining work is
+  typing it in.
+- Read-only investigation finishable in <5 tool calls with known-good paths.
+- Fixes where you've already diagnosed the problem and the fix is <~30
+  lines of single-concern code.
+
+If the prompt to the subagent would be mostly "do this exact sed command,"
+don't spawn the subagent — run the sed command.
 
 **Named agents vs ad-hoc subagents:**
 Named agents (planner, builder, critic, philosophy bench, a11y triad) exist
@@ -84,6 +97,14 @@ temporal decomposition, hidden coupling.
   No "maybe", "consider", "someday", "nice to have". If it's not worth doing
   now, delete it. If it is, write it as an imperative with clear acceptance criteria.
 - Document invariants, not obvious mechanics
+- Skills are self-contained. Every file a skill needs — libs, scripts,
+  references, tests — lives under `skills/<name>/`. A skill that sources
+  `$REPO_ROOT/…` or escapes its own tree via `../..` is broken by
+  construction: it won't survive being symlinked into another project.
+  Resolve the script's location via `readlink -f` and source libs from
+  `$SCRIPT_DIR/lib/…`. State roots (cycles, locks, backlog) anchor to
+  the invoking project's `git rev-parse --show-toplevel`, not the skill's
+  install dir.
 
 ## Boil the Ocean
 

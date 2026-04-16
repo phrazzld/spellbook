@@ -104,6 +104,10 @@ receipts; it never re-implements the phase.
 - **No claims.** Dropped per operating principle. Single local workspace.
   Concurrent worktrees coordinate via state-dir isolation (see
   `references/worktree.md`).
+- **Never re-deliver stale backlog.** If the target item already carries
+  `## What Was Built` or current-branch history contains an explicit closure
+  marker like `Closes backlog:<item-id>` / `Ships backlog:<item-id>`, stop
+  and route to `/groom tidy`. That is backlog drift, not fresh delivery work.
 - **Never push.** Delivery ≠ shipping. `git push` is the outer loop's call.
 - **Never merge.** `gh pr merge` is a human decision.
 - **Never deploy.** `/deploy` is the outer loop's concern.
@@ -168,6 +172,9 @@ Full protocol: `references/durability.md`.
   garbage. If the item has no oracle, `/shape` runs first. Always.
 - **Review without verdict = dirty.** If `/code-review` runs but no `refs/verdicts/<branch>` points at HEAD afterward, treat the review phase as failed.
 - **Merging.** Never. End-state is merge-ready, not merged.
+- **Stale active item.** An item can be "open" in `backlog.d/` and still be
+  already shipped in git history because a human landed it outside `/flywheel`.
+  Refuse to treat that as new work; fix the backlog state first.
 
 ## References
 

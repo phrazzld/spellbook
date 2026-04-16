@@ -286,7 +286,7 @@ for item in sorted(locked):
 
   local item_id
   item_id="$(python3 - "$cycle_id" <<'PYEOF'
-import glob, json, os, re, sys
+import glob, json, os, re, subprocess, sys
 from datetime import datetime, timezone
 
 cycle_id = sys.argv[1]
@@ -342,6 +342,31 @@ def parse_dep_list(raw_value: str):
         return [part.strip().strip('"').strip("'") for part in inner.split(',') if part.strip()]
     return [raw_value.strip().strip('"').strip("'")]
 
+def has_what_was_built(content: str) -> bool:
+    return re.search(r'^## What Was Built\b', content, re.MULTILINE) is not None
+
+try:
+    history_blob = subprocess.check_output(
+        ['git', 'log', '--format=%B%x00', '-n', '200', 'HEAD'],
+        text=True,
+        stderr=subprocess.DEVNULL,
+    )
+except Exception:
+    history_blob = ''
+
+def item_closed_by_history(stem: str) -> bool:
+    item_id = re.escape(stem)
+    numeric_id = re.escape(stem.split('-', 1)[0])
+    patterns = [
+        rf'(?im)^\s*(?:closes?|ships?)\s+backlog:(?:{item_id}|{numeric_id})\s*$',
+        rf'(?im)^\s*(?:closes?|ships?)\s+backlog\.d/(?:{item_id}|{numeric_id})(?:\.md)?\s*$',
+        rf'(?im)\bdelivery\s*\(item\s+{numeric_id}\)\b',
+        rf'(?im)\bdelivered here\b.*\bitem\s+{numeric_id}\b',
+        rf'(?im)\bitem\s+{numeric_id}\b.*\b(?:shipped|closed|archived)\b',
+        rf'(?im)\b(?:shipped|closed|archived)\b.*\bitem\s+{numeric_id}\b',
+    ]
+    return any(re.search(pattern, history_blob) for pattern in patterns)
+
 candidates = []
 for path in glob.glob('backlog.d/[0-9][0-9]*-*.md'):
     fname = os.path.basename(path)
@@ -356,6 +381,12 @@ for path in glob.glob('backlog.d/[0-9][0-9]*-*.md'):
         status_val = status_val.strip().lower()
         if any(s in status_val for s in SKIP_STATUSES):
             continue
+
+    # Eligibility 2b: active backlog drift should not burn a cycle.
+    # Skip items that already carry a completion block or were explicitly
+    # closed in current-branch history but never got archived to _done/.
+    if has_what_was_built(content) or item_closed_by_history(stem):
+        continue
 
     # Eligibility 3: not locked by another open cycle.
     if stem in locked:

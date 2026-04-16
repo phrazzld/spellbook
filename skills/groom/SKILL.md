@@ -45,8 +45,8 @@ Each file:
 ```markdown
 # Fix auth token rotation
 
-Priority: high
-Status: ready | blocked | in-progress | done
+Priority: P0 | P1 | P2 | P3 | high | medium | low
+Status: pending | ready | blocked | in-progress | done | shipped | abandoned
 Estimate: S | M | L | XL
 
 ## Goal
@@ -62,6 +62,13 @@ Estimate: S | M | L | XL
 ## Notes
 <context, constraints, prior art>
 ```
+
+Closure markers for manual landings:
+- `Closes backlog:<item-id>`
+- `Ships backlog:<item-id>`
+
+When work lands outside `/flywheel`, the landing commit should carry one of
+those markers so `tidy` and `/flywheel` can detect stale active items.
 
 When grooming Spellbook itself, shape items for downstream-repo usefulness first.
 Spellbook-local work should survive only if it creates reusable primitives,
@@ -217,15 +224,18 @@ Bootstrap a new project with quality gates:
 ## Workflow: Tidy
 
 1. **Backlog audit** — count open items, check against 30-item cap
-2. Archive completed items (`Status: done`) to `backlog.d/_done/`
-3. Delete stale items (>30 days untouched, no longer relevant)
-4. Flag items stuck in `in-progress` with no recent commits — these are abandoned, not active
-5. Verify each remaining item has Goal + Oracle
-6. Verify completed items have a "What Was Built" section — if not, add one from git log
-7. **git-bug audit** (if installed):
+2. Archive completed items (`Status: done` or `Status: shipped`) to `backlog.d/_done/`
+3. Archive active items that already carry `## What Was Built` or are closed
+   by current-branch commit markers (`Closes backlog:<item-id>`,
+   `Ships backlog:<item-id>`)
+4. Delete stale items (>30 days untouched, no longer relevant)
+5. Flag items stuck in `in-progress` with no recent commits — these are abandoned, not active
+6. Verify each remaining item has Goal + Oracle
+7. Verify completed items have a "What Was Built" section — if not, add one from git log
+8. **git-bug audit** (if installed):
    - Close stale bugs (>30 days untouched, no activity)
-8. Reorder remaining by priority
-9. If BACKLOG.md / icebox exists, review it once, migrate any still-relevant items, then delete the legacy file so `backlog.d/` remains the only backlog source of truth
+9. Reorder remaining by priority
+10. If BACKLOG.md / icebox exists, review it once, migrate any still-relevant items, then delete the legacy file so `backlog.d/` remains the only backlog source of truth
 
 ## Gotchas
 

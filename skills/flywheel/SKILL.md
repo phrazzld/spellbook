@@ -97,7 +97,7 @@ Unattended without `--budget` exits 2: `flywheel: unattended mode requires
 | Subcommand | Purpose |
 |------------|---------|
 | `new-cycle [--budget $X] [--unattended]` | Acquire lock, mint ULID, write manifest, emit cycle.opened. stdout: `<ulid>` |
-| `pick <cycle_id>` | Deterministic eligibility filter + scoring. stdout: `<item_id>` or `EMPTY` |
+| `pick <cycle_id>` | Deterministic eligibility filter + scoring, with stale-item screening for active backlog drift. stdout: `<item_id>` or `EMPTY` |
 | `emit <cycle_id> <kind> <phase> <agent> <payload>` | Validated event write; sums cost_usd; triggers budget.exhausted at 95% |
 | `close <cycle_id> <status> [<reason>]` | Emit cycle.closed, update manifest, release lock |
 | `update-bucket <cycle_id> <ship_status>` | Backlog mutation (move on shipped, stamp on failed). Idempotent |
@@ -158,6 +158,10 @@ For multi-cycle runs: one brief per cycle, then one aggregate summary.
 - **Inner loop is a black box.** Consume exit code + receipt only.
 - **emit validates kinds.** Do not invent kinds inline; update EVENT_KINDS
   in `scripts/lib/events.sh` and every consumer.
+- **pick is drift-aware.** Items still sitting in `backlog.d/` but already
+  carrying `## What Was Built` or closed by current-branch commit markers
+  such as `Closes backlog:<item-id>` / `Ships backlog:<item-id>` are skipped.
+  `/groom tidy` still owns archival; `pick` just refuses to burn the cycle.
 - **budget.exhausted fires at 95%.** Finish current phase first. The 5%
   headroom absorbs metering lag.
 - **update-bucket is idempotent.** Guards every mutation with cycle_id grep.

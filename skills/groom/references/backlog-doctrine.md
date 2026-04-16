@@ -53,6 +53,19 @@ merge it into a broader reusable effort, or rewrite it until the downstream payo
 - Keep active work narrow. High WIP destroys prioritization.
 - Ideas that aren't execution-ready live in `.groom/BACKLOG.md`, not GitHub.
 
+## Closure protocol
+
+An active backlog item is closed when it leaves `backlog.d/`, not when someone
+intends to close it later.
+
+- `/flywheel` closes shipped work by moving it to `backlog.d/_done/`
+- Manual landings on the current branch should include an explicit commit
+  marker: `Closes backlog:<item-id>` or `Ships backlog:<item-id>`
+- `## What Was Built` is archival content; an item that already has that block
+  does not belong in active backlog
+- `/groom tidy` must archive any active item that satisfies either of those
+  stale-item signals
+
 ## Healthy item shapes
 
 ### Epic

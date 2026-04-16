@@ -415,6 +415,115 @@ open(sys.argv[1], 'w').write(content)
   bash "$FLYWHEEL_SH" close "$cycle_id" noop >/dev/null 2>&1
 }
 
+test_pick_skips_active_item_with_what_was_built_section() {
+  for f in "$TEST_DIR"/backlog.d/[0-9][0-9]*-*.md; do
+    python3 -c "
+import re, sys
+content = open(sys.argv[1]).read()
+if re.search(r'^Status:', content, re.MULTILINE):
+    content = re.sub(r'^Status:.*', 'Status: done', content, flags=re.MULTILINE)
+else:
+    content = content + '\nStatus: done\n'
+open(sys.argv[1], 'w').write(content)
+" "$f"
+  done
+
+  cat > "$TEST_DIR/backlog.d/001-built-but-open.md" <<'EOF'
+# Built already, but left active
+
+Priority: high
+Status: ready
+Estimate: S
+
+## Goal
+Archive stale backlog drift.
+
+## Oracle
+- [ ] This item should not be picked again.
+
+## What Was Built
+- Historical delivery block that should have lived in `_done/`.
+EOF
+
+  cat > "$TEST_DIR/backlog.d/002-live-item.md" <<'EOF'
+# Still live work
+
+Priority: medium
+Status: ready
+Estimate: S
+
+## Goal
+Remain eligible for pick.
+
+## Oracle
+- [ ] This item should be selected once stale work is skipped.
+EOF
+
+  local cycle_id
+  cycle_id="$(bash "$FLYWHEEL_SH" new-cycle --budget 5 2>/dev/null)"
+
+  local item
+  item="$(bash "$FLYWHEEL_SH" pick "$cycle_id" 2>/dev/null)"
+  assert_eq "pick skips active item carrying What Was Built" "002-live-item" "$item"
+
+  bash "$FLYWHEEL_SH" close "$cycle_id" noop >/dev/null 2>&1
+}
+
+test_pick_skips_active_item_closed_by_history_marker() {
+  for f in "$TEST_DIR"/backlog.d/[0-9][0-9]*-*.md; do
+    python3 -c "
+import re, sys
+content = open(sys.argv[1]).read()
+if re.search(r'^Status:', content, re.MULTILINE):
+    content = re.sub(r'^Status:.*', 'Status: done', content, flags=re.MULTILINE)
+else:
+    content = content + '\nStatus: done\n'
+open(sys.argv[1], 'w').write(content)
+" "$f"
+  done
+
+  cat > "$TEST_DIR/backlog.d/001-history-closed.md" <<'EOF'
+# Closed in history, still left active
+
+Priority: high
+Status: ready
+Estimate: S
+
+## Goal
+Simulate stale active backlog.
+
+## Oracle
+- [ ] Flywheel should not select this item.
+EOF
+
+  cat > "$TEST_DIR/backlog.d/002-live-item.md" <<'EOF'
+# Live work
+
+Priority: medium
+Status: ready
+Estimate: S
+
+## Goal
+Be selected once the stale item is screened out.
+
+## Oracle
+- [ ] Flywheel should choose this item.
+EOF
+
+  git -C "$TEST_DIR" add backlog.d/001-history-closed.md backlog.d/002-live-item.md
+  git -C "$TEST_DIR" commit -q -m "Closes backlog:001-history-closed" \
+    --author="test <test@test>" 2>/dev/null || true
+
+  local cycle_id
+  cycle_id="$(bash "$FLYWHEEL_SH" new-cycle --budget 5 2>/dev/null)"
+
+  local item
+  item="$(bash "$FLYWHEEL_SH" pick "$cycle_id" 2>/dev/null)"
+  assert_eq "pick skips active item closed by history marker" "002-live-item" "$item"
+
+  bash "$FLYWHEEL_SH" close "$cycle_id" noop >/dev/null 2>&1
+}
+
 test_emit_rejects_unknown_kind() {
   local cycle_id
   cycle_id="$(bash "$FLYWHEEL_SH" new-cycle --budget 5 2>/dev/null)"

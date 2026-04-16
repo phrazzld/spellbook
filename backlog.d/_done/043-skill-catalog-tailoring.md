@@ -84,3 +84,38 @@ when time comes.
 - Thin-harness refactor of /flywheel (7ccd00d) is the form this
   ticket should match. Scripts only where they genuinely beat agent
   judgment.
+
+## What Was Built
+
+Shipped via merge commit `3b9b4b8` to master, pushed to origin
+2026-04-16.
+
+- `skills/tailor-skills/SKILL.md` — 90-line thin-form skill. Reads
+  current repo, reads `index.yaml`, picks 10-20 skills, writes
+  `.spellbook.yaml` to project root. Invariants: committed file,
+  reversible, agent judges, justify each pick.
+- `bootstrap.sh` — allowlist filter after `discover_local()`. Reads
+  `.spellbook.yaml` from `git rev-parse --show-toplevel` (subdir-safe).
+  Sentinel parser scheme (`PRESENT` / `PARSE_FAIL`) cleanly distinguishes
+  empty-list (fail-loud) from missing/malformed (fall through to global).
+  Extends `force_per_entry` so the allowlist-active state escapes the
+  parent-dir symlink shortcut. ~40 lines of net logic.
+- `scripts/test-bootstrap-filter.sh` — 8 cases covering: no file, valid
+  allowlist, malformed YAML, unknown names, empty list, missing key,
+  null value, subdir invocation. Uses `SPELLBOOK_TEST_MODE=1` probe
+  to dump post-filter state without touching harness dirs.
+- Removed pre-existing stale `.spellbook.yaml` stub in spellbook root
+  (`skills: []` documentation placeholder that became fail-loud after
+  the sentinel fix).
+
+Dogfood: ran on `~/Development/bitterblossom`, 101 skills → 17 (83%
+reduction). Cross-harness parity verified across Claude/Codex/Pi.
+Dagger CI 11/11 green. Bench verdict: ship (critic, ousterhout, grug,
+carmack; critic needed a second pass — two real blockers caught and
+fixed).
+
+Stretch goal (template → repo-specific skill generation) deferred to a
+follow-on ticket; adjacent to 029.
+
+Remote-install allowlist support explicitly deferred — see new
+follow-up ticket.

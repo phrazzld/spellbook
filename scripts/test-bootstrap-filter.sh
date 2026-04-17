@@ -12,6 +12,14 @@
 # pointing at a fake spellbook checkout + fake project dir. The bootstrap
 # exits cleanly right after the allowlist filter step and prints the
 # resulting state so the test can assert on it.
+#
+# Remote-install coverage: these tests exercise discover_local because it's
+# hermetic. The filter itself (bootstrap.sh:337) is discovery-agnostic — it
+# reads and rewrites GLOBAL_SKILLS[] / EXTERNAL_SKILLS[] regardless of which
+# discover_* populated them, and install_remote() iterates the filtered
+# result. Proving the filter correct on local fixtures therefore proves it
+# correct for remote by structural equivalence. A separate remote test
+# would require mocking the GitHub API for zero additional coverage.
 
 set -euo pipefail
 

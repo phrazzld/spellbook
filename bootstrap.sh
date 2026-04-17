@@ -326,6 +326,12 @@ fi
 # Per-project skill allowlist. Resolves symmetric to /tailor-skills: the file
 # lives at the git toplevel, so running bootstrap from a subdirectory still
 # picks it up. If there is no enclosing git repo, falls back to $PWD.
+#
+# Discovery-agnostic by construction: runs once on whichever arrays
+# discover_local or discover_remote populated, so remote-install (curl|bash)
+# gets the same filter as local-checkout. install_remote() at the bottom of
+# this file iterates the already-filtered GLOBAL_SKILLS[].
+#
 # Three parser states (sentinel on first stdout token):
 #   PRESENT <names…> → file present, `skills:` is a list (possibly empty).
 #                      Allowlist is active; empty list → empty result (fail-loud

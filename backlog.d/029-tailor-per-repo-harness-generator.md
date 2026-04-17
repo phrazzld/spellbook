@@ -164,15 +164,92 @@ No round 2. That's where `/focus` rotted.
 
 | Layer | Owner | Examples |
 |---|---|---|
-| Workflow primitives | **Global (spellbook)** | groom, shape, deliver, flywheel, code-review, reflect, settle, harness, tailor |
-| Philosophy bench | Global | beck, carmack, grug, ousterhout, planner, critic |
-| Domain skills | **Per-repo (generated)** | `<repo>-migrations`, `<repo>-fixtures`, `<repo>-deploy` — v2+ |
-| AGENTS.md content | Per-repo | build/test commands, hot paths, gotchas |
-| Hooks | Per-repo | pre-edit lint, post-test runner — v2+ |
-| Permissions allowlist | Per-repo | actual binaries used (`settings.local.json`) |
-| Reviewer agents | Per-repo only if stack-specific beats generic | `rust-unsafe-reviewer` yes, `general-reviewer` no — v2+ |
+| Workflow primitives | **Global (spellbook)** — canonical reference | groom, shape, deliver, flywheel, code-review, reflect, settle, harness, tailor |
+| Philosophy bench | Global — canonical reference | beck, carmack, grug, ousterhout, planner, critic |
+| **Primitive derivatives** | **Per-repo (overlay on global)** — v2 | tailored `/code-review` with this repo's review rubric; tailored `/qa` with this repo's golden paths; tailored `/implement` with this repo's TDD conventions |
+| Domain skills (novel) | Per-repo (generated) — v2 | `<repo>-migrations`, `<repo>-fixtures`, `<repo>-deploy` — only when no global primitive applies |
+| AGENTS.md content | Per-repo — MVP | build/test commands, hot paths, gotchas |
+| Hooks | Per-repo — v2 | pre-edit lint, post-test runner |
+| Permissions allowlist | Per-repo — MVP | actual binaries used (`settings.local.json`) |
+| Reviewer agents | Per-repo only if stack-specific beats generic — v2 | `rust-unsafe-reviewer` yes, `general-reviewer` no |
 
-Sharp line enforced by `tailor-lint.sh`.
+Sharp line enforced by `tailor-lint.sh`. In MVP, `.claude/skills/<name>/`
+shadowing a global name is forbidden outright. In v2, overlays are the
+**sanctioned** shadow mechanism — see below.
+
+## Reference-Derivative Pattern (v2)
+
+The working model is **spellbook as canonical reference, per-repo as
+specialization**. A global primitive (`/code-review`, `/qa`,
+`/implement`) is the stable contract; the per-repo tailored version
+inherits its shape and adds repo-specific content.
+
+### Overlay Composition
+
+```
+skills/code-review/SKILL.md          ← global, canonical
+.claude/.tailor/overlays/code-review.md  ← per-repo specialization
+         ↓ (compose at tailor-generate time)
+.claude/skills/code-review/SKILL.md  ← emitted final artifact
+```
+
+Overlay file schema (proposal, to harden in v2 shaping):
+
+```markdown
+---
+extends: code-review        # global primitive name (required)
+repo_sig_hash: sha256:...   # invalidates on repo signature change
+---
+
+<!-- tailor:inherit description -->
+<!-- tailor:inherit trigger -->
+
+<!-- tailor:append body -->
+## Repo-specific review rubric
+- Rust: flag `unsafe` blocks without SAFETY: comment
+- Axum handlers must return typed errors, not anyhow
+- Migrations in `migrations/`: require paired down.sql
+
+<!-- tailor:keep -->
+## Human additions (preserved across regens)
+```
+
+Compose-time rules:
+- `inherit` sections are copied from global SKILL.md as-is.
+- `append` sections are concatenated under the matching section header.
+- `keep` fences preserve human edits through regeneration.
+- If the global primitive version changes between generations, the
+  overlay `repo_sig_hash` is checked and the user is warned if the
+  inherited contract drifted.
+
+### Why Overlay, Not Fork
+
+- **Global improvements propagate.** Bug fixes or UX changes to the
+  global skill flow into every repo on next tailor-refresh.
+- **The diff is legible.** `.claude/.tailor/overlays/code-review.md`
+  shows exactly what this repo adds beyond the global contract.
+- **Cross-harness first.** Composition runs at tailor-generate time
+  on the spellbook side; the emitted SKILL.md works on Claude, Codex,
+  and Pi without harness-specific runtime machinery.
+- **Avoids `/focus` bloat.** The overlay is small and derivative.
+  A repo can't accumulate 87 full skills — only overlays on ≤N
+  canonical ones.
+
+### Greenfield Domain Skills (also v2)
+
+Novel per-repo skills that don't derive from a global primitive
+(e.g., `<repo>-migrations`) are still allowed in v2, but require a
+stronger justification in the critic pass: "no global primitive could
+be overlayed to cover this." Overlay-first is the default.
+
+### MVP Scope Impact
+
+None. MVP still ships only `AGENTS.md` + `settings.local.json` +
+`manifest.json`. The overlay system lands in v2 after MVP validates
+that tailored > vanilla on A/B. This section exists to ensure MVP
+doesn't foreclose the overlay design with incompatible decisions
+(e.g., baking absolute shadow-name prohibition into the manifest
+schema rather than the lint rule).
 
 ## Interfaces
 
@@ -233,6 +310,7 @@ Validate premise: if three real repos can't show tailored > vanilla on the A/B, 
 ## Non-Goals (MVP)
 
 - External research phase (exemplar-finder, framework-harness-hunter, best-practice fetcher)
+- Overlay composition — v2 (reference-derivative pattern above)
 - Domain skill generation (`<repo>-migrations` etc.) — v2
 - Reviewer agent generation (`rust-unsafe-reviewer` etc.) — v2
 - Hook generation — v2

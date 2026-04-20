@@ -36,11 +36,36 @@ tailoring; it's decoration.
    `$SPELLBOOK/agents/`. Each primitive's frontmatter describes when
    to use it. That's your map.
 
-4. **Pick.** Dispatch planner + critic subagents. Planner proposes a
-   set following the picking defaults below; critic applies
-   `references/focus-postmortem.md`. One round. Stop on critic-clear.
+4. **Synthesize a repo brief.** Write a short prose document
+   (1-2 pages) that every downstream subagent will read. It is
+   the shared spine that keeps rewrites coherent — without it,
+   `/ci` calls the enforcing layer one thing and `/deliver` calls
+   it another. Required anchors:
 
-5. **Install.** Three categories, different rules:
+   - **Vision & purpose** — what this repo is building, for whom.
+   - **Stack & boundaries** — layers and what each owns.
+   - **Load-bearing gate** — *the* single declaration of what must
+     pass to ship (e.g. "`pnpm ci:prepush` IS the gate; the Dagger
+     lanes are its components"). Every gate-adjacent skill cites
+     this verbatim.
+   - **Invariants** — repo-wide rules (don't touch X, base branch
+     is Y, commits go through Z).
+   - **Known debts** — active issues, hot files, recurring failure
+     modes, incident IDs. Pull from backlog, session history, and
+     recent git log.
+   - **Terminology** — what this repo calls its things.
+   - **Session signal** — 3-5 recurring user corrections from
+     session JSONL + 3-5 validated patterns the user has ratified.
+
+   Short, dense, concrete. This is the single source of truth for
+   "what is this repo" that every rewriter anchors to.
+
+5. **Pick.** Dispatch planner + critic subagents with the repo
+   brief attached. Planner proposes a set following the picking
+   defaults below; critic applies `references/focus-postmortem.md`.
+   One round. Stop on critic-clear.
+
+6. **Install.** Three categories, different rules:
 
    - **Universal skills** — `research`, `groom`, `office-hours`,
      `ceo-review`, `reflect`, and similar that carry no repo-specific
@@ -54,25 +79,50 @@ tailoring; it's decoration.
      reference; fill every example, every command, every gotcha with
      repo-specific content. Preserve `references/` and `scripts/`
      from the source — they travel with the skill.
+
+     **Dispatch one rewriter subagent per workflow skill, in
+     parallel.** Monolithic rewriting of 10+ skills in one context
+     causes attention decay — the model pattern-matches "just copy
+     this one too" and ships byte-identical output. Each rewriter
+     receives: (a) the repo brief from step 4 (shared spine —
+     cite these anchors, don't invent parallel vocabulary),
+     (b) the spellbook source, (c) a domain-specific reading
+     assignment (`/ci` reads `.github/workflows/` + dagger config;
+     `/diagnose` reads evidence logs + postmortems; `/deliver`
+     reads `backlog.d/` + recent merged PRs), (d) the mandate
+     above.
+
+     **Critic reviews all rewrites together, not individually.**
+     Three checks: (1) **depth** — subtractive test, would this
+     rewrite be wrong if applied to another repo with the same
+     stack? If no, it's shallow — reject; (2) **cohesion** — does
+     every gate-adjacent skill cite the same load-bearing gate
+     from the repo brief? Any contradiction against repo brief or
+     sibling skills → reject; (3) **completeness** — byte-identical
+     to spellbook source → reject. Critic sends specific rewriters
+     back with specific objections. Iterate until coherent. Up to
+     3 rounds; critic judges convergence.
    - **Domain skills (invented)** — greenfield additions like
      `/convex-migrate`, `/rust-unsafe-reviewer`. Only invent when you
      can name the concrete repo characteristic demanding it.
 
-6. **Write `AGENTS.md`.** As a router, not a manual. Suggested
-   structure:
+7. **Write `AGENTS.md`.** Project the repo brief + the coherent
+   rewrite set into a router (not a manual). Suggested structure:
    - **Stack & boundaries** — stack names and what each layer owns.
    - **Ground-truth pointers** — files that ARE the API (e.g.
      `convex/_generated/api.d.ts`); stale training data lies.
    - **Invariants** — hard rules specific to this repo (functions,
      env vars, schema constraints, auth flows).
-   - **Gate contract** — CI commands, pre-commit hooks, what humans
-     do, what's enforced where.
-   - **Known-debt map** — concrete file/line pointers to debt the
-     agent should know about.
+   - **Gate contract** — cite the load-bearing gate from the repo
+     brief; enumerate pre-commit hooks, what humans do, what's
+     enforced where.
+   - **Known-debt map** — concrete file/line pointers. Every P0
+     debt item gets a filed issue ID, not `(unfiled)`.
    - **Harness index** — table: installed skill → what it does
-     *here* (not the generic description).
+     *here* (not the generic description). Agents in a sibling
+     table, not a prose sentence.
 
-7. **Write `.claude/settings.local.json`.** Permissions allowlist
+8. **Write `.claude/settings.local.json`.** Permissions allowlist
    derived from the tools actually in use.
 
 ## Invariants
@@ -92,6 +142,14 @@ tailoring; it's decoration.
   repo-specific content, it belongs in the SKILL.md body. A sidecar
   notes file is the sewn-on-sleeve anti-pattern — the generic jacket
   with an appendix. Forbidden.
+- **Self-audit before declaring done.** For each workflow skill you
+  installed, `diff` the rewritten SKILL.md against the spellbook
+  source. Byte-identical means the rewriter dropped the ball — go
+  back and redo that skill. For each workflow skill you *excluded*,
+  name the concrete missing infrastructure (no `vercel.json`, no
+  `fly.*.toml`, no `convex/`, no `Dockerfile`, no `.github/workflows/
+  *deploy*` — concrete absence, not "didn't seem relevant"). Silent
+  skip is the failure mode that ships B+ output when A is the bar.
 - Preserve self-containment. When you copy or rewrite a skill, its
   `references/` and `scripts/` stay with it.
 

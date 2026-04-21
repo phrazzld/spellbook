@@ -278,12 +278,31 @@ tailoring; it's decoration.
 
 - Never write outside the current repo. No `$SPELLBOOK` mutation,
   no `~/.claude` / `~/.codex` / `~/.pi` mutation.
-- **Workflow skills default to include.** Only exclude if the repo
-  genuinely lacks the infrastructure the skill operates on (no CI
-  config → skip `/ci`; no deploy target → skip `/deploy`; no active
-  backlog → skip `/groom`). A repo with real CI, tests, deploy, and
-  backlog needs most of the workflow set — that's the inner/outer
-  loop of shipping.
+- **Workflow skills split into two tiers.** (Universal skills —
+  `research`, `reflect`, `groom`, `office-hours`, `ceo-review` —
+  are *also* always-present via step 6's universal category; they
+  install verbatim, not tailored. Functionally always-present.)
+  - **Always install** (orchestrators, foundational loop skills,
+    and judgment-only skills): `deliver`, `shape`, `implement`,
+    `code-review`, `ci`, `refactor`, `flywheel`, `settle`, `yeet`.
+    **Never skipped, under any justification.** A repo without a CI
+    pipeline *today* still gets `/ci` — the skill drives local gates
+    and establishes the shipping contract. Spellbook is the source of
+    `/flywheel`; any repo that articulates a `/deliver` → `/flywheel`
+    loop must ship the orchestrator. An exact-copy install is a valid
+    tailoring outcome; silent skip is a regression.
+  - **Infrastructure-tied, skip only with named absence.** `deploy`
+    (no deploy target named in `vercel.json` / `fly.*.toml` /
+    `Dockerfile*` / `.github/workflows/*deploy*`), `monitor` (no signal
+    surfaces — Sentry, health endpoints, observability config),
+    `diagnose` (no postmortem/evidence dir, no observability tooling),
+    `qa` (no browser/E2E surface), `demo` (no demo scripts /
+    evidence capture tooling). Skipping requires naming the concrete
+    missing file; "didn't seem relevant" does not count. **Confusing
+    an orchestrator's missing leaf step with the orchestrator itself
+    is the trap:** no `/deploy` target does not justify skipping
+    `/flywheel`; no `/qa` surface does not justify skipping
+    `/code-review`.
 - **Domain skills default to exclude.** Invent only when you can
   name the concrete repo characteristic demanding it. "We might want
   X" is not a name.
@@ -299,21 +318,28 @@ tailoring; it's decoration.
   disclosure — not a repo appendix. If the name could apply to
   another repo on the same stack, it's fine. If the name is this
   repo, rewrite it into SKILL.md.
-- **Self-audit before declaring done.** Four checks:
+- **Self-audit before declaring done.** Five checks:
   1. **Workflow rewrites:** `diff` each installed workflow SKILL.md
      against the spellbook source. Byte-identical = rewriter
      dropped the ball. Go back and redo.
-  2. **Excluded workflows:** name the concrete missing infrastructure
-     for each skipped skill (no `vercel.json`, no `fly.*.toml`, no
-     `convex/`, no `Dockerfile`, no `.github/workflows/*deploy*` —
-     concrete absence, not "didn't seem relevant").
-  3. **Agent installation:** grep every installed skill for
+  2. **Always-install coverage:** every skill in the always-install
+     tier (`deliver`, `shape`, `implement`, `code-review`, `ci`,
+     `refactor`, `flywheel`, `settle`, `yeet`) resolves to a directory
+     under the shared skill root. Zero missing. If one is absent, the
+     run failed — reinstall before declaring done.
+  3. **Excluded workflows:** only skills from the infrastructure-tied
+     tier may be skipped, and each skip names the concrete missing
+     file (no `vercel.json`, no `fly.*.toml`, no `Dockerfile*`, no
+     `.github/workflows/*deploy*`, no browser/E2E config — concrete
+     absence, not "didn't seem relevant"). An always-install skill
+     appearing in the skipped list is a critical regression.
+  4. **Agent installation:** grep every installed skill for
      `subagent_type:` references. Every referenced agent must resolve
      to a file in the repo's installed agent directory (usually
      `.claude/agents/`). A `/code-review` that dispatches
      `ousterhout` + `carmack` + `grug` against nonexistent agent
      files is a silent regression — the skill fails at call time.
-  4. **AGENTS.md debt map:** zero `(unfiled)` entries. Every P0 has
+  5. **AGENTS.md debt map:** zero `(unfiled)` entries. Every P0 has
      a filed tracker ID.
 
   Silent skip is the failure mode that ships B+ output when A is

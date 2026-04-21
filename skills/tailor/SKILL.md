@@ -284,18 +284,20 @@ tailoring; it's decoration.
   install verbatim, not tailored. Functionally always-present.)
   - **Always install** (orchestrators, foundational loop skills,
     and judgment-only skills): `deliver`, `shape`, `implement`,
-    `code-review`, `ci`, `refactor`, `flywheel`, `settle`, `yeet`.
-    **Never skipped, under any justification.** A repo without a CI
-    pipeline *today* still gets `/ci` — the skill drives local gates
-    and establishes the shipping contract. Spellbook is the source of
-    `/flywheel`; any repo that articulates a `/deliver` → `/flywheel`
-    loop must ship the orchestrator. An exact-copy install is a valid
-    tailoring outcome; silent skip is a regression.
+    `code-review`, `ci`, `refactor`, `flywheel`, `settle`, `yeet`,
+    `diagnose`. **Never skipped, under any justification.** A repo
+    without a CI pipeline *today* still gets `/ci` — the skill drives
+    local gates and establishes the shipping contract. Spellbook is
+    the source of `/flywheel`; any repo that articulates a `/deliver`
+    → `/flywheel` loop must ship the orchestrator. `/diagnose` is the
+    merged investigate/audit/debug skill (reserved-name collisions
+    retired `/investigate` and `/debug`); every repo has bugs to
+    investigate. An exact-copy install is a valid tailoring outcome;
+    silent skip is a regression.
   - **Infrastructure-tied, skip only with named absence.** `deploy`
     (no deploy target named in `vercel.json` / `fly.*.toml` /
     `Dockerfile*` / `.github/workflows/*deploy*`), `monitor` (no signal
     surfaces — Sentry, health endpoints, observability config),
-    `diagnose` (no postmortem/evidence dir, no observability tooling),
     `qa` (no browser/E2E surface), `demo` (no demo scripts /
     evidence capture tooling). Skipping requires naming the concrete
     missing file; "didn't seem relevant" does not count. **Confusing
@@ -324,9 +326,9 @@ tailoring; it's decoration.
      dropped the ball. Go back and redo.
   2. **Always-install coverage:** every skill in the always-install
      tier (`deliver`, `shape`, `implement`, `code-review`, `ci`,
-     `refactor`, `flywheel`, `settle`, `yeet`) resolves to a directory
-     under the shared skill root. Zero missing. If one is absent, the
-     run failed — reinstall before declaring done.
+     `refactor`, `flywheel`, `settle`, `yeet`, `diagnose`) resolves to
+     a directory under the shared skill root. Zero missing. If one is
+     absent, the run failed — reinstall before declaring done.
   3. **Excluded workflows:** only skills from the infrastructure-tied
      tier may be skipped, and each skip names the concrete missing
      file (no `vercel.json`, no `fly.*.toml`, no `Dockerfile*`, no

@@ -154,13 +154,14 @@ tailoring; it's decoration.
 
    Three categories, different install rules:
 
-   - **Universal skills** — `research`, `groom`, `office-hours`,
-     `ceo-review`, `reflect`, and similar that carry no repo-specific
-     judgment. Copy their directories verbatim. Tailoring them would
-     be artificial.
+   - **Universal skills** — `groom`, `office-hours`, `ceo-review`,
+     `reflect`, and similar that carry no repo-specific judgment.
+     Copy their directories verbatim. Tailoring them would be
+     artificial.
    - **Workflow skills** — `deliver`, `shape`, `implement`,
      `code-review`, `ci`, `refactor`, `qa`, `flywheel`, `deploy`,
-     `monitor`, `diagnose`, `settle`, `yeet`. **Rewrite each SKILL.md
+     `monitor`, `diagnose`, `settle`, `yeet`, `research`. **Rewrite
+     each SKILL.md
      with this repo's commands, gates, conventions, and file paths
      embedded throughout.** Use the spellbook version as structural
      reference; fill every example, every command, every gotcha with
@@ -202,6 +203,7 @@ tailoring; it's decoration.
      | **groom** | issue tracker (git-bug / GH / backlog.d/), grooming cadence, prioritization scheme |
      | **implement** | test runner command, mocking boundaries, test config, recent TDD cycles |
      | **diagnose** | signal surfaces, `.evidence/`, postmortems, observability tooling |
+     | **research** | prior research artifacts (`.claude/research/`, `docs/research/`, `.groom/`), stack manifest (`package.json` / `Cargo.toml` / `pyproject.toml`) for domain cues, open research threads in `backlog.d/`, repo-specific source/doc lists |
 
      **Loop-core skills must not ship shallow.** The seven bolded
      rows above (shape, refactor, code-review, flywheel, groom,
@@ -279,20 +281,24 @@ tailoring; it's decoration.
 - Never write outside the current repo. No `$SPELLBOOK` mutation,
   no `~/.claude` / `~/.codex` / `~/.pi` mutation.
 - **Workflow skills split into two tiers.** (Universal skills —
-  `research`, `reflect`, `groom`, `office-hours`, `ceo-review` —
-  are *also* always-present via step 6's universal category; they
-  install verbatim, not tailored. Functionally always-present.)
+  `groom`, `office-hours`, `ceo-review`, `reflect` — are *also*
+  always-present via step 6's universal category; they install
+  verbatim, not tailored. Functionally always-present.)
   - **Always install** (orchestrators, foundational loop skills,
     and judgment-only skills): `deliver`, `shape`, `implement`,
     `code-review`, `ci`, `refactor`, `flywheel`, `settle`, `yeet`,
-    `diagnose`. **Never skipped, under any justification.** A repo
-    without a CI pipeline *today* still gets `/ci` — the skill drives
-    local gates and establishes the shipping contract. Spellbook is
-    the source of `/flywheel`; any repo that articulates a `/deliver`
-    → `/flywheel` loop must ship the orchestrator. `/diagnose` is the
-    merged investigate/audit/debug skill (reserved-name collisions
-    retired `/investigate` and `/debug`); every repo has bugs to
-    investigate. An exact-copy install is a valid tailoring outcome;
+    `diagnose`, `research`. **Never skipped, under any justification.**
+    A repo without a CI pipeline *today* still gets `/ci` — the skill
+    drives local gates and establishes the shipping contract.
+    Spellbook is the source of `/flywheel`; any repo that articulates
+    a `/deliver` → `/flywheel` loop must ship the orchestrator.
+    `/diagnose` is the merged investigate/audit/debug skill
+    (reserved-name collisions retired `/investigate` and `/debug`);
+    every repo has bugs to investigate. `/research` is always
+    tailored, not copied — its tool preferences, domain sources, and
+    prior-artifact pointers are repo-specific even though the
+    protocol is universal. An exact-copy install is a valid tailoring
+    outcome only for a repo that is itself the canonical source;
     silent skip is a regression.
   - **Infrastructure-tied, skip only with named absence.** `deploy`
     (no deploy target named in `vercel.json` / `fly.*.toml` /
@@ -326,9 +332,10 @@ tailoring; it's decoration.
      dropped the ball. Go back and redo.
   2. **Always-install coverage:** every skill in the always-install
      tier (`deliver`, `shape`, `implement`, `code-review`, `ci`,
-     `refactor`, `flywheel`, `settle`, `yeet`, `diagnose`) resolves to
-     a directory under the shared skill root. Zero missing. If one is
-     absent, the run failed — reinstall before declaring done.
+     `refactor`, `flywheel`, `settle`, `yeet`, `diagnose`, `research`)
+     resolves to a directory under the shared skill root. Zero
+     missing. If one is absent, the run failed — reinstall before
+     declaring done.
   3. **Excluded workflows:** only skills from the infrastructure-tied
      tier may be skipped, and each skip names the concrete missing
      file (no `vercel.json`, no `fly.*.toml`, no `Dockerfile*`, no

@@ -116,10 +116,9 @@ Tracked shapes (open, `backlog.d/NNN-*.md`):
 | Dagger merge gate | the gate should block merges directly, not just pre-commit | `backlog.d/025-dagger-merge-gate.md` |
 | Multi-machine sync | harness state across machines | `backlog.d/026-multi-machine-sync.md` |
 | End-to-end offline validation | full offline run coverage | `backlog.d/027-end-to-end-offline-validation.md` |
-| Flywheel outer-loop orchestrator | scheduled cycles + budget | `backlog.d/028-flywheel-outer-loop-orchestrator.md` |
-| `/tailor` per-repo harness generator | active — this run | `backlog.d/029-tailor-per-repo-harness-generator.md` (branch: `feat/tailor-harden`) |
-| Harness auto-tune (GEPA) | adaptive harness tuning | `backlog.d/031-harness-auto-tune-gepa.md` |
+| Harness auto-tune (GEPA) | adaptive harness tuning — parked until ≥20 flywheel cycles produce signal | `backlog.d/031-harness-auto-tune-gepa.md` |
 | Legacy `curate` skill triage | `.agents/skills/curate/` + `.claude/skills/curate/` predate `.spellbook` markers | `backlog.d/046-curate-skill-triage.md` |
+| `/tailor` external-skill install | externals declared in `registry.yaml` aren't on any harness skill-discovery path; three-mode install (copy / rewrite / symlink) | `backlog.d/047-tailor-external-skill-install.md` |
 
 Hot files (recent churn — check `git log` before editing):
 - `skills/tailor/SKILL.md` — actively evolving on `feat/tailor-harden`.

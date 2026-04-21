@@ -1,9 +1,57 @@
 # `/tailor` — per-repo harness generator
 
-Priority: high
-Status: pending
-Estimate: L (MVP ~1 week)
+Priority: P0 (shipped)
+Status: done
+Estimate: L
+Shipped: 2026-04-20 (tailor-harden branch squash); superseded-and-
+validated-by: 045 (harness pivot to minimal globals).
 Aliases: `/attune`
+
+## What shipped
+
+`skills/tailor/SKILL.md` (382 lines). Explores the repo + session
+history, browses the catalog, synthesizes a repo brief at
+`.spellbook/repo-brief.md`, dispatches parallel rewriters (one per
+workflow skill) with critic adjudication, installs shared-root
+skills under `.agents/skills/` with per-harness symlink bridges
+(`.claude/skills/`, `.codex/skills/`, `.pi/skills/`), writes a
+router `AGENTS.md`, writes per-harness settings (merged additively).
+
+Validated first-run on spellbook itself (commit `bef16b2`, 2026-04-20):
+14 skills (9 workflow rewrites + 5 universal) + 7 agents installed,
+gate 12/12 green, self-audit (byte-identity, agent-refs-resolve,
+debt-map-zero-unfiled, skip-justification) passes.
+
+## What was cut (deliberate)
+
+The Oracle-level criteria below (`manifest.json` with hashes, A/B
+eval machinery, automatic rollback on loss, 7-day manifest refresh
+guard, `tailor-lint.sh` pre-commit hook, drift detection) were
+deleted in two refactors:
+
+- `68e276b refactor(tailor): cut 683 lines — push scoring to skill
+  judgment` — removed the A/B eval harness and scoring code; replaced
+  with skill-judgment criteria (critic checklist, subtractive test,
+  cohesion test, byte-identity test).
+- `f91f1c4 refactor(harness): pivot to minimal globals — /tailor +
+  /seed only` — removed the `.spellbook.yaml` allowlist machinery,
+  `SPELLBOOK_TEST_MODE` probe, `EXTERNAL_SKILLS[]` array.
+
+The `.spellbook` marker file (`installed-by: tailor`, `tailor-version:
+<sha>`, `category: workflow|universal|agent|external`) serves the
+"what's tailor-owned" function that `manifest.json` was originally
+designed for, with less ceremony.
+
+## Follow-on work
+
+- `046-curate-skill-triage.md` — legacy unmarked `curate` skill
+  surfaced during first-run self-audit.
+- `047-tailor-external-skill-install.md` — extend `/tailor` with a
+  third install mode for externally-managed skills (from
+  `registry.yaml` sources — vercel-*, anthropic-*, jakub-*, emil-*,
+  karpathy-*).
+
+## Original shape preserved below for reference
 
 ## Goal
 

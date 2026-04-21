@@ -129,13 +129,13 @@ Open in `backlog.d/`:
 - `025-dagger-merge-gate.md`
 - `026-multi-machine-sync.md`
 - `027-end-to-end-offline-validation.md`
-- `028-flywheel-outer-loop-orchestrator.md` (mostly shipped)
-- `029-tailor-per-repo-harness-generator.md` (active — this skill, this run)
-- `031-harness-auto-tune-gepa.md`
+- `031-harness-auto-tune-gepa.md` (parked until /flywheel produces ≥20 cycles of signal)
+- `046-curate-skill-triage.md` (legacy unmarked `curate` skill)
+- `047-tailor-external-skill-install.md` (three-mode install for external sources)
 
-Active branch: `feat/tailor-harden` (5 commits past `master`): repo brief,
-iterative rewriters, reconciliation, cross-harness install, force depth on
-loop-core skills.
+Active branch: `master`. `/tailor` and `/flywheel` have both shipped
+(see `_done/028`, `_done/029`); current work threads are offline evidence
+(024 → 025 → 027) and external-skill install (047).
 
 Hot files (recent churn):
 - `skills/tailor/SKILL.md` — the skill currently running.

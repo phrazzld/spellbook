@@ -1,8 +1,35 @@
 # `/flywheel` — outer delivery loop (formerly `/iterate`)
 
-Priority: high
-Status: in-progress (Phase 1 + rename shipped; Phase 2+ ahead)
-Estimate: L (MVP ~5 dev-days; Phase 1 + rename done; Phase 2+ remaining)
+Priority: P0 (shipped)
+Status: done
+Estimate: L
+Shipped: 2026-04-15 (Phase 1 + rename); 2026-04-16 (thin-harness pivot)
+
+## What shipped
+
+`/flywheel` exists at `skills/flywheel/SKILL.md` (42 lines) — the
+"thin-harness reference form" cited in `.spellbook/repo-brief.md`. It
+composes `/deliver` → land → `/deploy` → `/monitor` → `/reflect cycle`
+and loops.
+
+## What was cut (deliberate)
+
+The Phase 2+ scaffold originally shaped below (`skills/flywheel/scripts/
+flywheel.sh` helper lib, ULID cycle IDs, NDJSON event streams, lock file
+coordination, budget/predicate flag machinery, GEPA feedback hooks) was
+deleted in commit `7ccd00d refactor(flywheel): thin-harness — scripts
+out, judgment in` (977 + 738 LOC → 42-line SKILL.md).
+
+The pivot aligns with the doctrine in `harnesses/shared/AGENTS.md`:
+*"Prefer thin harnesses over semantic orchestration. Launch, bound, and
+record agents; do not pre-solve their work in harness code."* The model
+runs the cycle; the skill encodes the invariants that aren't inferable
+from the leaf names.
+
+GEPA-style auto-tune lives on as a separate ticket (`031-harness-auto-
+tune-gepa.md`, parked until ≥20 cycles of signal exist).
+
+## Original shape preserved below for reference
 
 ## Progress
 

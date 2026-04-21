@@ -1,5 +1,5 @@
 # Spellbook Index
-# Generated: 2026-04-20T19:14:50Z
+# Generated: 2026-04-21T16:07:39Z
 # Do not edit manually. Run: ./scripts/generate-index.sh
 
 skills:
@@ -59,6 +59,10 @@ skills:
     description: "Atomic TDD build skill. Takes a context packet (shaped ticket) and produces code + tests on a feature branch. Red → Green → Refactor. Does not shape, review, QA, or ship — single concern: spec t"
     source: first-party
     tags: [a,atomic,branch,build,code,concern,context,feature,green,on]
+  - name: karpathy-guidelines
+    description: "Four behavioral guidelines to reduce common LLM coding mistakes: surface assumptions, prefer simplicity, make surgical changes, drive by verifiable goals. Distilled from Andrej Karpathy's observations"
+    source: first-party
+    tags: [andrej,assumptions,behavioral,by,changes,coding,common,distilled,drive,four]
   - name: model-research
     description: "Research, compare, and select LLM models for AI-powered apps and workflows. Finds latest models per family, verifies availability on target platform, compares pricing/benchmarks/tool-calling, produces"
     source: first-party

@@ -152,6 +152,20 @@ tailoring; it's decoration.
    Markers are how re-runs tell your output apart from human-
    authored content.
 
+   **Shared scripts.** Tailored skills source shared shell helpers
+   at a stable path. Install verbatim from `$SPELLBOOK/scripts/lib/`
+   to `<repo-root>/scripts/lib/` (create if missing). Do not rewrite
+   — divergence breaks sourcing in every consumer at once.
+
+   | Path | Required by | Overwrite policy |
+   |---|---|---|
+   | `scripts/lib/backlog.sh` | `/ship`, `/groom tidy`, any skill reconciling master against `backlog.d/` | Copy verbatim; merge additively with unrelated files; never overwrite an unmarked script |
+   | `scripts/lib/verdicts.sh` | `/ship`, `/settle` (git-native mode) | Copy verbatim; merge additively; never overwrite an unmarked script |
+
+   Emit `.spellbook` markers alongside if the repo uses them for
+   scripts; otherwise content parity against spellbook is the drift
+   signal.
+
    Three categories, different install rules:
 
    - **Universal skills** — `groom`, `office-hours`, `ceo-review`,
@@ -160,13 +174,13 @@ tailoring; it's decoration.
      artificial.
    - **Workflow skills** — `deliver`, `shape`, `implement`,
      `code-review`, `ci`, `refactor`, `qa`, `flywheel`, `deploy`,
-     `monitor`, `diagnose`, `settle`, `yeet`, `research`. **Rewrite
-     each SKILL.md
-     with this repo's commands, gates, conventions, and file paths
-     embedded throughout.** Use the spellbook version as structural
-     reference; fill every example, every command, every gotcha with
-     repo-specific content. Preserve `references/` and `scripts/`
-     from the source — they travel with the skill.
+     `monitor`, `diagnose`, `settle`, `ship`, `yeet`, `research`.
+     **Rewrite each SKILL.md with this repo's commands, gates,
+     conventions, and file paths embedded throughout.** Use the
+     spellbook version as structural reference; fill every example,
+     every command, every gotcha with repo-specific content. Preserve
+     `references/` and `scripts/` from the source — they travel with
+     the skill.
 
      **Dispatch one rewriter subagent per workflow skill, in
      parallel.** Monolithic rewriting of 10+ skills in one context
@@ -192,6 +206,7 @@ tailoring; it's decoration.
      | deliver | `backlog.d/`, recent merged PRs, CONTRIBUTING.md |
      | deploy | `vercel.json`, `fly.*.toml`, `Dockerfile*`, deploy workflows |
      | settle | merge history, branch-protection rules, release tooling |
+     | ship | squash-merge history (`git log --merges master`), drift contract (e.g. `docs/context/DRIFT-WATCHLIST.md`), PR templates, branch-naming conventions, `backlog.d/` + `backlog.d/_done/` layout |
      | yeet | commit history, `commitlint.config.*`, semver tooling |
      | qa | test configs, critical-path routes, Playwright/E2E specs |
      | demo | evidence scripts, demo capture tools |
@@ -200,8 +215,8 @@ tailoring; it's decoration.
      | **refactor** | git churn (hot files), debt map, ARCHITECTURE.md, recent refactor PRs, named hotspots from repo brief |
      | **code-review** | AGENTS.md red flags, recent review threads, repo's philosophy bench, known anti-patterns |
      | **flywheel** | milestone tracker, issue IDs from repo brief, recent cycle reflections, deploy observables |
-     | **groom** | issue tracker (git-bug / GH / backlog.d/), grooming cadence, prioritization scheme |
-     | **implement** | test runner command, mocking boundaries, test config, recent TDD cycles |
+     | **groom** | `backlog.d/` (or equivalent file-driven tracker), GitHub issues if in use, grooming cadence, prioritization scheme |
+     | **implement** | test runner command, mocking boundaries, test config, recent TDD cycles, branch-naming convention (`<type>/<id>-<slug>`) |
      | **diagnose** | signal surfaces, `.evidence/`, postmortems, observability tooling |
      | **research** | prior research artifacts (`.claude/research/`, `docs/research/`, `.groom/`), stack manifest (`package.json` / `Cargo.toml` / `pyproject.toml`) for domain cues, open research threads in `backlog.d/`, repo-specific source/doc lists |
 
@@ -219,6 +234,20 @@ tailoring; it's decoration.
      `getRevealPhaseState` (N+1, #146) and theme-token leakage."
      If your rewrite could describe any Next.js+Convex repo, any
      Elixir/Phoenix repo, any Rust service — it's shallow. Redo.
+
+     **Backlog-automation load-bearing mandates.** The ship/groom/
+     settle/flywheel/implement rewriters MUST preserve the trailer-
+     based closure contract — it is not stylistic, it is what lets
+     `/groom` sweep master and detect stale active tickets.
+     Rewriters that "simplify" these away break the loop.
+
+     | Skill | Must preserve |
+     |---|---|
+     | `/ship` | Branch-name regex `^(feat\|fix\|chore\|refactor\|docs\|test\|perf)/(\d+)-` (contract with `/implement`); trailer keys `Closes-backlog:` / `Ships-backlog:` (closing) + `Refs-backlog:` (reference), bare numeric IDs, injected via `git interpret-trailers`; `backlog_archive` step (`git mv backlog.d/<id>-*.md backlog.d/_done/` on feature branch pre-squash); explicit-body squash carrying trailers into master merge commit (`gh pr merge --squash --body` for GitHub, `git merge --squash` + `git commit -F` bare-git); `/reflect` invocation with bounded scope (branch, merged SHA, closing IDs, reference IDs); harness-branch routing — reflect outputs land on `harness/reflect-outputs`, never master; embed the repo's doc-sync convention verbatim (cite drift-contract file path if present, state absence explicitly if not — do not invent); embed the repo's merge strategy verbatim with detection logic (remote URL + `gh` on PATH + `gh pr view` exit code) |
+     | `/groom` | Always-on `tidy` step sweeping master for `Closes-backlog:` / `Ships-backlog:` trailers via `scripts/lib/backlog.sh`, reconciling against active `backlog.d/` files; strategic-layer modes (brainstorm / ceo-review / technical bench / research / investigate) — trigger vocabulary and dispatch pattern universal, tailored content is the repo's prioritization scheme + cadence + tracker surfaces; canonical tracker set is `backlog.d/` plus GitHub issues when present — name both; no retired third-party trackers (any residual is a stale-source signal to scrub) |
+     | `/settle` | Polish-loop framing (CI → code-review → refactor until merge-ready); `/settle` stops at merge-ready, does NOT merge — landing is `/ship`'s job; hand-off to `/ship` (not retired `/land`); only `backlog.d/` + GitHub issues as valid tracker references |
+     | `/flywheel` | Composition `pick → /shape → /implement → /yeet → /settle → /ship → /monitor → loop`; `/ship` owns closure (archive + reflect + harness routing); `/flywheel` does NOT invoke `/reflect` directly and does NOT archive tickets itself; harness edits from `/reflect` route to `harness/reflect-outputs` via `/ship`, never master |
+     | `/implement` | Branch-naming invariant `git checkout -b <type>/<id>-<slug>` where `<type>` ∈ `feat\|fix\|chore\|refactor\|docs\|test\|perf` and `<id>` is the bare numeric backlog ID; branch name IS the backlog claim (`/ship` reads ID via the regex above); no weakening to free-form branch names or repo-specific prefix schemes without a coordinated `/ship` change |
 
      **Rewriters may add sections, delete irrelevant structure,
      and restructure — the spellbook source is a reference, not
@@ -258,9 +287,9 @@ tailoring; it's decoration.
    - **Known-debt map** — concrete file/line pointers. Every P0
      debt item gets a filed issue ID, not `(unfiled)`. If the repo
      brief surfaced a P0 with no tracker ID, file it (`gh issue
-     create` or `git-bug bug new` or `backlog.d/NNN-*.md`) before
-     writing this section. Debt-map entries like `INCIDENT-*.md`
-     filenames are pointers, not IDs — attach a tracker ID.
+     create` or `backlog.d/NNN-*.md`) before writing this section.
+     Debt-map entries like `INCIDENT-*.md` filenames are pointers,
+     not IDs — attach a tracker ID.
    - **Harness index** — table: installed skill → what it does
      *here* (not the generic description). Agents in a sibling
      table, not a prose sentence.
@@ -286,12 +315,15 @@ tailoring; it's decoration.
   verbatim, not tailored. Functionally always-present.)
   - **Always install** (orchestrators, foundational loop skills,
     and judgment-only skills): `deliver`, `shape`, `implement`,
-    `code-review`, `ci`, `refactor`, `flywheel`, `settle`, `yeet`,
-    `diagnose`, `research`. **Never skipped, under any justification.**
-    A repo without a CI pipeline *today* still gets `/ci` — the skill
-    drives local gates and establishes the shipping contract.
-    Spellbook is the source of `/flywheel`; any repo that articulates
-    a `/deliver` → `/flywheel` loop must ship the orchestrator.
+    `code-review`, `ci`, `refactor`, `flywheel`, `settle`, `ship`,
+    `yeet`, `diagnose`, `research`. **Never skipped, under any
+    justification.** A repo without a CI pipeline *today* still gets
+    `/ci` — the skill drives local gates and establishes the shipping
+    contract. Spellbook is the source of `/flywheel`; any repo that
+    articulates a `/deliver` → `/flywheel` loop must ship the
+    orchestrator. `/ship` is the closure stage (archive, squash,
+    reflect, harness routing); `/settle` leaves branches
+    merge-ready and `/ship` lands them — the pair is indivisible.
     `/diagnose` is the merged investigate/audit/debug skill
     (reserved-name collisions retired `/investigate` and `/debug`);
     every repo has bugs to investigate. `/research` is always
@@ -326,16 +358,16 @@ tailoring; it's decoration.
   disclosure — not a repo appendix. If the name could apply to
   another repo on the same stack, it's fine. If the name is this
   repo, rewrite it into SKILL.md.
-- **Self-audit before declaring done.** Five checks:
+- **Self-audit before declaring done.** Six checks:
   1. **Workflow rewrites:** `diff` each installed workflow SKILL.md
      against the spellbook source. Byte-identical = rewriter
      dropped the ball. Go back and redo.
   2. **Always-install coverage:** every skill in the always-install
      tier (`deliver`, `shape`, `implement`, `code-review`, `ci`,
-     `refactor`, `flywheel`, `settle`, `yeet`, `diagnose`, `research`)
-     resolves to a directory under the shared skill root. Zero
-     missing. If one is absent, the run failed — reinstall before
-     declaring done.
+     `refactor`, `flywheel`, `settle`, `ship`, `yeet`, `diagnose`,
+     `research`) resolves to a directory under the shared skill
+     root. Zero missing. If one is absent, the run failed —
+     reinstall before declaring done.
   3. **Excluded workflows:** only skills from the infrastructure-tied
      tier may be skipped, and each skip names the concrete missing
      file (no `vercel.json`, no `fly.*.toml`, no `Dockerfile*`, no
@@ -348,7 +380,16 @@ tailoring; it's decoration.
      `.claude/agents/`). A `/code-review` that dispatches
      `ousterhout` + `carmack` + `grug` against nonexistent agent
      files is a silent regression — the skill fails at call time.
-  5. **AGENTS.md debt map:** zero `(unfiled)` entries. Every P0 has
+  5. **Shared scripts present:** `scripts/lib/backlog.sh` and
+     `scripts/lib/verdicts.sh` exist at the repo root and match
+     spellbook content. `/ship` and `/groom tidy` source
+     `backlog.sh`; `/ship` and `/settle` source `verdicts.sh`. A
+     missing or diverged library is a silent-sourcing failure at
+     call time. Also grep installed skills for retired
+     third-party tracker names — zero hits. Any residual reference
+     to a retired tracker is a stale-rewrite regression; the
+     canonical tracker set is `backlog.d/` plus GitHub issues.
+  6. **AGENTS.md debt map:** zero `(unfiled)` entries. Every P0 has
      a filed tracker ID.
 
   Silent skip is the failure mode that ships B+ output when A is

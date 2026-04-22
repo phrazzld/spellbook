@@ -1,224 +1,247 @@
 ---
 name: settle
 description: |
-  Unblock, polish, and merge. Works in two modes:
-  GitHub mode (PR exists): fix CI/conflicts/reviews, polish, refactor, land PR.
-  Git-native mode (no PR): use verdict refs, Dagger CI, agent swarm review,
-  and land the branch.
-  /land alias: validate verdict ref, run Dagger, and land the branch using
-  repo policy (default: squash single-ticket branches).
-  Use when: PR is blocked, CI red, review comments open, "land this",
-  "get this mergeable", "fix and polish", "unblock", "clean up",
-  "make this merge-ready", "address reviews", "fix CI", "land this branch".
-  Trigger: /settle, /land (alias), /pr-fix, /pr-polish.
+  Polish loop. Take a feature branch with code and tests and iterate on it
+  via /ci, /code-review, and /refactor until the branch is lean, green, and
+  ship-ready. Stops at merge-ready. Does not merge. Does not archive tickets.
+  Hands off to /ship for the final mile.
+  Use when: "polish this", "get this merge-ready", "unblock", "clean up",
+  "address reviews", "fix CI", "make this shippable".
+  Trigger: /settle, /pr-fix, /pr-polish.
 argument-hint: "[PR-number|branch-name]"
 ---
 
 # /settle
 
-Take a branch from blocked to clean. Plain `/settle` stops at merge-ready.
-`/land` is the landing mode of this same skill and continues through the
-repo-policy merge. Dual-mode: works with GitHub PRs or git-native verdict refs.
+Take a feature branch from "works" to ship-ready. Iterate `/ci` →
+`/code-review` → `/refactor` until all four exit gates pass in one pass.
+Then report ship-ready and hand the operator off to `/ship`.
 
-## Role
+## Stance
 
-Senior engineer who owns the lane end-to-end. Not done until the PR is genuinely
-clean — not just "CI green" but architecturally sound, well-tested, and simple.
+1. **Polish until green, stop at merge-ready.** `/settle` does not merge,
+   does not archive tickets, does not reflect. When the loop exits clean,
+   the operator runs `/ship`.
+2. **Compose, do not replace.** `/ci`, `/code-review`, and `/refactor` own
+   their domains. `/settle` sequences them and decides when to loop.
+3. **Executive orchestrator.** Keep review-comment disposition, risk
+   tradeoffs, and ship-readiness judgment on the lead model. Delegate
+   bounded fixes and evidence gathering to focused subagents.
+4. **Bounded iteration.** The loop has a safety cap (max 6 iterations).
+   If polish isn't converging by then, escalate rather than thrash.
+5. **Fresh-eyes self-review is load-bearing.** The final gate is reading
+   the full diff one last time and asking "would I approve this?" —
+   same-model bias is real; counter it with explicit hindsight.
 
-## Execution Stance
+## Prerequisites
 
-You are the executive orchestrator.
-- Keep review-comment disposition, risk tradeoffs, and merge-readiness judgment on the lead model.
-- Delegate bounded evidence gathering and implementation to focused subagents.
-- Use parallel fanout for independent fixes; serialize when fixes share files or checks.
-- Compose `/ci`, `/code-review`, and `/refactor`; do not replace their domain contracts.
+Assert at start; refuse with a clear reason on any miss.
 
-## Mode Detection
+- On a feature branch (not `master` / `main` / default protected branch).
+- Branch has commits beyond the base branch (`git log base..HEAD` non-empty).
+- Working tree clean, or dirty in a way the operator acknowledges —
+  `/settle` will not stage random debris.
+- No rebase / merge / cherry-pick in progress.
 
-`/settle` operates in two modes based on context:
+## The Polish Loop
 
-**GitHub mode** — when `$ARGUMENTS` is a PR number, or `gh pr view` succeeds for
-the current branch. Uses GitHub PR state, review threads, and `gh` CLI.
+Run the six steps in order. If any step produces changes, return to step 2
+(`/ci`). The loop exits only when all four exit gates pass in the same
+iteration without requiring further changes.
 
-**Git-native mode** — when no PR exists. Uses verdict refs (`scripts/lib/verdicts.sh`),
-local Dagger CI, and agent swarm review output. No GitHub API calls.
+### 1. Assert preconditions
 
-Detection sequence:
-1. If `$ARGUMENTS` matches `^[0-9]+$` → GitHub mode (PR number)
-2. If `gh pr view` for current branch succeeds → GitHub mode
-3. Otherwise → git-native mode
+Check the prerequisites above. Detect mode:
 
-There is no separate `/land` skill. When invoked as `/land <branch>`, always
-use git-native mode regardless of
-whether a PR exists. `/land` validates the verdict ref (must exist and point
-at HEAD), rejects `dont-ship` verdicts, runs Dagger CI when available, and
-lands the branch directly. Default landing policy is squash merge for
-single-ticket feature branches unless repo guidance says otherwise.
-`SPELLBOOK_NO_REVIEW=1` bypasses the verdict gate for emergencies.
+- **PR mode** — `$ARGUMENTS` is a PR number, or `gh pr view` succeeds for
+  the current branch. Use `skills/settle/scripts/fetch-pr-reviews.sh` for
+  review bodies; check remote checks via `gh pr checks`.
+- **Local mode** — no PR. Rely on local `/ci` and `/code-review` output.
 
-## Objective
+Mode only changes *where* findings come from, not *what* the loop does.
 
-Take the current branch through three phases until it reaches:
-- No merge conflicts
-- CI green (Dagger local + GitHub checks in GitHub mode)
-- Every review finding addressed
-- Architecture reviewed with hindsight lens
-- Tests audited for coverage and quality
-- Complexity reduced where possible
-- Docs current
+### 2. Ci
 
-## Executive / Worker Split
+Invoke `/ci`. If green, proceed to step 3. If red, classify:
 
-Keep synthesis, judgment, and user communication on the lead:
-- deciding which review comments are valid, in scope, or rejected
-- hindsight architecture review and simplification choices
-- confidence assessment and final merge-readiness judgment
+- **Self-healable** (lint drift, stale lockfile, trivial import/typo):
+  `/ci` handles it directly per its own fix-vs-escalate contract.
+- **Logic/algorithm failure:** dispatch a **builder** subagent with the
+  specific failure (file:line, gate, excerpt) and a bounded fix scope.
+  Commit, then return to step 2.
 
-Delegate bounded remediation to ad-hoc **general-purpose** subagents:
-- fixing one comment thread or one failing check at a time
-- gathering review evidence, reproducing CI failures, and drafting narrow patches
-- mechanical cleanups, focused test additions, and doc refreshes with clear ownership
+Do not declare green while checks are pending. In PR mode, also check
+`gh pr checks` before proceeding.
 
-Use **Explore** subagents for evidence gathering when no file mutations are needed.
-Use **builder** agent for fixes that require TDD discipline.
+### 3. Code-review
 
-## Process
+Invoke `/code-review` with a must-ship lens. Synthesize the verdict:
 
-### Phase 1: Fix — Unblock
+- **ship / conditional** → proceed to step 4.
+- **dont-ship** or blockers present → fix loop. For each blocking finding:
+  dispatch a **builder** subagent with the specific file:line and fix
+  scope. Fix → commit. Then return to step 2.
 
-Read `references/pr-fix.md` and follow it completely.
+**In PR mode**, also read every PR comment in full via
+`skills/settle/scripts/fetch-pr-reviews.sh <PR>`. Do not preview with
+truncated `gh api` output. Triage per `references/pr-fix.md`: fix (in
+scope), defer (out of scope → `backlog.d/`), or reject (with specific
+reasoning, after steelman). Address one at a time, not in batches.
 
-**Goal:** Get from blocked to green.
+**Reviewer dispositions go on the lead model**, not a subagent. Deciding
+whether a reviewer's concern is valid is judgment work.
 
-1. **Conflicts** — rebase or merge, resolve all conflicts
-2. **CI** — invoke `/ci` for gate ownership. In GitHub mode, also check remote CI.
-3. **Self-review** — read the entire diff as a reviewer would
-4. **Review findings** —
-   - **GitHub mode:** read every PR comment via `skills/settle/scripts/fetch-pr-reviews.sh`
-   - **Git-native mode:** run `/code-review` if no verdict ref exists, then read
-     `.evidence/<branch>/review-synthesis.md` for findings
-   - For each finding: fix (in scope), defer (out of scope → git-bug/backlog), or reject (with reasoning)
-5. **Async settlement** —
-   - **GitHub mode:** wait for CI checks and bot reviewers; re-check via `gh pr view --json statusCheckRollup,reviews`
-   - **Git-native mode:** re-run `/ci` after fixes. No async bots to wait for.
+### 4. Refactor
 
-Dispatch fixes to smaller worker subagents when scope is clear and bounded.
+Invoke `/refactor`. It runs in feature-branch mode against the detected
+base.
 
-6. **Merge-readiness verification** —
-   - **GitHub mode:** `gh pr view --json reviews,statusCheckRollup` — at least one
-     approving review, all checks passing
-   - **Git-native mode:** `source scripts/lib/verdicts.sh && verdict_validate <branch>`
-     — verdict ref exists and SHA matches HEAD. Plus `/ci` is green.
+- **Mandatory** when net branch diff is >200 LOC.
+- **Recommended** otherwise — cheap to run, often finds something.
 
-**Exit gate:** CI green, all review findings addressed, merge-readiness verified.
+If `/refactor` applies changes, commit and return to step 2.
 
-If already green and settled, skip to Phase 2.
+Exit criterion: one `/refactor` pass in this iteration produced no
+applied changes (or the changes it applied were already reverified by a
+subsequent loop).
 
-### Phase 2: Polish — Elevate quality
+### 5. Self-review hindsight
 
-Read `references/pr-polish.md` and follow it completely.
+Read the full branch diff one last time with fresh eyes:
 
-**Goal:** Get from "works" to "exemplary."
-
-1. **Hindsight review** — "Would we build it the same way starting over?"
-   Read the full diff. Look for:
-   - Shallow modules, pass-through layers
-   - Hidden coupling, temporal decomposition
-   - Missing abstractions or premature abstractions
-   - Tests that test implementation, not behavior
-2. **Agent-first assessment** — run `assess-review` (triad, strong tier) for
-   structured code review. Run `assess-tests` for test quality scoring. Run
-   `assess-docs` if docs were touched. Address all `fail` findings before proceeding.
-3. **Architecture edits** — fix what the hindsight review and assess-* checks find. Commit.
-4. **Test audit** — coverage gaps, brittle tests, missing edge cases. Fix.
-5. **Docs** — update any docs/comments that are stale after the changes.
-6. **Confidence assessment** — how confident are we this won't break anything?
-   Treat confidence as an explicit deliverable with evidence.
-
-Use the strongest available model for hindsight review and confidence judgment.
-Use smaller workers for narrow polish follow-through once the direction is clear.
-
-**Exit gate:** Architecture clean, tests solid, docs current, confidence stated.
-
-If polish generates changes, return to Phase 1 (CI must stay green).
-
-### Phase 3: Refactor — Reduce complexity
-
-Invoke `/refactor` for this branch and use it as the simplification engine.
-
-**Goal:** Remove complexity that doesn't earn its keep.
-
-1. **Run refactor pass** — invoke `/refactor` and rely on its built-in base-branch auto-detection; pass `--base <branch>` only if auto-detection fails or is ambiguous.
-2. **Select one bounded change** — deletion > consolidation > state reduction > naming clarity > abstraction.
-3. **Implement + verify** — preserve behavior, run tests, commit.
-4. **Validate simplification** — run `assess-simplify` (strong tier) when available.
-   `complexity_moved_not_removed` must be false to exit this phase.
-
-**Mandatory when diff >200 LOC net.** For smaller diffs, manual module-depth
-review using Ousterhout checks: shallow modules, information leakage,
-pass-throughs, compatibility shims with no active contract.
-
-**Exit gate:** No obvious complexity to remove, or explicit justification for keeping it.
-
-If refactor generates changes, return to Phase 1 (CI must stay green).
-
-## Loop Until Done
-
-```text
-Phase 1 (fix) → Phase 2 (polish) → Phase 3 (refactor)
-       ↑                                      │
-       └──────── if changes pushed ───────────┘
+```sh
+git diff $(git merge-base HEAD master)...HEAD
 ```
 
-Each phase that generates commits sends you back to Phase 1 to re-verify
-CI and reviews. The loop terminates when a full pass produces no changes.
+Ask: **"Would I approve this if I were the reviewer?"** Look for:
 
-## Reviewer Artifact Policy
+- Shallow modules, pass-through layers, hidden coupling.
+- Tests that assert implementation instead of behavior.
+- Stale comments or docs in changed areas.
+- Debug artifacts, commented-out code, TODO placeholders the loop missed.
 
-When settlement needs screenshots, videos, logs, or walkthrough proof:
+If anything non-trivial surfaces, fix it and return to step 2. The
+self-review gate is not optional — it is the last defense against
+same-model blind spots.
 
-**GitHub mode:**
-- Upload screenshots/GIFs to draft GitHub release assets, embed download URLs
-  in PR comments. See `skills/demo/references/pr-evidence-upload.md` for the recipe.
-- Convert `.webm` → `.gif` before upload (GitHub renders GIFs inline, not video).
-- Never use `raw.githubusercontent.com` URLs (breaks for private repos).
-- Link the full release at the bottom of every evidence comment.
+### 6. Verdict-ref check (if supported)
 
-**Git-native mode:**
-- Store evidence in `.evidence/<branch>/<date>/` (LFS-tracked for binaries).
-- Write `qa-report.md` and `review-synthesis.md` alongside captures.
-- Commit evidence to the branch. It becomes part of the auditable history.
-- Convert `.webm` → `.gif` before committing (easier to browse).
+If the repo uses verdict refs (`scripts/lib/verdicts.sh` exists), confirm
+the current verdict at `refs/verdicts/<branch>` reads `ship` or
+`conditional` and its SHA matches HEAD:
 
-**Both modes:**
-- Prefer CI artifacts or step summaries for generated verification output.
-- Never commit binary evidence directly to tracked git (use LFS or GitHub releases).
+```sh
+source scripts/lib/verdicts.sh
+verdict_validate "$(git rev-parse --abbrev-ref HEAD)"
+```
 
-## Flags
+A stale verdict (SHA mismatch) means changes landed after the last
+review; return to step 3 and re-run `/code-review`. A `dont-ship`
+verdict means exit criteria are not met — return to step 3.
 
-- `$ARGUMENTS` as PR number — target specific PR
-- If no argument, uses the current branch's PR
+Repos without `scripts/lib/verdicts.sh` skip this step.
 
-## Anti-Patterns
+## Exit Criteria
 
-- Declaring "done" while CI is still running
-- Ignoring review comments instead of addressing them
-- **Truncating review comments** — reading 300-char previews instead of full text. Run `skills/settle/scripts/fetch-pr-reviews.sh <PR>` to get complete bodies.
-- **Reflexive dismissal** — rejecting automated reviewer comments with "by design" or "established pattern" without steelmanning the argument. See disposition criteria in `references/pr-fix.md`.
-- **Batch reply without fixing** — replying to all comments in one PR comment instead of addressing each inline, one at a time.
-- Polish without re-running CI afterward
-- Refactoring without verifying behavior is preserved
-- Skipping refactor because "it works"
-- Posting "PR Unblocked" while async reviewers can still add findings
-- Merging from plain `/settle` — `/settle` ends at merge-ready. Use `/land`
-  when the task is to land the branch.
-- **Git-native mode: merging without a verdict ref.** Always validate via
-  `verdict_validate` before merging. No verdict = no merge.
+The loop exits and `/settle` reports **ship-ready** only when all four
+gates pass in the *same* iteration:
 
-## Output
+- [ ] `/ci` green (all gates, no pending checks)
+- [ ] `/code-review` verdict `ship` or `conditional` (no open blockers)
+- [ ] `/refactor` ran and applied no further changes this iteration
+- [ ] Self-review hindsight pass produced no follow-ups
+- [ ] (If applicable) verdict ref is fresh and not `dont-ship`
 
-Report per phase:
-- **Fix:** conflicts resolved, CI failures fixed, review comments addressed (count + dispositions)
-- **Polish:** architecture changes made, test gaps filled, confidence level + evidence
-- **Refactor:** complexity removed (LOC delta, modules consolidated, abstractions deleted)
-- **Final:** PR URL, merge readiness assessment, any remaining risks
+Safety cap: **max 6 iterations**. If the loop has not converged by the
+sixth pass, stop and emit a structured diagnosis — the branch likely has
+a deeper issue that needs human judgment, not more loop churn.
+
+On clean exit, emit:
+
+```
+/settle complete — ship-ready.
+
+Iterations: 3
+CI:          green (dagger call check, 4m12s)
+Code-review: ship (3 reviewers, 0 blockers)
+Refactor:    no further simplification found (diff: 187 LOC net)
+Self-review: clean
+Verdict ref: refs/verdicts/<branch> → ship (SHA matches HEAD)
+
+Next: run /ship to merge, archive, and reflect.
+```
+
+## What /settle Does NOT Do
+
+These are hard non-goals. Surface them to the operator if asked.
+
+- **Does not merge.** Squash-merge is `/ship`'s job. `/settle` stops at
+  merge-ready.
+- **Does not archive backlog tickets.** `Closes-backlog` trailers and
+  `backlog.d/_done/` moves happen in `/ship`.
+- **Does not run `/reflect`.** Retro, backlog mutations, and
+  harness-tuning outputs are `/ship`'s responsibility.
+- **Does not push.** Use `/yeet` to ship commits to the remote, or let
+  `/ship` handle the final push as part of the merge.
+- **Does not scaffold CI.** If CI is absent or weak, `/ci` handles it
+  per its own contract; `/settle` does not duplicate that logic.
+
+## PR Mode vs Local Mode
+
+| Concern | PR mode | Local mode |
+|---|---|---|
+| Detection | `$ARGUMENTS` is a PR number, or `gh pr view` succeeds | no PR for branch |
+| CI signal | `/ci` + `gh pr checks` | `/ci` only |
+| Review input | `fetch-pr-reviews.sh <PR>` + `/code-review` | `/code-review` only |
+| Verdict proof | approving review on PR + verdict ref (if supported) | verdict ref only |
+
+Both modes run the same six-step loop. PR mode adds remote-checks and
+reviewer-comment sources to the existing gates.
+
+## Refuse Conditions
+
+Stop and surface to the operator instead of looping:
+
+- On `master` / `main` / default protected branch directly.
+- Branch has no commits beyond base (nothing to polish).
+- Rebase / merge / cherry-pick in progress (`.git/MERGE_HEAD`,
+  `.git/CHERRY_PICK_HEAD`, or `rebase-*` dir).
+- Working tree has unresolved conflict markers.
+- Safety cap hit (6 iterations without convergence) — emit diagnosis,
+  do not loop further.
+- Escape-hatch environment variable `SPELLBOOK_NO_REVIEW=1` does **not**
+  apply here — it's for `/ship`'s pre-merge check, not `/settle`'s loop.
+
+## Interactions
+
+- **Invoked by:** `/flywheel` as the polish stage of each cycle;
+  `/deliver` as the final step before handing back to the outer loop.
+- **Invokes:** `/ci`, `/code-review`, `/refactor`. Dispatches
+  **builder** subagents for bounded fixes.
+- **Hands off to:** `/ship` for merge + archive + reflect. `/settle`'s
+  exit report always names `/ship` as the next step.
+- **Complements `/yeet`:** `/yeet` handles commit/push discipline on the
+  feature branch; `/settle` handles polish; `/ship` handles the merge.
+  All three are imperative finals at different layers.
+
+## Gotchas
+
+- **Truncated review comments.** `gh api` + jq previews hide the body of
+  long reviewer comments, especially automated reviewers with code
+  suggestions. Always run `fetch-pr-reviews.sh` for full text.
+- **Reflexive dismissal.** "By design" and "established pattern" are not
+  valid rejection reasons on their own. Steelman first; cite specifics.
+  See `references/pr-fix.md` disposition criteria.
+- **Declaring ship-ready while checks are pending.** A pending check is
+  not a passing check. Wait for terminal state before exiting the loop.
+- **Polishing without re-running CI.** Every loop step that commits must
+  return to `/ci`. Never exit with refactor changes unverified by CI.
+- **Skipping the hindsight pass.** "Tests pass, review is clean" is not
+  the exit gate — the exit gate is *also* that fresh eyes see nothing
+  worth fixing. The hindsight pass catches what the sub-gates miss.
+- **Infinite polish.** The safety cap exists because some branches
+  genuinely need human judgment, not more loop iterations. At 6 passes,
+  stop and diagnose.
+- **Treating `/settle` as the merge step.** It isn't. If the operator
+  says "ship this" after `/settle` reports ship-ready, the answer is
+  `/ship`, not another `/settle` pass.

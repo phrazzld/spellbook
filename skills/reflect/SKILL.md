@@ -31,7 +31,7 @@ Every finding becomes one of three things:
 | **coach** | Deep dive on prompt quality, technical specificity, and concept building | `references/coach.md` |
 | **tune-repo** | Refresh context artifacts, detect drift, update repo guidance | `references/tune-repo.md` |
 | **append** | Append issue-scoped retro notes for `/groom` to consume later | `references/retro-format.md` |
-| **cycle** | Outer-loop cycle critique — read `backlog.d/_cycles/<ulid>/`, emit `reflect.signals.json`, mutate `backlog.d/`, push harness suggestions to `reflect/<cycle-id>` branch | `references/cycle.md` |
+| **cycle** | Bounded end-of-ship retrospective invoked by `/ship` — emit backlog mutations, harness-tuning proposals, and a cycle summary for the caller to apply | `references/cycle.md` |
 
 If the first argument matches a mode name, route to that reference.
 If no mode is provided, run `distill`.
@@ -43,7 +43,8 @@ Interpret natural-language requests as:
   -> `calibrate`
 - "tune this repo", "refresh AGENTS", "context drift"
   -> `tune-repo`
-- "reflect on cycle <ulid>", "postmortem this cycle", invocation from `/flywheel`
+- "reflect on cycle <cycle-id>", "postmortem this cycle", invocation from
+  `/ship` (or transitively from `/flywheel`, which composes `/ship`)
   -> `cycle`
 
 ## Responsibility Split
@@ -82,21 +83,81 @@ Type system > Lint rule > Hook > Test > CI > Skill/reference > AGENTS.md > Memor
 
 ## Cycle Mode Authority (outer-loop only)
 
-When invoked as `cycle`, reflect gains two privileges the other modes lack:
+`cycle` is a **bounded invocation**: `/ship` calls it at the end of the
+final-mile pipeline to capture learnings from the just-shipped ticket.
+`/flywheel` triggers it transitively by composing `/ship`. When invoked as
+`cycle`, reflect gains two privileges the other modes lack:
 
-1. **Backlog mutation** — may create, edit, consolidate, or delete items in
-   `backlog.d/` (never `backlog.d/_done/`). Every mutation must cite an
-   evidence ref from the cycle (event line, artifact path, diff hunk).
-2. **Harness suggestion branch** — may push skill/agent/hook/AGENTS.md edits
-   to a branch named `reflect/<cycle-id>`, never to the current feature
-   branch and never to main/master. Humans review and merge.
+1. **Backlog mutation proposals** — may propose create, edit, consolidate,
+   reprioritize, or delete on items in `backlog.d/` (never
+   `backlog.d/_done/`). Every proposal must cite an evidence ref from the
+   cycle (commit, diff hunk, receipt path, log line).
+2. **Harness-tuning proposals** — may propose skill/agent/hook/AGENTS.md/
+   CLAUDE.md edits. Reflect **emits**; it does not apply. The caller
+   routes these to a harness branch for human review.
 
 All other modes are read-only against `backlog.d/` and the harness. If
 `cycle` cannot cite evidence for a mutation, downgrade it to a finding and
 let a human decide.
 
-See `references/cycle.md` for the full contract, `reflect.signals.json`
-schema, and judgment rules (consolidate vs split, branch vs memory note).
+### Invocation Contract
+
+Triggered as `/reflect cycle` (aliases: `/reflect --cycle <cycle-id>`).
+The caller — normally `/ship` — passes this input packet:
+
+- `branch`: name of the just-shipped feature branch (pre-merge).
+- `merged_sha`: squash commit SHA now on master/main.
+- `closed_backlog_ids`: list of IDs closed in this cycle (the closing set
+  from `/ship`'s trailer scan).
+- `referenced_backlog_ids` (optional): `Refs-backlog` IDs noted but not
+  closed.
+
+A `cycle-id` identifies the retro artifact; derive it from `merged_sha`
+short form when the caller does not supply one.
+
+### Output Contract
+
+Three categories. The two structured categories must be cleanly separable
+so the caller can apply them under different policies.
+
+1. **Backlog mutations** (structured, machine-consumable). For each:
+   - action: `create` | `edit` | `reprioritize` | `delete`
+   - path: concrete `backlog.d/<id>-*.md` target
+   - body: full file content for `create`, unified diff for `edit`, new
+     priority for `reprioritize`, justification for `delete`
+   - evidence: cycle ref justifying the mutation
+   These are **proposals**. The caller (`/ship`) applies them to master
+   via a follow-up commit and owns commit hygiene. Reflect does not stage,
+   commit, or push these files itself.
+
+2. **Harness-tuning proposals** (structured, machine-consumable). For each:
+   - path: concrete file under `skills/`, `agents/`, `harnesses/`,
+     `AGENTS.md`, `CLAUDE.md`, or a hook script
+   - body: unified diff or full new-file content
+   - evidence: cycle ref and codification-hierarchy justification
+   Reflect **must not** write these to master. The caller routes them to
+   a harness branch (`/ship` uses `harness/reflect-outputs`). A `cycle`
+   run that mutates harness files on the current branch is a bug.
+
+3. **Cycle summary** (human-readable narrative). What shipped, what was
+   learned, what went well, what went poorly. Also written to the
+   standard retro location (`.groom/retro/<primary-id>.md` or the
+   `.spellbook/reflect/<cycle-id>/` receipts dir, matching whatever
+   convention the invoking repo already uses).
+
+### Invariants
+
+- **Harness mutations never land on master directly.** Reflect emits;
+  the caller routes to a harness branch. This is a hard cross-skill
+  invariant also asserted in `ship/SKILL.md`.
+- **Backlog mutations are proposals, not auto-applied.** Reflect does
+  not `git add` / `git commit` on behalf of the caller.
+- **Session-retrospective mode still works standalone.** `distill`,
+  `calibrate`, `coach`, `tune-repo`, and `append` remain usable without
+  cycle context — `cycle` is additive, not a replacement.
+
+See `references/cycle.md` for judgment rules (consolidate vs split,
+when to escalate to a harness branch, evidence standards).
 
 ## Gotchas
 

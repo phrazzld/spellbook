@@ -71,12 +71,30 @@ escalate to human if still blocked.
 **Skip:** pure refactors, config-only, test-only, backend-only with no
 user-facing surface.
 
+## Executable Path Verification
+
+**Trigger:** the diff adds or materially changes an executable path —
+script entrypoint, CLI, `package.json` / `make` target, Dagger function,
+migration, runner, responder, or job entrypoint.
+
+**Rule:** the marshal or a reviewer must either:
+
+- run the exact entrypoint once
+- or cite a gate or artifact that invokes that exact path
+
+Helper tests, fixture-only critics, and adjacent lanes do not count.
+
+**Verdict:** if the path was not exercised, label it an
+`unverified runtime path`. That is a blocking finding for a **Ship**
+verdict unless the diff is explicitly framed as scaffolding only.
+
 ## Plausible-but-Wrong Patterns
 
 LLMs optimize for plausibility, not correctness. Reviewers must hunt for:
 - Wrong algorithm complexity (O(n²) where O(log n) is needed)
 - Unnecessary abstractions (82K lines vs 1-line solution)
 - Stub implementations that pass tests but don't actually work
+- Adjacent green lanes that never invoked the new entrypoint
 - "Specification-shaped" code — right module names, wrong behavior
 - Missing invariant checks that only matter at scale
 

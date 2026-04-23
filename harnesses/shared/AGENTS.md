@@ -343,6 +343,12 @@ TDD rhythm and `ousterhout` for interface-depth critique.
   fundamentally wrong. Define acceptance criteria before generating code.
   Benchmark performance-sensitive paths. If you can't explain why approach
   X over Y, investigate before shipping.
+- **Adjacent evidence ≠ runtime proof.** A green helper test or neighboring
+  CI lane proves only the commands that actually ran. For any newly added or
+  materially changed executable path — CLI, runner, migration, responder,
+  Dagger function, script entrypoint — name the exact command or artifact that
+  exercised it, or mark the path unverified. Never claim "tested" or "ready"
+  on indirect evidence alone.
 
 ## Session Anti-Patterns
 

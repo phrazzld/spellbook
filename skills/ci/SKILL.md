@@ -142,6 +142,20 @@ new thresholds before the skill returns clean.
 - Write new test frameworks — uses what the repo has
 - Lower any threshold to make a gate pass
 
+## Verification Scope
+
+**A green gate proves only the commands that actually ran.**
+
+When a diff adds or materially changes an executable path — script
+entrypoint, CLI, `package.json` / `make` target, Dagger function,
+migration, runner, responder, or job entrypoint — the `/ci` report must:
+
+- name the exact command that exercised the path
+- or say explicitly that the runtime path is unverified
+
+Helper fixtures, unit coverage, and adjacent lanes do **not** count as
+runtime verification unless they invoke that exact path.
+
 ## Anti-Patterns
 
 - **Reporting red and exiting** when the failure was a trivially
@@ -166,6 +180,9 @@ new thresholds before the skill returns clean.
   diagnose, don't suppress.
 - **Auto-fixing a type error by casting to `Any` / `any`** or adding
   `# type: ignore`. Escalate — this is a logic/contract decision.
+- **Claiming a new runner, CLI, or lane was tested when only helper
+  fixtures ran.** Name the exact runtime command that executed or mark
+  the path unverified.
 - **Declaring "green"** while gates are still running. Wait for exit.
 
 ## Output
@@ -197,4 +214,3 @@ Failure: tests/widget/test_reducer.py::test_merge_conflict line 42
 Classification: logic failure (behavior change in reducer)
 Action: escalated — human decision needed on reducer contract.
 ```
-

@@ -233,7 +233,7 @@ extra inch onto an off-the-rack jacket is decoration, not tailoring.
      | Skill | Read |
      |---|---|
      | ci | `.github/workflows/`, `dagger/`, `Dockerfile*`, CI status history |
-     | deliver | `backlog.d/`, recent merged PRs, CONTRIBUTING.md |
+     | **deliver** | `backlog.d/`, recent merged PRs, CONTRIBUTING.md, priority/status scheme |
      | deploy | `vercel.json`, `fly.*.toml`, `Dockerfile*`, deploy workflows |
      | settle | merge history, branch-protection rules, release tooling |
      | ship | squash-merge history (`git log --merges master`), drift contract (e.g. `docs/context/DRIFT-WATCHLIST.md`), PR templates, branch-naming conventions, `backlog.d/` + `backlog.d/_done/` layout |
@@ -250,24 +250,21 @@ extra inch onto an off-the-rack jacket is decoration, not tailoring.
      | **diagnose** | signal surfaces, `.evidence/`, postmortems, observability tooling |
      | **research** | prior research artifacts (`.claude/research/`, `docs/research/`, `.groom/`), stack manifest (`package.json` / `Cargo.toml` / `pyproject.toml`) for domain cues, open research threads in `backlog.d/`, repo-specific source/doc lists |
 
-     **Loop-core skills must not ship shallow.** The seven bolded
-     rows above (shape, refactor, code-review, flywheel, groom,
-     implement, diagnose) are the development loop's connective
-     tissue — they encode *how this team builds here*. Their source
+     **Loop-core skills must not ship shallow.** The eight bolded rows above
+     are the development loop's connective tissue — they encode *how this team
+     builds here*. Their source
      text looks abstract because its job is generic wisdom. *Your*
      rewrite's job is to name what each skill MEANS in this
-     codebase: the actual hotspots, the actual red flags, the
-     actual backlog conventions, the actual milestone structure,
-     the actual test command, the actual signal surfaces. "Generic
+     codebase: the actual hotspots, red flags, backlog conventions, milestone
+     structure, test command, and signal surfaces. "Generic
      refactoring discipline" is the source's contribution; your
      contribution is "in this repo, refactor first targets
      `getRevealPhaseState` (N+1, #146) and theme-token leakage."
      If your rewrite could describe any Next.js+Convex repo, any
      Elixir/Phoenix repo, any Rust service — it's shallow. Redo.
 
-     **Backlog-lifecycle load-bearing mandates.** The ship/groom/
-     settle/flywheel/implement rewriters MUST preserve one mechanical
-     closure contract across all five skills. The portable concept is:
+     **Backlog-lifecycle load-bearing mandates.** Ship/groom/settle/flywheel/
+     implement/deliver MUST preserve one mechanical closure contract:
      active work lives in `backlog.d/`, closed work lives in
      `backlog.d/_done/`, and a structured closing signal lets a local
      command or CI check detect a shipped-but-still-active ticket.
@@ -284,6 +281,7 @@ extra inch onto an off-the-rack jacket is decoration, not tailoring.
      | `/settle` | Polish-loop framing (CI → code-review → refactor until merge-ready); stops at merge-ready; hands off to `/ship`; checks or names the lifecycle gate that prevents a ready PR from referencing active-but-unarchived backlog work. |
      | `/flywheel` | Composition `pick → /shape → /implement → /yeet → /settle → /ship → /monitor → loop`; `/ship` owns closure (archive + reflect + harness routing); `/flywheel` does not archive tickets or invoke `/reflect` directly; it only consumes `/ship`'s final lifecycle result. |
      | `/implement` | Branch or context-packet creation produces whatever structured item reference `/ship` can later resolve. If the repo weakens Spellbook's default branch regex, the rewrite must update `/ship`, `/groom`, `/settle`, and `/flywheel` in the same tailor run and name the replacement detector. |
+     | `/deliver` | No explicit item: select the highest-priority ready active tracker item before phases; ask only if no deterministic priority/status scheme exists. Compose `/shape -> /implement -> /ci -> /code-review -> /refactor -> /qa` to merge-ready, stop before merge/push/deploy, and report the selected tracker ref plus gate evidence. |
 
      **Rewriters may add sections, delete irrelevant structure,
      and restructure — the spellbook source is a reference, not
@@ -435,9 +433,11 @@ extra inch onto an off-the-rack jacket is decoration, not tailoring.
      `ousterhout` + `carmack` + `grug` against nonexistent agent
      files is a silent regression — the skill fails at call time.
   5. **Backlog lifecycle coherence:** `/ship`, `/groom`, `/settle`,
-     `/flywheel`, and `/implement` all name the same active tracker,
-     closed tracker, structured closing signal, archive operation, and
-     detector command. Contradictions like "no trailers" in `/ship`
+     `/flywheel`, `/implement`, and `/deliver` all name the same active
+     tracker, closed tracker, structured closing signal, archive operation,
+     and detector command. `/deliver` preserves the no-arg priority/status
+     pick.
+     Contradictions like "no trailers" in `/ship`
      while `/groom` sweeps trailer history fail the run. If the repo
      lacks a detector today, the tailor run must file a high-priority
      backlog item and every lifecycle skill must name that gap instead
